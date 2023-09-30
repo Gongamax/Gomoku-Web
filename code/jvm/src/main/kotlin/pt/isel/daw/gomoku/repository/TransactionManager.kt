@@ -1,6 +1,4 @@
-package pt.isel.daw.tictactoe.repository
-
-import pt.isel.daw.gomoku.repository.Transaction
+package pt.isel.daw.gomoku.repository
 
 interface TransactionManager {
     fun <R> run(block: (Transaction) -> R): R

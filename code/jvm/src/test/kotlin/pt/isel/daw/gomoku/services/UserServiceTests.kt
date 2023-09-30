@@ -4,6 +4,7 @@ import org.jdbi.v3.core.Jdbi
 import org.junit.jupiter.api.Test
 import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.Sha256TokenEncoder
 import pt.isel.daw.gomoku.domain.UsersDomain
@@ -284,9 +285,11 @@ class UserServiceTests {
 
         private fun newTestUserName() = "user-${Math.abs(Random.nextLong())}"
 
+        private val dbUrl = Environment.getDbUrl()
+
         private val jdbi = Jdbi.create(
             PGSimpleDataSource().apply {
-                setURL("jdbc:postgresql://localhost:5432/DAW?user=postgres&password=Revolver-38")
+                setURL(dbUrl)
             }
         ).configureWithAppRequirements()
     }

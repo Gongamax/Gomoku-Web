@@ -4,6 +4,7 @@ import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 import org.junit.jupiter.api.Test
 import org.postgresql.ds.PGSimpleDataSource
+import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.repository.jdbi.JdbiUsersRepository
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.PasswordValidationInfo
@@ -102,9 +103,11 @@ class JdbiUserRepositoryTests {
 
         private fun newTokenValidationData() = "token-${abs(Random.nextLong())}"
 
+        private val dbUrl = Environment.getDbUrl()
+
         private val jdbi = Jdbi.create(
             PGSimpleDataSource().apply {
-                setURL("jdbc:postgresql://localhost:5432/DAW?user=postgres&password=Revolver-38")
+                setURL(dbUrl)
             }
         ).configureWithAppRequirements()
     }

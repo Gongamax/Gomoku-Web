@@ -16,6 +16,8 @@ interface UsersRepository {
 
     fun getUserByUsername(username: String): User?
 
+    fun getUserById(id: Int): User?
+
     fun getTokenByTokenValidationInfo(tokenValidationInfo: TokenValidationInfo): Pair<User, Token>?
 
     fun isUserStoredByUsername(username: String): Boolean

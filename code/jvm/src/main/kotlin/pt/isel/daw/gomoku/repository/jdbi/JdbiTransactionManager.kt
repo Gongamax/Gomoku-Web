@@ -3,7 +3,7 @@ package pt.isel.daw.gomoku.repository.jdbi
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.repository.Transaction
-import pt.isel.daw.tictactoe.repository.TransactionManager
+import pt.isel.daw.gomoku.repository.TransactionManager
 
 @Component
 class JdbiTransactionManager(

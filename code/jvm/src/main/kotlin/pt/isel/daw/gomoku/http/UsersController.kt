@@ -7,11 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.daw.gomoku.domain.AuthenticatedUser
-import pt.isel.daw.gomoku.http.model.Problem
-import pt.isel.daw.gomoku.http.model.UserCreateInputModel
-import pt.isel.daw.gomoku.http.model.UserCreateTokenInputModel
-import pt.isel.daw.gomoku.http.model.UserHomeOutputModel
-import pt.isel.daw.gomoku.http.model.UserTokenCreateOutputModel
+import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.services.TokenCreationError
 import pt.isel.daw.gomoku.services.UserCreationError
 import pt.isel.daw.gomoku.services.UsersService
@@ -65,8 +61,11 @@ class UsersController(
     }
 
     @GetMapping(Uris.Users.GET_BY_ID)
-    fun getById(@PathVariable id: String) {
-        TODO("TODO")
+    fun getById(@PathVariable id: String): ResponseEntity<UserGetByIdModel> {
+        val user = userService.getUserById(id.toInt())
+        return user?.let {
+            ResponseEntity.ok(UserGetByIdModel(it.id, it.username))
+        } ?: ResponseEntity.notFound().build()
     }
 
     @GetMapping(Uris.Users.HOME)
@@ -75,5 +74,10 @@ class UsersController(
             id = userAuthenticatedUser.user.id,
             username = userAuthenticatedUser.user.username
         )
+    }
+
+    @GetMapping("/api/user/hello")
+    fun testUser(): String {
+        return "Hello User!"
     }
 }

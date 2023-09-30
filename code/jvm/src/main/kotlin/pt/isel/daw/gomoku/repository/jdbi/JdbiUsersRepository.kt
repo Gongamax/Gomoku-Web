@@ -20,6 +20,13 @@ class JdbiUsersRepository(
             .mapTo<User>()
             .singleOrNull()
 
+    override fun getUserById(id: Int): User? =
+        handle.createQuery("select * from dbo.Users where id = :id")
+            .bind("id", id)
+            .mapTo<User>()
+            .singleOrNull()
+
+
     override fun storeUser(username: String, passwordValidation: PasswordValidationInfo): Int =
         handle.createUpdate(
             """

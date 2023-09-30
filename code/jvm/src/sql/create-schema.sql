@@ -20,6 +20,6 @@ create table dbo.Games(
                           created int not null,
                           updated int not null,
                           deadline int,
-                          player_x int references dbo.Users(id),
-                          player_o int references dbo.Users(id)
+                          player_black int references dbo.Users(id),
+                          player_white int references dbo.Users(id)
 );

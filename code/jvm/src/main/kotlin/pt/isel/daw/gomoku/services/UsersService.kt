@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.domain.Token
 import pt.isel.daw.gomoku.domain.User
 import pt.isel.daw.gomoku.domain.UsersDomain
-import pt.isel.daw.tictactoe.repository.TransactionManager
+import pt.isel.daw.gomoku.repository.TransactionManager
 import pt.isel.daw.gomoku.utils.Either
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
@@ -80,6 +80,14 @@ class UsersService(
                     usersDomain.getTokenExpiration(newToken)
                 )
             )
+        }
+    }
+
+    fun getUserById(id: Int): User? {
+        return transactionManager.run {
+            val usersRepository = it.usersRepository
+            val userAndId = usersRepository.getUserById(id)
+            userAndId
         }
     }
 
