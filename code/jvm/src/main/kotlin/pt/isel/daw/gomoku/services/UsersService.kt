@@ -3,9 +3,10 @@ package pt.isel.daw.gomoku.services
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.springframework.stereotype.Component
-import pt.isel.daw.gomoku.domain.Token
-import pt.isel.daw.gomoku.domain.User
-import pt.isel.daw.gomoku.domain.UsersDomain
+import org.springframework.stereotype.Service
+import pt.isel.daw.gomoku.domain.utils.Token
+import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.repository.TransactionManager
 import pt.isel.daw.gomoku.utils.Either
 import pt.isel.daw.gomoku.utils.failure
@@ -28,6 +29,7 @@ sealed class TokenCreationError {
 typealias TokenCreationResult = Either<TokenCreationError, TokenExternalInfo>
 
 @Component
+@Service
 class UsersService(
     private val transactionManager: TransactionManager,
     private val usersDomain: UsersDomain,

@@ -1,9 +1,12 @@
-package pt.isel.daw.gomoku.domain
+package pt.isel.daw.gomoku.domain.users
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
+import pt.isel.daw.gomoku.domain.utils.Token
+import pt.isel.daw.gomoku.domain.utils.TokenEncoder
+import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
 import java.security.SecureRandom
 import java.util.*
 

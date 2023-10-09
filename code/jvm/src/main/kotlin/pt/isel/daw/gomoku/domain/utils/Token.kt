@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.domain
+package pt.isel.daw.gomoku.domain.utils
 
 import kotlinx.datetime.Instant
 

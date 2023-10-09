@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.domain
+package pt.isel.daw.gomoku.domain.users
 
 class AuthenticatedUser(
     val user: User,

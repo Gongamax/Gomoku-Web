@@ -1,10 +1,10 @@
 package pt.isel.daw.gomoku.repository
 
 import kotlinx.datetime.Instant
-import pt.isel.daw.gomoku.domain.PasswordValidationInfo
-import pt.isel.daw.gomoku.domain.Token
-import pt.isel.daw.gomoku.domain.TokenValidationInfo
-import pt.isel.daw.gomoku.domain.User
+import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
+import pt.isel.daw.gomoku.domain.utils.Token
+import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
+import pt.isel.daw.gomoku.domain.users.User
 
 
 interface UsersRepository {

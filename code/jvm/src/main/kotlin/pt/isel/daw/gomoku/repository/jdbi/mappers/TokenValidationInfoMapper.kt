@@ -2,7 +2,7 @@ package pt.isel.daw.gomoku.repository.jdbi.mappers
 
 import org.jdbi.v3.core.mapper.ColumnMapper
 import org.jdbi.v3.core.statement.StatementContext
-import pt.isel.daw.gomoku.domain.TokenValidationInfo
+import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
 import java.sql.ResultSet
 import java.sql.SQLException
 

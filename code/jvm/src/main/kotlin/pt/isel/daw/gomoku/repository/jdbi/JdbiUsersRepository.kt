@@ -4,10 +4,10 @@ import kotlinx.datetime.Instant
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import org.slf4j.LoggerFactory
-import pt.isel.daw.gomoku.domain.PasswordValidationInfo
-import pt.isel.daw.gomoku.domain.Token
-import pt.isel.daw.gomoku.domain.TokenValidationInfo
-import pt.isel.daw.gomoku.domain.User
+import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
+import pt.isel.daw.gomoku.domain.utils.Token
+import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
+import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.repository.UsersRepository
 
 class JdbiUsersRepository(

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import pt.isel.daw.gomoku.domain.AuthenticatedUser
+import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.services.TokenCreationError
 import pt.isel.daw.gomoku.services.UserCreationError

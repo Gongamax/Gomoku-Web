@@ -6,9 +6,9 @@ import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.TestClock
-import pt.isel.daw.gomoku.domain.Sha256TokenEncoder
-import pt.isel.daw.gomoku.domain.UsersDomain
-import pt.isel.daw.gomoku.domain.UsersDomainConfig
+import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
+import pt.isel.daw.gomoku.domain.users.UsersDomain
+import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.repository.jdbi.JdbiTransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.utils.Either

@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.domain
+package pt.isel.daw.gomoku.domain.users
 
 data class User(
     val id: Int,

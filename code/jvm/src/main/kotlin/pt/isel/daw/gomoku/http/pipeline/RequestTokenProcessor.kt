@@ -1,7 +1,7 @@
 package pt.isel.daw.gomoku.http.pipeline
 
 import org.springframework.stereotype.Component
-import pt.isel.daw.gomoku.domain.AuthenticatedUser
+import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.services.UsersService
 
 @Component

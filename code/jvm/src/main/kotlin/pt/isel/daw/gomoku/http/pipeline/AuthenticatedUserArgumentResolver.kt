@@ -7,7 +7,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
-import pt.isel.daw.gomoku.domain.AuthenticatedUser
+import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 
 @Component
 class AuthenticatedUserArgumentResolver : HandlerMethodArgumentResolver {
