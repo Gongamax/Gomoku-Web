@@ -10,6 +10,14 @@ object Uris {
 
     fun home(): URI = URI(HOME)
 
+    object  NonUsers {
+        const val SYSTEM_INFO = "$PREFIX/system"
+        const val RANKING_INFO = "$PREFIX/ranks"
+
+        fun systemInfo(): URI = URI(SYSTEM_INFO)
+        fun rankingInfo(): URI = URI(RANKING_INFO)
+    }
+
     object Users {
         const val CREATE = "$PREFIX/users"
         const val TOKEN = "$PREFIX/users/token"

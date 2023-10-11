@@ -61,10 +61,10 @@ class UsersController(
     }
 
     @GetMapping(Uris.Users.GET_BY_ID)
-    fun getById(@PathVariable id: String): ResponseEntity<UserGetByIdModel> {
+    fun getById(@PathVariable id: String): ResponseEntity<UserGetByIdOutputModel> {
         val user = userService.getUserById(id.toInt())
-        return user?.let {
-            ResponseEntity.ok(UserGetByIdModel(it.id, it.username))
+        return user?.let {/** Doubt about using user.username **/
+            ResponseEntity.ok(UserGetByIdOutputModel(it.username))
         } ?: ResponseEntity.notFound().build()
     }
 
