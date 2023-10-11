@@ -5,11 +5,13 @@ import java.util.UUID
 
 interface GamesRepository {
 
-    fun getGame(gameId: UUID): Game?
+    fun getGame(id: UUID): Game?
 
     fun createGame(game: Game) : Unit
 
     fun updateGame(game: Game): Unit
 
-    //TODO: ADD MORE METHODS
+    fun deleteGame(id: UUID): Unit
+
+    fun getGamesByUser(userId : Int): List<Game>
 }

@@ -1,16 +1,12 @@
 package pt.isel.daw.gomoku.repository.jdbi
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import kotlinx.datetime.Instant
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.statement.Update
 import org.postgresql.util.PGobject
-import pt.isel.daw.gomoku.domain.games.Board
-import pt.isel.daw.gomoku.domain.games.Game
-import pt.isel.daw.gomoku.domain.games.Player
+import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.repository.GamesRepository
 import java.util.*
@@ -19,10 +15,28 @@ class JdbiGamesRepository(
     private val handle: Handle
 ) : GamesRepository {
 
-    //TODO: check if this is correct and complete query
-    override fun getGame(gameId: UUID) =
-        handle.createQuery("select id, board, player_black, player_white from dbo.games where id = :id")
-            .bind("id", gameId)
+    override fun getGame(id: UUID) =
+        handle.createQuery(
+            """
+            select games.id,
+               games.state,
+               games.board,
+               games.created,
+               games.updated,
+               games.deadline,
+               users_black.id                  as playerBlakc_id,
+               users_black.username            as playerBlack_username,
+               users_black.password_validation as playerBlack_password_validation,
+               users_white.id                  as playerWhite_id,
+               users_white.username            as playerWhite_username,
+               users_white.password_validation as playerWhite_password_validation
+            from dbo.Games games
+                     inner join dbo.Users users_black on games.player_black = users_black.id
+                     inner join dbo.Users users_white on games.player_white = users_white.id
+            where games.id = :id
+        """.trimIndent()
+        )
+            .bind("id", id)
             .mapTo<GameDbModel>()
             .singleOrNull()
             ?.run {
@@ -53,15 +67,56 @@ class JdbiGamesRepository(
             """.trimIndent()
         )
             .bind("id", game.id)
-            .bind("state", "TODO: state")
+            .bind("state", getGameState(game.board))
             .bindBoard("board", game.board)
             .bind("created", game.created.epochSeconds)
             .bind("updated", game.updated.epochSeconds)
             .bind("deadline", game.deadline?.epochSeconds)
-            .bind("player_black", game.localPlayer)
+            .bind("player_black", game.playerBlack)
             .bind("player_white", game.remotePlayer)
             .execute()
     }
+
+    override fun deleteGame(id: UUID) {
+        handle.createUpdate(
+            """
+            delete from dbo.Games
+            where id=:id
+        """
+        )
+            .bind("id", id)
+            .execute()
+    }
+
+    override fun getGamesByUser(userId: Int): List<Game> =
+        handle.createQuery(
+            """
+                select games.id,
+                       games.state,
+                       games.board,
+                       games.created,
+                       games.updated,
+                       games.deadline,
+                       users_black.id                  as playerBlakc_id,
+                       users_black.username            as playerBlack_username,
+                       users_black.password_validation as playerBlack_password_validation,
+                       users_white.id                  as playerWhite_id,
+                       users_white.username            as playerWhite_username,
+                       users_white.password_validation as playerWhite_password_validation
+                from dbo.Games games
+                         inner join dbo.Users users_black on games.player_black = users_black.id
+                         inner join dbo.Users users_white on games.player_white = users_white.id
+                where games.player_black = :userId or games.player_white = :userId
+                order by games.created desc
+            """.trimIndent()
+        )
+            .bind("userId", userId)
+            .mapTo<GameDbModel>()
+            .list()
+            .map {
+                it.toGame()
+            }
+
 
     companion object {
         private fun Update.bindBoard(name: String, board: Board) = run {
@@ -74,22 +129,29 @@ class JdbiGamesRepository(
             )
         }
 
+        private fun getGameState(board: Board) = when (board) {
+            is BoardRun -> "Game Running"
+            is BoardDraw -> "Game Draw"
+            is BoardWin -> "Game is Over"
+        }
+
         private fun serializeBoardToJson(board: Board): String = BoardSerializer.serialize(board)
 
         fun deserializeBoardFromJson(json: String) = BoardSerializer.deserialize(json)
     }
 }
 
+// Class that represents the game in the database
 class GameDbModel(
     val id: UUID,
     val board: Board,
     val created: Instant,
     val updated: Instant,
     val deadline: Instant?,
-    @Nested("playerX")
-    val playerBlack: Player, //User
-    @Nested("playerO")
-    val playerWhite: Player, //User
+    @Nested("playerBlack")
+    val playerBlack: User,
+    @Nested("playerWhite")
+    val playerWhite: User
 ) {
     fun toGame() = Game(id, board, created, updated, deadline, playerBlack, playerWhite)
 }
