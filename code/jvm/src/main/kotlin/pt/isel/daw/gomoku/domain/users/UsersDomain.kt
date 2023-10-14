@@ -10,6 +10,14 @@ import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
 import java.security.SecureRandom
 import java.util.*
 
+/**
+ * Domain layer for users.
+ * It is responsible for the creation of tokens and password validation information.
+ * @property passwordEncoder Encoder for passwords.
+ * @property tokenEncoder Encoder for tokens.
+ * @property config Configuration for the domain.
+ * */
+
 @Component
 class UsersDomain(
     private val passwordEncoder: PasswordEncoder,

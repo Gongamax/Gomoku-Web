@@ -72,8 +72,8 @@ class JdbiGamesRepository(
             .bind("created", game.created.epochSeconds)
             .bind("updated", game.updated.epochSeconds)
             .bind("deadline", game.deadline?.epochSeconds)
-            .bind("player_black", game.playerBlack)
-            .bind("player_white", game.remotePlayer)
+            .bind("player_black", game.playerBLACK)
+            .bind("player_white", game.secondPlayer)
             .execute()
     }
 

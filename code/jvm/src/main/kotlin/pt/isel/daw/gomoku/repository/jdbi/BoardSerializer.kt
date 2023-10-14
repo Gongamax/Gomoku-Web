@@ -24,11 +24,11 @@ object BoardSerializer {
             if (movesLine.isEmpty()) emptyMap()
             else movesLine.split(" ").associate {
                 val (k, v) = it.split(":")
-                k.toCell() to Player.valueOf(v)
+                k.toCell() to Piece.valueOf(v)
             }
         return when (kind) {
-            "Run" -> BoardRun(moves, Player.valueOf(player))
-            "Win" -> BoardWin(moves, Player.valueOf(player))
+            "Run" -> BoardRun(moves, Piece.valueOf(player))
+            "Win" -> BoardWin(moves, Piece.valueOf(player))
             "Draw" -> BoardDraw(moves)
             else -> error("Invalid board kind: $kind")
         }

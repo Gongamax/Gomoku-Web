@@ -40,8 +40,7 @@ class UsersController(
     fun token(
         @RequestBody input: UserCreateTokenInputModel
     ): ResponseEntity<*> {
-        val res = userService.createToken(input.username, input.password)
-        return when (res) {
+        return when (val res = userService.createToken(input.username, input.password)) {
             is Success ->
                 ResponseEntity.status(200)
                     .body(UserTokenCreateOutputModel(res.value.tokenValue))
