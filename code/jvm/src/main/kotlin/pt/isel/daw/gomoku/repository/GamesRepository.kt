@@ -14,4 +14,6 @@ interface GamesRepository {
     fun deleteGame(id: UUID): Unit
 
     fun getGamesByUser(userId : Int): List<Game>
+
+    fun getAll() : List<Game>
 }

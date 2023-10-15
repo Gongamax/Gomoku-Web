@@ -64,7 +64,7 @@ class JdbiGamesRepository(
             """
                 insert into dbo.Games(id, state, board, created, updated, deadline, player_black, player_white)
                 values (:id, :state, :board, :created, :updated, :deadline, :player_black , :player_white)
-            """.trimIndent()
+            """
         )
             .bind("id", game.id)
             .bind("state", getGameState(game.board))
@@ -73,7 +73,7 @@ class JdbiGamesRepository(
             .bind("updated", game.updated.epochSeconds)
             .bind("deadline", game.deadline?.epochSeconds)
             .bind("player_black", game.playerBLACK)
-            .bind("player_white", game.secondPlayer)
+            .bind("player_white", game.playerWHITE)
             .execute()
     }
 
@@ -117,6 +117,33 @@ class JdbiGamesRepository(
                 it.toGame()
             }
 
+    override fun getAll(): List<Game> =
+        handle.createQuery(
+            """
+                select games.id,
+                       games.state,
+                       games.board,
+                       games.created,
+                       games.updated,
+                       games.deadline,
+                       users_black.id                  as playerBlakc_id,
+                       users_black.username            as playerBlack_username,
+                       users_black.password_validation as playerBlack_password_validation,
+                       users_white.id                  as playerWhite_id,
+                       users_white.username            as playerWhite_username,
+                       users_white.password_validation as playerWhite_password_validation
+                from dbo.Games games
+                         inner join dbo.Users users_black on games.player_black = users_black.id
+                         inner join dbo.Users users_white on games.player_white = users_white.id
+                order by games.created desc
+            """.trimIndent()
+        )
+            .mapTo<GameDbModel>()
+            .list()
+            .map {
+                it.toGame()
+            }
+
 
     companion object {
         private fun Update.bindBoard(name: String, board: Board) = run {
@@ -144,6 +171,7 @@ class JdbiGamesRepository(
 // Class that represents the game in the database
 class GameDbModel(
     val id: UUID,
+    val state: Game.State,
     val board: Board,
     val created: Instant,
     val updated: Instant,
@@ -153,5 +181,5 @@ class GameDbModel(
     @Nested("playerWhite")
     val playerWhite: User
 ) {
-    fun toGame() = Game(id, board, created, updated, deadline, playerBlack, playerWhite)
+    fun toGame() = Game(id, state, board, created, updated, deadline, playerBlack, playerWhite)
 }

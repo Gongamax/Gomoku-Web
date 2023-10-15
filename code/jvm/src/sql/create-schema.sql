@@ -3,6 +3,7 @@ create schema dbo;
 -- Table Dropping
 
 drop table if exists dbo.tokens cascade;
+drop table if exists dbo.statistics cascade;
 drop table if exists dbo.users cascade;
 drop table if exists dbo.game_config cascade;
 drop table if exists dbo.games cascade;

@@ -1,7 +1,7 @@
 package pt.isel.daw.gomoku.domain.games
 
 import pt.isel.daw.gomoku.domain.users.User
-import java.time.Instant
+import kotlinx.datetime.Instant
 import java.util.UUID
 
 /**

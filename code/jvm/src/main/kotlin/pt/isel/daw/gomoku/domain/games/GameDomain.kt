@@ -1,10 +1,11 @@
 package pt.isel.daw.gomoku.domain.games
 
+import kotlinx.datetime.Clock
+import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.domain.users.User
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
+import kotlinx.datetime.Instant
 import java.util.*
+import kotlin.time.Duration
 
 /**
  * This class is responsible for the game domain logic.
@@ -16,6 +17,7 @@ import java.util.*
  * in gitHub repository: https://github.com/isel-leic-daw/s2223i-51d-51n-public
  * */
 
+@Component
 class GameDomain(
     private val clock: Clock,
     private val timeout: Duration
@@ -24,7 +26,7 @@ class GameDomain(
         playerBLACK: User,
         playerWHITE: User
     ): Game {
-        val now = clock.instant()
+        val now = clock.now()
         return Game(
             id = UUID.randomUUID(),
             state = Game.State.NEXT_PLAYER_BLACK,
@@ -43,7 +45,7 @@ class GameDomain(
         if (round.player.user.id != game.playerWHITE.id && round.player.user.id != game.playerBLACK.id) {
             return RoundResult.NotAPlayer
         }
-        val now = clock.instant()
+        val now = clock.now()
         return when (game.state) {
             Game.State.PLAYER_BLACK_WON -> RoundResult.GameAlreadyEnded
             Game.State.PLAYER_WHITE_WON -> RoundResult.GameAlreadyEnded
@@ -61,25 +63,26 @@ class GameDomain(
     ): RoundResult = if (!aux.isTurn(game, round.player.user)) {
         RoundResult.NotYourTurn
     } else {
-        if (now > game.deadline) {
+        if (game.deadline != null && now > game.deadline) {
             val newGame = game.copy(state = aux.otherWon, deadline = null)
             RoundResult.TooLate(newGame)
         } else {
             if (game.board.canPlayOn(round.cell)) {
-                val newBoard = game.board.playRound(round.cell)
-                if (newBoard is BoardWin) {
-                    val newGame =
-                        game.copy(board = newBoard, state = aux.iWon, deadline = null)
-                    RoundResult.YouWon(newGame)
-                } else {
-                    if (newBoard is BoardDraw) {
+                when (val newBoard = game.board.playRound(round.cell)) {
+                    is BoardWin -> {
+                        val newGame =
+                            game.copy(board = newBoard, state = aux.iWon, deadline = null)
+                        RoundResult.YouWon(newGame)
+                    }
+                    is BoardDraw -> {
                         val newGame = game.copy(
                             board = newBoard,
                             state = Game.State.DRAW,
                             deadline = null,
                         )
                         RoundResult.Draw(newGame)
-                    } else {
+                    }
+                    is BoardRun -> {
                         val newGame = game.copy(
                             board = newBoard,
                             state = aux.nextPlayer,
@@ -93,6 +96,7 @@ class GameDomain(
             }
         }
     }
+
     companion object {
         private val PLAYER_BLACK_LOGIC = PlayerDomain(
             isTurn = { game, user -> game.isPlayerBLACK(user) },

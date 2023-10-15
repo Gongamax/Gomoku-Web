@@ -16,7 +16,9 @@ import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.http.pipeline.AuthenticatedUserArgumentResolver
 import pt.isel.daw.gomoku.http.pipeline.AuthenticationInterceptor
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 @SpringBootApplication
 class GomokuApplication {
@@ -36,6 +38,9 @@ class GomokuApplication {
 
     @Bean
     fun clock() = Clock.System
+
+    @Bean
+    fun timeout() = 10.minutes
 
     @Bean
     fun usersDomainConfig() = UsersDomainConfig(

@@ -10,7 +10,7 @@ package pt.isel.daw.gomoku.domain.games
  *  @property TooLate when the player took too long to play
  *  @property YouWon when the player won the game
  *  @property OthersTurn when it's the other player's turn
- *  @property Draw: when the game ended in a draw
+ *  @property Draw when the game ended in a draw
  * */
 
 sealed class RoundResult {
