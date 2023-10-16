@@ -8,6 +8,7 @@ import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.users.UserStatistics
 import pt.isel.daw.gomoku.repository.UsersRepository
 
 class JdbiUsersRepository(
@@ -24,6 +25,33 @@ class JdbiUsersRepository(
         handle.createQuery("select * from dbo.Users where id = :id")
             .bind("id", id)
             .mapTo<User>()
+            .singleOrNull()
+
+    override fun updateUser(user: User) : Int =
+        handle.createUpdate(
+            """
+            update dbo.Users
+            set username=:username, password_validation=:password_validation
+            where id=:id
+        """
+        )
+            .bind("id", user.id)
+            .bind("username", user.username)
+            .bind("password_validation", user.passwordValidation.validationInfo)
+            .execute()
+
+    override fun getUserStatsById(id: Int): UserStatistics? =
+        handle.createQuery(
+            """
+                select users.id, users.username, users.password_validation, statistics.wins, statistics.losses, statistics.draws
+                from dbo.Users as users
+                inner join dbo.Statistics as statistics
+                on users.id = statistics.user_id
+                where users.id = :id
+            """.trimIndent()
+        )
+            .bind("id", id)
+            .mapTo<UserStatistics>()
             .singleOrNull()
 
 

@@ -55,7 +55,9 @@ class JdbiGamesRepository(
         """
         )
             .bind("id", game.id)
+            .bind("state", game.state)
             .bindBoard("board", game.board)
+            .bind("updated", game.updated.epochSeconds)
             .bind("deadline", game.deadline?.epochSeconds)
             .execute()
     }

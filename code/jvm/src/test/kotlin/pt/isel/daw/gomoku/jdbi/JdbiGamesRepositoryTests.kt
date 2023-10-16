@@ -51,7 +51,7 @@ class JdbiGamesRepositoryTests {
         assertEquals(game, retrievedGame)
 
         // when: updating the game
-        val newGame = game.copy(board = game.board.playRound(Cell(1,1), Player(bob.id, Piece.WHITE)))
+        val newGame = game.copy(board = game.board.playRound(Cell(1,1), Player(bob.id, Piece.BLACK)))
 
         // and: storing the game
         gameRepo.updateGame(newGame)
@@ -63,26 +63,11 @@ class JdbiGamesRepositoryTests {
         assertEquals(newGame, newRetrievedGame)
     }
 
-    @Test
-    fun `retrieve a game`() = runWithHandle { handle ->
-        val id = UUID.fromString("4c7159cc-a146-46c4-8158-920b4e6d7ddb")
-        val repo = JdbiGamesRepository(handle)
-        val game = repo.getGame(id)
-
-        println(game.toString())
-        assertEquals(id, game?.id)
-    }
-
-
     companion object {
 
         private fun runWithHandle(block: (Handle) -> Unit) = jdbi.useTransaction<Exception>(block)
 
         private fun newTestUserName() = "user-${abs(Random.nextLong())}"
-
-        private fun newGameId() = "game-${abs(Random.nextLong())}"
-
-        private fun newTokenValidationData() = "token-${abs(Random.nextLong())}"
 
         private val dbUrl = Environment.getDbUrl()
 

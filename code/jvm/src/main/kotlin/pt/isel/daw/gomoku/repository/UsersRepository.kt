@@ -5,6 +5,7 @@ import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.users.UserStatistics
 
 
 interface UsersRepository {
@@ -17,6 +18,10 @@ interface UsersRepository {
     fun getUserByUsername(username: String): User?
 
     fun getUserById(id: Int): User?
+
+    fun updateUser(user: User): Int
+
+    fun getUserStatsById(id: Int): UserStatistics?
 
     fun getTokenByTokenValidationInfo(tokenValidationInfo: TokenValidationInfo): Pair<User, Token>?
 
