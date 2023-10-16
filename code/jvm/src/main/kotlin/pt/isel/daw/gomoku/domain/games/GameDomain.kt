@@ -47,6 +47,7 @@ class GameDomain(
             return RoundResult.NotAPlayer
         }
         val now = clock.now()
+        println("[PLAY_ROUND] ${game.state}")
         return when (game.state) {
             Game.State.PLAYER_BLACK_WON -> RoundResult.GameAlreadyEnded
             Game.State.PLAYER_WHITE_WON -> RoundResult.GameAlreadyEnded
@@ -122,6 +123,10 @@ class GameDomain(
     }
 }
 
-private fun Game.isPlayerBLACK(player: Int) = this.playerBLACK.id == player
+private fun Game.isPlayerBLACK(player: Int) = run {
+    this.playerBLACK.id == player
+}
 
-private fun Game.isPlayerWHITE(player: Int) = this.playerBLACK.id == player
+private fun Game.isPlayerWHITE(player: Int) = run {
+    this.playerWHITE.id == player
+}
