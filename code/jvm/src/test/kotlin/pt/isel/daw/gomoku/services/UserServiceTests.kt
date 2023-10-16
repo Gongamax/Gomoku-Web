@@ -11,6 +11,7 @@ import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.repository.jdbi.JdbiTransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
+import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
 import java.util.*
 import kotlin.random.Random

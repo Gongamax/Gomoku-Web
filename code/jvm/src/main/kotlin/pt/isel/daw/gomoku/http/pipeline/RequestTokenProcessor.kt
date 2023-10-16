@@ -2,7 +2,7 @@ package pt.isel.daw.gomoku.http.pipeline
 
 import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
-import pt.isel.daw.gomoku.services.UsersService
+import pt.isel.daw.gomoku.services.users.UsersService
 
 @Component
 class RequestTokenProcessor(

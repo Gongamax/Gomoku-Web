@@ -1,7 +1,5 @@
-package pt.isel.daw.gomoku.services
+package pt.isel.daw.gomoku.services.games
 
-import kotlinx.datetime.Clock
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import pt.isel.daw.gomoku.domain.games.Game
 import pt.isel.daw.gomoku.domain.games.GameDomain
@@ -10,26 +8,22 @@ import pt.isel.daw.gomoku.domain.games.RoundResult
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.repository.TransactionManager
 import pt.isel.daw.gomoku.services.exceptions.NotFoundException
-import pt.isel.daw.gomoku.utils.Either
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
 import java.util.UUID
 
-sealed class GameCreationError {
-    object GameAlreadyExists : GameCreationError()
-}
-
-typealias GameCreationResult = Either<GameCreationError, Game>
-
-@Component
 @Service
 class GamesService(
     private val transactionManager: TransactionManager,
     private val gamesDomain: GameDomain,
-    private val clock: Clock
 ) {
     fun createGame(userBlack: User, userWhite: User): GameCreationResult {
         return transactionManager.run {
+            if (it.usersRepository.getUserById(userBlack.id) == null ||
+                it.usersRepository.getUserById(userWhite.id) == null
+            ) {
+                failure(GameCreationError.UserDoesNotExist)
+            }
             val gamesRepository = it.gamesRepository
             val game = gamesDomain.createGame(userBlack, userWhite)
             if (gamesRepository.getGame(game.id) != null) {
@@ -41,7 +35,7 @@ class GamesService(
         }
     }
 
-    fun getById(id: UUID): Game? {
+    fun getById(id: UUID): Game {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             gamesRepository.getGame(id) ?: throw NotFoundException("Game with id $id not found")
@@ -65,11 +59,26 @@ class GamesService(
         }
     }
 
+    fun leaveGame(id: UUID, userId: Int) {
+        return transactionManager.run {
+            val gamesRepository = it.gamesRepository
+            val game = getById(id)
+            val newGame = if (game.playerBLACK.id == userId) game.copy(state = Game.State.PLAYER_WHITE_WON)
+            else game.copy(state = Game.State.PLAYER_BLACK_WON)
+
+            when (game.state) {
+                Game.State.DRAW, Game.State.PLAYER_BLACK_WON, Game.State.PLAYER_WHITE_WON ->
+                    throw IllegalStateException("Game already ended")
+
+                else -> gamesRepository.updateGame(newGame)
+            }
+        }
+    }
+
     fun getAll(): List<Game> {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             gamesRepository.getAll()
         }
     }
-
 }

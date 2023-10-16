@@ -39,13 +39,10 @@ class JdbiGamesRepositoryTests {
         val alice = userRepo.getUserByUsername(aliceName) ?: fail("user must exist")
         val bob = userRepo.getUserByUsername(bobName) ?: fail("user must exist")
         val game = gameDomain.createGame(alice, bob)
-        println(game.toString())
         gameRepo.createGame(game)
 
         // and: retrieving the game
         val retrievedGame = gameRepo.getGame(game.id) ?: fail("game must exist")
-
-        println(retrievedGame.toString())
 
         // then: the retrieved game must be the same as the created one
         assertEquals(game, retrievedGame)

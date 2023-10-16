@@ -1,8 +1,7 @@
-package pt.isel.daw.gomoku.services
+package pt.isel.daw.gomoku.services.users
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.users.User
@@ -12,23 +11,6 @@ import pt.isel.daw.gomoku.utils.Either
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
 
-data class TokenExternalInfo(
-    val tokenValue: String,
-    val tokenExpiration: Instant
-)
-
-sealed class UserCreationError {
-    object UserAlreadyExists : UserCreationError()
-    object InsecurePassword : UserCreationError()
-}
-typealias UserCreationResult = Either<UserCreationError, Int>
-
-sealed class TokenCreationError {
-    object UserOrPasswordAreInvalid : TokenCreationError()
-}
-typealias TokenCreationResult = Either<TokenCreationError, TokenExternalInfo>
-
-@Component
 @Service
 class UsersService(
     private val transactionManager: TransactionManager,
