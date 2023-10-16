@@ -4,12 +4,9 @@ import pt.isel.daw.gomoku.domain.users.User
 
 /**
  * Represents a player of the game.
- * @property user the user that is playing.
+ * @property userId  the id of the user that is playing.
  * @property piece the piece that the player is using.
  */
 
-data class Player(val user: User, val piece: Piece){
-    fun other() =
-        if (this.piece == Piece.BLACK) Player(user, Piece.WHITE) else Player(user, Piece.BLACK)
-}
+data class Player(val userId: Int, val piece: Piece)
 enum class Piece { BLACK, WHITE }

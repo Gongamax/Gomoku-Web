@@ -30,7 +30,7 @@ class GameDomain(
         return Game(
             id = UUID.randomUUID(),
             state = Game.State.NEXT_PLAYER_BLACK,
-            board = Board.createBoard(player = Player(playerBLACK, Piece.BLACK)),
+            board = Board.createBoard(player = Player(playerBLACK.id, Piece.BLACK)),
             created = now,
             updated = now,
             deadline = now.plus(timeout),
@@ -42,7 +42,7 @@ class GameDomain(
         game: Game,
         round: Round,
     ): RoundResult {
-        if (round.player.user.id != game.playerWHITE.id && round.player.user.id != game.playerBLACK.id) {
+        if (round.player.userId != game.playerWHITE.id && round.player.userId != game.playerBLACK.id) {
             return RoundResult.NotAPlayer
         }
         val now = clock.now()
@@ -60,7 +60,7 @@ class GameDomain(
         round: Round,
         now: Instant,
         aux: PlayerDomain,
-    ): RoundResult = if (!aux.isTurn(game, round.player.user)) {
+    ): RoundResult = if (!aux.isTurn(game, round.player.userId)) {
         RoundResult.NotYourTurn
     } else {
         if (game.deadline != null && now > game.deadline) {
@@ -115,6 +115,6 @@ class GameDomain(
     }
 }
 
-private fun Game.isPlayerBLACK(player: User) = this.playerBLACK.id == player.id
+private fun Game.isPlayerBLACK(player: Int) = this.playerBLACK.id == player
 
-private fun Game.isPlayerWHITE(player: User) = this.playerBLACK.id == player.id
+private fun Game.isPlayerWHITE(player: Int) = this.playerBLACK.id == player

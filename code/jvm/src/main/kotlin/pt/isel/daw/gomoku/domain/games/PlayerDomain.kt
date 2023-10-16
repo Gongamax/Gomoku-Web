@@ -10,8 +10,9 @@ import pt.isel.daw.gomoku.domain.users.User
  * @property nextPlayer the state of the game if it is the next player's turn.
  * @property boardState the piece that the player is using.
  * */
+
 class PlayerDomain(
-    val isTurn: (game: Game, user: User) -> Boolean,
+    val isTurn: (game: Game, userId: Int) -> Boolean,
     val otherWon: Game.State,
     val iWon: Game.State,
     val nextPlayer: Game.State,
