@@ -1,5 +1,7 @@
 package pt.isel.daw.gomoku.repository.jdbi
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import kotlinx.datetime.Instant
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -24,7 +26,7 @@ class JdbiGamesRepository(
                games.created,
                games.updated,
                games.deadline,
-               users_black.id                  as playerBlakc_id,
+               users_black.id                  as playerBlack_id,
                users_black.username            as playerBlack_username,
                users_black.password_validation as playerBlack_password_validation,
                users_white.id                  as playerWhite_id,
@@ -56,7 +58,6 @@ class JdbiGamesRepository(
             .bindBoard("board", game.board)
             .bind("deadline", game.deadline?.epochSeconds)
             .execute()
-
     }
 
     override fun createGame(game: Game) {
@@ -64,16 +65,16 @@ class JdbiGamesRepository(
             """
                 insert into dbo.Games(id, state, board, created, updated, deadline, player_black, player_white)
                 values (:id, :state, :board, :created, :updated, :deadline, :player_black , :player_white)
-            """
+            """.trimIndent()
         )
             .bind("id", game.id)
-            .bind("state", getGameState(game.board))
+            .bind("state", game.state)
             .bindBoard("board", game.board)
             .bind("created", game.created.epochSeconds)
             .bind("updated", game.updated.epochSeconds)
             .bind("deadline", game.deadline?.epochSeconds)
-            .bind("player_black", game.playerBLACK)
-            .bind("player_white", game.playerWHITE)
+            .bind("player_black", game.playerBLACK.id)
+            .bind("player_white", game.playerWHITE.id)
             .execute()
     }
 
@@ -97,7 +98,7 @@ class JdbiGamesRepository(
                        games.created,
                        games.updated,
                        games.deadline,
-                       users_black.id                  as playerBlakc_id,
+                       users_black.id                  as playerBlack_id,
                        users_black.username            as playerBlack_username,
                        users_black.password_validation as playerBlack_password_validation,
                        users_white.id                  as playerWhite_id,
@@ -126,7 +127,7 @@ class JdbiGamesRepository(
                        games.created,
                        games.updated,
                        games.deadline,
-                       users_black.id                  as playerBlakc_id,
+                       users_black.id                  as playerBlack_id,
                        users_black.username            as playerBlack_username,
                        users_black.password_validation as playerBlack_password_validation,
                        users_white.id                  as playerWhite_id,
@@ -156,11 +157,7 @@ class JdbiGamesRepository(
             )
         }
 
-        private fun getGameState(board: Board) = when (board) {
-            is BoardRun -> "Game Running"
-            is BoardDraw -> "Game Draw"
-            is BoardWin -> "Game is Over"
-        }
+        private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
 
         private fun serializeBoardToJson(board: Board): String = BoardSerializer.serialize(board)
 
@@ -181,5 +178,5 @@ class GameDbModel(
     @Nested("playerWhite")
     val playerWhite: User
 ) {
-    fun toGame() = Game(id, state, board, created, updated, deadline, playerBlack, playerWhite)
+    fun toGame() : Game = Game(id, state, board, created, updated, deadline, playerBlack, playerWhite)
 }

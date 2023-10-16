@@ -4,14 +4,14 @@ VALUES ('alice', 'hash1'),
        ('charlie', 'hash3');
 
 INSERT INTO dbo.Tokens (token_validation, user_id, created_at, last_used_at)
-VALUES ('token1', 5, 1634260800, 1634260810),
-       ('token2', 6, 1634260820, 1634260830),
-       ('token3', 7, 1634260840, 1634260850);
+VALUES ('token1', 1, 1634260800, 1634260810),
+       ('token2', 2, 1634260820, 1634260830),
+       ('token3', 3, 1634260840, 1634260850);
 
 INSERT INTO dbo.Games (id, state, board, created, updated, deadline, player_black, player_white)
-VALUES ('4c7159cc-a146-46c4-8158-920b4e6d7ddb', 'Game Running', '{
+VALUES ('4c7159cc-a146-46c4-8158-920b4e6d7ddb', 'NEXT_PLAYER_WHITE', '{
   "board_data": "your_board_json_data"
-}', 1634260800, 1634260820, 1634260840, 6, 7);
+}', 1634260800, 1634260820, 1634260840, 1, 2);
 
 
 INSERT INTO dbo.Game_Config (game_id, board_size, variant, opening_rule)

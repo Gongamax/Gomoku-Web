@@ -38,6 +38,7 @@ class GameDomain(
             playerWHITE = playerWHITE
         )
     }
+
     fun playRound(
         game: Game,
         round: Round,
@@ -68,12 +69,13 @@ class GameDomain(
             RoundResult.TooLate(newGame)
         } else {
             if (game.board.canPlayOn(round.cell)) {
-                when (val newBoard = game.board.playRound(round.cell)) {
+                when (val newBoard = game.board.playRound(round.cell, nextPlayer(game, round.player))) {
                     is BoardWin -> {
                         val newGame =
                             game.copy(board = newBoard, state = aux.iWon, deadline = null)
                         RoundResult.YouWon(newGame)
                     }
+
                     is BoardDraw -> {
                         val newGame = game.copy(
                             board = newBoard,
@@ -82,6 +84,7 @@ class GameDomain(
                         )
                         RoundResult.Draw(newGame)
                     }
+
                     is BoardRun -> {
                         val newGame = game.copy(
                             board = newBoard,
@@ -96,6 +99,10 @@ class GameDomain(
             }
         }
     }
+
+    private fun nextPlayer(game: Game, player: Player): Player =
+        if (player.userId == game.playerBLACK.id) Player(game.playerWHITE.id, Piece.WHITE)
+        else Player(game.playerBLACK.id, Piece.BLACK)
 
     companion object {
         private val PLAYER_BLACK_LOGIC = PlayerDomain(

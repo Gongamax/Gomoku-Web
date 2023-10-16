@@ -10,6 +10,7 @@ import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.repository.jdbi.JdbiGamesRepository
 import pt.isel.daw.gomoku.repository.jdbi.JdbiUsersRepository
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
+import java.util.UUID
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.Test
@@ -28,13 +29,15 @@ class JdbiGamesRepositoryTests {
         val gameDomain = GameDomain(testClock, 5.minutes)
 
         // and: two existing users
+        val aliceName = newTestUserName()
+        val bobName = newTestUserName()
         val passwordValidationInfo = PasswordValidationInfo("not-valid")
-        userRepo.storeUser("alice", passwordValidationInfo)
-        userRepo.storeUser("bob", passwordValidationInfo)
+        userRepo.storeUser(aliceName, passwordValidationInfo)
+        userRepo.storeUser(bobName, passwordValidationInfo)
 
         // when:
-        val alice = userRepo.getUserByUsername("alice") ?: fail("user must exist")
-        val bob = userRepo.getUserByUsername("bob") ?: fail("user must exist")
+        val alice = userRepo.getUserByUsername(aliceName) ?: fail("user must exist")
+        val bob = userRepo.getUserByUsername(bobName) ?: fail("user must exist")
         val game = gameDomain.createGame(alice, bob)
         println(game.toString())
         gameRepo.createGame(game)
@@ -42,11 +45,13 @@ class JdbiGamesRepositoryTests {
         // and: retrieving the game
         val retrievedGame = gameRepo.getGame(game.id) ?: fail("game must exist")
 
+        println(retrievedGame.toString())
+
         // then: the retrieved game must be the same as the created one
         assertEquals(game, retrievedGame)
 
         // when: updating the game
-        val newGame = game.copy(board = game.board.playRound(Cell(1,1)))
+        val newGame = game.copy(board = game.board.playRound(Cell(1,1), Player(bob.id, Piece.WHITE)))
 
         // and: storing the game
         gameRepo.updateGame(newGame)
@@ -56,6 +61,16 @@ class JdbiGamesRepositoryTests {
 
         // then: the two games are equal
         assertEquals(newGame, newRetrievedGame)
+    }
+
+    @Test
+    fun `retrieve a game`() = runWithHandle { handle ->
+        val id = UUID.fromString("4c7159cc-a146-46c4-8158-920b4e6d7ddb")
+        val repo = JdbiGamesRepository(handle)
+        val game = repo.getGame(id)
+
+        println(game.toString())
+        assertEquals(id, game?.id)
     }
 
 

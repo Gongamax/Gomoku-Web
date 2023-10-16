@@ -26,6 +26,16 @@ sealed class Board(val moves: Moves) {
         }
     }
 
+    override fun toString(): String {
+        return when (this) {
+            is BoardRun -> "Run:$turn"
+            is BoardWin -> "Win:$winner"
+            is BoardDraw -> "Draw:-"
+        } + moves.entries.joinToString(" ") {
+            "${it.key}:${it.value.piece.name}"
+        }
+    }
+
     override fun hashCode(): Int = moves.hashCode()
 
     companion object {
@@ -42,7 +52,7 @@ class BoardDraw(moves: Moves) : Board(moves)
  * @throws IllegalArgumentException if the [cell] is already used.
  * @throws IllegalStateException if the game is over (Draw or Win).
  */
-fun Board.playRound(cell: Cell): Board {
+fun Board.playRound(cell: Cell, nextPlayer: Player): Board {
     return when (this) {
         is BoardRun -> {
             require(moves[cell] == null) { "Position $cell used" }
@@ -50,7 +60,7 @@ fun Board.playRound(cell: Cell): Board {
             when {
                 isWin(cell) -> BoardWin(moves, winner = turn)
                 isDraw() -> BoardDraw(moves)
-                else -> BoardRun(moves, turn.other())
+                else -> BoardRun(moves, nextPlayer)
             }
         }
 
