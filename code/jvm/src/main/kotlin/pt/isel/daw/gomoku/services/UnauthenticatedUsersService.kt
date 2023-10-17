@@ -21,7 +21,7 @@ class UnauthenticatedUsersService {
         TODO()
     }
 
-    fun getRanking() {
+    fun getStatistics() {
         TODO()
     }
 }

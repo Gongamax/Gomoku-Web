@@ -41,5 +41,17 @@ class Problem(
                         "docs/problems/invalid-request-content"
             )
         )
+
+        val gameAlreadyExists = Problem(
+            URI(
+                "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/problems/game-already-exists"
+            )
+        )
+
+        val userDoesNotExists = Problem(
+            URI(
+                "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/problems/user-does-not-exists"
+            )
+        )
     }
 }

@@ -19,7 +19,7 @@ class UsersController(
     private val userService: UsersService
 ) {
 
-    @PostMapping(Uris.Users.CREATE)
+    @PostMapping(Uris.Users.CREATE_USER)
     fun create(@RequestBody input: UserCreateInputModel): ResponseEntity<*> {
         val res = userService.createUser(input.username, input.password)
         return when (res) {
@@ -59,11 +59,11 @@ class UsersController(
         userService.revokeToken(user.token)
     }
 
-    @GetMapping(Uris.Users.GET_BY_ID)
+    @GetMapping(Uris.Users.GET_USER_BY_ID)
     fun getById(@PathVariable id: String): ResponseEntity<UserGetByIdOutputModel> {
         val user = userService.getUserById(id.toInt())
         return user?.let {/** Doubt about using user.username **/
-            ResponseEntity.ok(UserGetByIdOutputModel(it.username))
+            ResponseEntity.ok(UserGetByIdOutputModel(it.id, it.username))
         } ?: ResponseEntity.notFound().build()
     }
 

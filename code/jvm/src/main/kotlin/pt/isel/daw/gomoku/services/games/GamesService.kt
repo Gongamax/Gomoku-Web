@@ -35,7 +35,7 @@ class GamesService(
         }
     }
 
-    fun getById(id: UUID): Game {
+    fun getGameById(id: UUID): Game {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             gamesRepository.getGame(id) ?: throw NotFoundException("Game with id $id not found")
@@ -62,7 +62,7 @@ class GamesService(
     fun leaveGame(id: UUID, userId: Int) {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
-            val game = getById(id)
+            val game = getGameById(id)
             val newGame = if (game.playerBLACK.id == userId) game.copy(state = Game.State.PLAYER_WHITE_WON)
             else game.copy(state = Game.State.PLAYER_BLACK_WON)
             if (newGame.state.isEnded)
@@ -76,6 +76,13 @@ class GamesService(
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             gamesRepository.getAll()
+        }
+    }
+
+    fun getGameStateById(id: UUID): Game.State {
+        return transactionManager.run {
+            val gamesRepository = it.gamesRepository
+            gamesRepository.getGameState(id) ?: throw NotFoundException("Game with id $id not found")
         }
     }
 }

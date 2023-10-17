@@ -16,4 +16,5 @@ interface GamesRepository {
     fun getGamesByUser(userId : Int): List<Game>
 
     fun getAll() : List<Game>
+    fun getGameState(id: UUID): Game.State?
 }
