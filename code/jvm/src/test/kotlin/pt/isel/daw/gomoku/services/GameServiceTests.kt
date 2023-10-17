@@ -190,7 +190,12 @@ class GameServiceTests {
             JdbiTransactionManager(jdbi),
             GameDomain(
                 clock = testClock,
-                timeout = 10.minutes,
+                config = GamesDomainConfig(
+                    boardSize = 15,
+                    variant = Variant.STANDARD,
+                    openingRule = OpeningRule.STANDARD,
+                    timeout = 10.minutes
+                )
             ),
         )
 

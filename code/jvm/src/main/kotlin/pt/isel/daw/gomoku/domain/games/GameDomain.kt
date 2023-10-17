@@ -6,6 +6,7 @@ import pt.isel.daw.gomoku.domain.users.User
 import kotlinx.datetime.Instant
 import java.util.*
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * This class is responsible for the game domain logic.
@@ -20,7 +21,7 @@ import kotlin.time.Duration
 @Component
 class GameDomain(
     private val clock: Clock,
-    private val timeout: Duration
+    private val config: GamesDomainConfig
 ) {
     fun createGame(
         playerBLACK: User,
@@ -33,7 +34,7 @@ class GameDomain(
             board = Board.createBoard(player = Player(playerBLACK.id, Piece.BLACK)),
             created = now,
             updated = now,
-            deadline = now.plus(timeout),
+            deadline = now.plus(config.timeout),
             playerBLACK = playerBLACK,
             playerWHITE = playerWHITE
         )
@@ -90,7 +91,7 @@ class GameDomain(
                         val newGame = game.copy(
                             board = newBoard,
                             state = aux.nextPlayer,
-                            deadline = now + timeout,
+                            deadline = now + config.timeout,
                         )
                         RoundResult.OthersTurn(newGame)
                     }

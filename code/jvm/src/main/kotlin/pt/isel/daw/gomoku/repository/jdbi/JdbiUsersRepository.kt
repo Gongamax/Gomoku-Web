@@ -43,7 +43,7 @@ class JdbiUsersRepository(
     override fun getUserStatsById(id: Int): UserStatistics? =
         handle.createQuery(
             """
-                select users.id, users.username, users.password_validation, statistics.wins, statistics.losses, statistics.draws
+                select users.id, users.username, users.password_validation, statistics.wins, statistics.losses
                 from dbo.Users as users
                 inner join dbo.Statistics as statistics
                 on users.id = statistics.user_id

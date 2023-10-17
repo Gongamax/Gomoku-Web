@@ -26,7 +26,7 @@ class JdbiGamesRepositoryTests {
         val userRepo = JdbiUsersRepository(handle)
         val gameRepo = JdbiGamesRepository(handle)
         val testClock = TestClock()
-        val gameDomain = GameDomain(testClock, 5.minutes)
+        val gameDomain = GameDomain(testClock, gameConfig)
 
         // and: two existing users
         val aliceName = newTestUserName()
@@ -65,6 +65,13 @@ class JdbiGamesRepositoryTests {
         private fun runWithHandle(block: (Handle) -> Unit) = jdbi.useTransaction<Exception>(block)
 
         private fun newTestUserName() = "user-${abs(Random.nextLong())}"
+
+        private val gameConfig = GamesDomainConfig(
+            boardSize = 15,
+            variant = Variant.STANDARD,
+            openingRule = OpeningRule.STANDARD,
+            timeout = 10.minutes
+        )
 
         private val dbUrl = Environment.getDbUrl()
 

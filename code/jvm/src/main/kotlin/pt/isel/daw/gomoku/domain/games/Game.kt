@@ -15,7 +15,6 @@ import java.util.UUID
  * @property playerBLACK the player that is using the black piece.
  * @property playerWHITE the player that is using the white piece.
  */
-
 data class Game(
     val id : UUID,
     val state: State,

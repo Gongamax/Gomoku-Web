@@ -128,7 +128,10 @@ class GameDomainTests {
         // given: a game logic, a game and a list of rounds
         val testClock = TestClock()
         val timeout = 5.minutes
-        val gameLogic = GameDomain(testClock, timeout)
+        val gameLogic = GameDomain(
+            testClock,
+            gameConfig
+        )
         var game = gameLogic.createGame(alice, bob)
 
         // when: alice plays
@@ -167,9 +170,16 @@ class GameDomainTests {
     }
 
     companion object {
+        private val gameConfig = GamesDomainConfig(
+            boardSize = 15,
+            variant = Variant.STANDARD,
+            openingRule = OpeningRule.STANDARD,
+            timeout = 10.minutes
+        )
+
         private val gameDomain = GameDomain(
             Clock.System,
-            5.minutes,
+            gameConfig
         )
 
         // our test players

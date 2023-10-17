@@ -65,13 +65,10 @@ class GamesService(
             val game = getById(id)
             val newGame = if (game.playerBLACK.id == userId) game.copy(state = Game.State.PLAYER_WHITE_WON)
             else game.copy(state = Game.State.PLAYER_BLACK_WON)
-
-            when (game.state) {
-                Game.State.DRAW, Game.State.PLAYER_BLACK_WON, Game.State.PLAYER_WHITE_WON ->
-                    throw IllegalStateException("Game already ended")
-
-                else -> gamesRepository.updateGame(newGame)
-            }
+            if (newGame.state.isEnded)
+                throw IllegalStateException("Game already ended")
+            else
+                gamesRepository.updateGame(newGame)
         }
     }
 
