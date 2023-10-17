@@ -22,9 +22,9 @@ class GameController(
     @GetMapping(Uris.Games.GET_GAME_BY_ID)
     fun getGameById(@PathVariable id: String): ResponseEntity<GameGetByIdOutputModel> {
         val game = gameService.getGameById(UUID.fromString(id))
-        return game?.let {
+        return game.let {
             ResponseEntity.ok(GameGetByIdOutputModel(GameOutputModel(it.id, it.board, it.playerBLACK, it.playerWHITE)))
-        } ?: ResponseEntity.notFound().build()
+        }
     }
 
     @PostMapping(Uris.Games.CREATE_GAME)
@@ -51,11 +51,11 @@ class GameController(
         }
     }
 
-    @GetMapping(Uris.Games.GAME_STATE)
-    fun gameState(@PathVariable id: String): ResponseEntity<GameStateGetByIdOutputModel> {
-        val state = gameService.getGameStateById(UUID.fromString(id))
-        return state?.let {
-            ResponseEntity.ok(GameStateGetByIdOutputModel(it))
-        } ?: ResponseEntity.notFound().build()
-    }
+//    @GetMapping(Uris.Games.GAME_STATE)
+//    fun gameState(@PathVariable id: String): ResponseEntity<GameStateGetByIdOutputModel> {
+//        val state = gameService.getGameStateById(UUID.fromString(id))
+//        return state?.let {
+//            ResponseEntity.ok(GameStateGetByIdOutputModel(it))
+//        } ?: ResponseEntity.notFound().build()
+//    }
 }
