@@ -1,10 +1,7 @@
 package pt.isel.daw.gomoku.services.games
 
 import org.springframework.stereotype.Service
-import pt.isel.daw.gomoku.domain.games.Game
-import pt.isel.daw.gomoku.domain.games.GameDomain
-import pt.isel.daw.gomoku.domain.games.Round
-import pt.isel.daw.gomoku.domain.games.RoundResult
+import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.repository.TransactionManager
 import pt.isel.daw.gomoku.services.exceptions.NotFoundException
@@ -15,6 +12,7 @@ import java.util.UUID
 @Service
 class GamesService(
     private val transactionManager: TransactionManager,
+    private val matchmaking: Matchmaking,
     private val gamesDomain: GameDomain,
 ) {
     fun createGame(userBlack: User, userWhite: User): GameCreationResult {
@@ -63,12 +61,11 @@ class GamesService(
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             val game = getGameById(id)
+            if (game.state.isEnded)
+                throw IllegalStateException("Game already ended")
             val newGame = if (game.playerBLACK.id == userId) game.copy(state = Game.State.PLAYER_WHITE_WON)
             else game.copy(state = Game.State.PLAYER_BLACK_WON)
-            if (newGame.state.isEnded)
-                throw IllegalStateException("Game already ended")
-            else
-                gamesRepository.updateGame(newGame)
+            gamesRepository.updateGame(newGame)
         }
     }
 

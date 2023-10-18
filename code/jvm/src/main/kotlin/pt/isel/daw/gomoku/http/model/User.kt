@@ -1,6 +1,9 @@
 package pt.isel.daw.gomoku.http.model
 
+import pt.isel.daw.gomoku.domain.users.Email
+
 data class UserCreateInputModel(
+    val email: Email,
     val username: String,
     val password: String
 )
@@ -12,8 +15,8 @@ data class UserCreateTokenInputModel(
 
 class UserGetByIdOutputModel(
     val id: Int,
-    val username: String
-    /** More properties to come **/
+    val username: String,
+    val email: Email
 )
 
 class UserHomeOutputModel(

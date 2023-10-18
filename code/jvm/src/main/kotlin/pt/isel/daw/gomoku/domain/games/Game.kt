@@ -33,11 +33,5 @@ data class Game(
         DRAW;
         val isEnded: Boolean
             get() = this == PLAYER_BLACK_WON || this == PLAYER_WHITE_WON || this == DRAW
-
-        /** Could be implemented by a better solution to convert State to string **/
-        override fun toString(): String {
-            return "GAME STATE: $name"
-        }
     }
-
 }

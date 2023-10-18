@@ -6,6 +6,7 @@ import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.TestClock
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
@@ -14,6 +15,7 @@ import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
 import java.util.*
+import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -35,8 +37,8 @@ class UserServiceTests {
 
         // when: creating a user
         val username = newTestUserName()
-        val password = "changeit"
-        val createUserResult = userService.createUser(username, password)
+        val password = newTestPassword()
+        val createUserResult = userService.createUser(username, newTestEmail(), password)
 
         // then: the creation is successful
         when (createUserResult) {
@@ -77,8 +79,8 @@ class UserServiceTests {
 
         // when: creating a user
         val username = newTestUserName()
-        val password = "changeit"
-        val createUserResult = userService.createUser(username, password)
+        val password = newTestPassword()
+        val createUserResult = userService.createUser(username, newTestEmail(), password)
 
         // then: the creation is successful
         when (createUserResult) {
@@ -115,8 +117,8 @@ class UserServiceTests {
 
         // when: creating a user
         val username = newTestUserName()
-        val password = "changeit"
-        val createUserResult = userService.createUser(username, password)
+        val password = newTestPassword()
+        val createUserResult = userService.createUser(username, newTestEmail(), password)
 
         // then: the creation is successful
         when (createUserResult) {
@@ -172,8 +174,8 @@ class UserServiceTests {
 
         // when: creating a user
         val username = newTestUserName()
-        val password = "changeit"
-        val createUserResult = userService.createUser(username, password)
+        val password = newTestPassword()
+        val createUserResult = userService.createUser(username, newTestEmail(), password)
 
         // then: the creation is successful
         when (createUserResult) {
@@ -229,8 +231,8 @@ class UserServiceTests {
 
         // when: creating a user
         val username = newTestUserName()
-        val password = "changeit"
-        val createUserResult = userService.createUser(username, password)
+        val password = newTestPassword()
+        val createUserResult = userService.createUser(username, newTestEmail(), password)
 
         // then: the creation is successful
         when (createUserResult) {
@@ -285,6 +287,10 @@ class UserServiceTests {
         )
 
         private fun newTestUserName() = "user-${Math.abs(Random.nextLong())}"
+
+        private fun newTestPassword() = "TestPassword${abs(Random.nextLong())}"
+
+        private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
 
         private val dbUrl = Environment.getDbUrl()
 

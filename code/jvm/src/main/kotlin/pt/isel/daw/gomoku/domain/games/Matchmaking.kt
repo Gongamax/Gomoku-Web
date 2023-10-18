@@ -9,7 +9,7 @@ import kotlin.time.Duration
 
 typealias Match = Pair<User, User>
 
-class Matchmaking<T> {
+class Matchmaking {
 
     private val lock: ReentrantLock = ReentrantLock()
     private val waiters: NodeLinkedList<Request> = NodeLinkedList()

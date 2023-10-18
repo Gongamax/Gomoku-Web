@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import org.slf4j.LoggerFactory
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
@@ -27,16 +28,17 @@ class JdbiUsersRepository(
             .mapTo<User>()
             .singleOrNull()
 
-    override fun updateUser(user: User) : Int =
+    override fun updateUser(user: User): Int =
         handle.createUpdate(
             """
             update dbo.Users
-            set username=:username, password_validation=:password_validation
+            set username=:username, email=:email, password_validation=:password_validation
             where id=:id
         """
         )
             .bind("id", user.id)
             .bind("username", user.username)
+            .bind("email", user.email.mail)
             .bind("password_validation", user.passwordValidation.validationInfo)
             .execute()
 
@@ -55,13 +57,14 @@ class JdbiUsersRepository(
             .singleOrNull()
 
 
-    override fun storeUser(username: String, passwordValidation: PasswordValidationInfo): Int =
+    override fun storeUser(username: String, email: Email, passwordValidation: PasswordValidationInfo): Int =
         handle.createUpdate(
             """
-            insert into dbo.Users (username, password_validation) values (:username, :password_validation)
+            insert into dbo.Users (username, email, password_validation) values (:username, :email, :password_validation)
             """
         )
             .bind("username", username)
+            .bind("email", email.mail)
             .bind("password_validation", passwordValidation.validationInfo)
             .executeAndReturnGeneratedKeys()
             .mapTo<Int>()
@@ -119,7 +122,7 @@ class JdbiUsersRepository(
     override fun getTokenByTokenValidationInfo(tokenValidationInfo: TokenValidationInfo): Pair<User, Token>? =
         handle.createQuery(
             """
-                select id, username, password_validation, token_validation, created_at, last_used_at
+                select id, username, email, password_validation, token_validation, created_at, last_used_at
                 from dbo.Users as users 
                 inner join dbo.Tokens as tokens 
                 on users.id = tokens.user_id
@@ -145,6 +148,7 @@ class JdbiUsersRepository(
     private data class UserAndTokenModel(
         val id: Int,
         val username: String,
+        val email: Email,
         val passwordValidation: PasswordValidationInfo,
         val tokenValidation: TokenValidationInfo,
         val createdAt: Long,
@@ -152,7 +156,7 @@ class JdbiUsersRepository(
     ) {
         val userAndToken: Pair<User, Token>
             get() = Pair(
-                User(id, username, passwordValidation),
+                User(id, username, email, passwordValidation),
                 Token(
                     tokenValidation,
                     id,

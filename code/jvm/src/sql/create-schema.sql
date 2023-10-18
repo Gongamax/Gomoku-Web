@@ -14,6 +14,7 @@ create table dbo.Users
 (
     id                  int generated always as identity primary key,
     username            VARCHAR(64) unique,
+    email               VARCHAR(64) unique,
     password_validation VARCHAR(256) not null
 );
 

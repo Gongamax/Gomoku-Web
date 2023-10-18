@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.repository
 
 import kotlinx.datetime.Instant
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
@@ -12,6 +13,7 @@ interface UsersRepository {
 
     fun storeUser(
         username: String,
+        email: Email,
         passwordValidation: PasswordValidationInfo
     ): Int
 

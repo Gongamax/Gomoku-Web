@@ -3,6 +3,7 @@ package pt.isel.daw.gomoku.services.users
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.springframework.stereotype.Service
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UsersDomain
@@ -18,7 +19,7 @@ class UsersService(
     private val clock: Clock
 ) {
 
-    fun createUser(username: String, password: String): UserCreationResult {
+    fun createUser(username: String, email: Email, password: String): UserCreationResult {
         if (!usersDomain.isSafePassword(password)) {
             return failure(UserCreationError.InsecurePassword)
         }
@@ -30,7 +31,7 @@ class UsersService(
             if (usersRepository.isUserStoredByUsername(username)) {
                 failure(UserCreationError.UserAlreadyExists)
             } else {
-                val id = usersRepository.storeUser(username, passwordValidationInfo)
+                val id = usersRepository.storeUser(username, email, passwordValidationInfo)
                 success(id)
             }
         }

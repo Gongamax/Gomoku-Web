@@ -70,8 +70,11 @@ class UsersDomain(
     fun createTokenValidationInformation(token: String): TokenValidationInfo =
         tokenEncoder.createValidationInformation(token)
 
-    // TODO it could be better
-    fun isSafePassword(password: String) = password.length > 4
+    fun isSafePassword(password: String): Boolean =
+        password.length in 8..64
+                && password.contains(Regex("[a-z]"))
+                && password.contains(Regex("[A-Z]"))
+                && password.contains(Regex("[0-9]"))
 
     val maxNumberOfTokensPerUser = config.maxTokensPerUser
 }

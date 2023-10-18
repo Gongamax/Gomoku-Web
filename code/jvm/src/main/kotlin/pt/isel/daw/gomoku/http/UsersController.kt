@@ -21,7 +21,8 @@ class UsersController(
 
     @PostMapping(Uris.Users.CREATE_USER)
     fun create(@RequestBody input: UserCreateInputModel): ResponseEntity<*> {
-        val res = userService.createUser(input.username, input.password)
+        val res = userService.createUser(input.username, input.email, input.password)
+        println(res)
         return when (res) {
             is Success -> ResponseEntity.status(201)
                 .header(
@@ -62,8 +63,8 @@ class UsersController(
     @GetMapping(Uris.Users.GET_USER_BY_ID)
     fun getById(@PathVariable id: String): ResponseEntity<UserGetByIdOutputModel> {
         val user = userService.getUserById(id.toInt())
-        return user?.let {/** Doubt about using user.username **/
-            ResponseEntity.ok(UserGetByIdOutputModel(it.id, it.username))
+        return user?.let {
+            ResponseEntity.ok(UserGetByIdOutputModel(it.id, it.username, it.email))
         } ?: ResponseEntity.notFound().build()
     }
 
@@ -73,10 +74,5 @@ class UsersController(
             id = userAuthenticatedUser.user.id,
             username = userAuthenticatedUser.user.username
         )
-    }
-
-    @GetMapping("/api/user/hello")
-    fun testUser(): String {
-        return "Hello User!"
     }
 }

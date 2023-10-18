@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.web.reactive.server.WebTestClient
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.http.model.TokenResponse
 import kotlin.math.abs
 import kotlin.random.Random
@@ -22,14 +23,16 @@ class UserTests {
         val client = WebTestClient.bindToServer().baseUrl("http://localhost:$port/api").build()
 
         // and: a random user
+        val email = newTestEmail()
         val username = newTestUserName()
-        val password = "changeit"
+        val password = newTestPassword()
 
         // when: creating an user
         // then: the response is a 201 with a proper Location header
         client.post().uri("/users")
             .bodyValue(
                 mapOf(
+                    "email" to email,
                     "username" to username,
                     "password" to password
                 )
@@ -47,14 +50,16 @@ class UserTests {
         val client = WebTestClient.bindToServer().baseUrl("http://localhost:$port/api").build()
 
         // and: a random user
+        val email = newTestEmail()
         val username = newTestUserName()
-        val password = "changeit"
+        val password = newTestPassword()
 
         // when: creating an user
         // then: the response is a 201 with a proper Location header
         client.post().uri("/users")
             .bodyValue(
                 mapOf(
+                    "email" to email,
                     "username" to username,
                     "password" to password
                 )
@@ -70,6 +75,7 @@ class UserTests {
         val result = client.post().uri("/users/token")
             .bodyValue(
                 mapOf(
+                    "email" to email.mail,
                     "username" to username,
                     "password" to password
                 )
@@ -114,6 +120,10 @@ class UserTests {
     }
 
     companion object {
+        private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
+
         private fun newTestUserName() = "user-${abs(Random.nextLong())}"
+
+        private fun newTestPassword() = "TestPassword${abs(Random.nextLong())}"
     }
 }

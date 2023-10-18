@@ -3,10 +3,7 @@ package pt.isel.daw.gomoku.repository.jdbi
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
 import org.jdbi.v3.postgres.PostgresPlugin
-import pt.isel.daw.gomoku.repository.jdbi.mappers.BoardMapper
-import pt.isel.daw.gomoku.repository.jdbi.mappers.InstantMapper
-import pt.isel.daw.gomoku.repository.jdbi.mappers.PasswordValidationInfoMapper
-import pt.isel.daw.gomoku.repository.jdbi.mappers.TokenValidationInfoMapper
+import pt.isel.daw.gomoku.repository.jdbi.mappers.*
 
 fun Jdbi.configureWithAppRequirements(): Jdbi {
     installPlugin(KotlinPlugin())
@@ -14,6 +11,7 @@ fun Jdbi.configureWithAppRequirements(): Jdbi {
 
     registerColumnMapper(PasswordValidationInfoMapper())
     registerColumnMapper(TokenValidationInfoMapper())
+    registerColumnMapper(EmailMapper())
     registerColumnMapper(BoardMapper())
     registerColumnMapper(InstantMapper())
 

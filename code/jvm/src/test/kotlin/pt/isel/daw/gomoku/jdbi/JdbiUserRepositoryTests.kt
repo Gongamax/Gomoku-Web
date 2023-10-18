@@ -7,6 +7,7 @@ import org.postgresql.ds.PGSimpleDataSource
 import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.repository.jdbi.JdbiUsersRepository
 import pt.isel.daw.gomoku.TestClock
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
@@ -30,8 +31,9 @@ class JdbiUserRepositoryTests {
 
         // when: storing a user
         val userName = newTestUserName()
+        val email = newTestEmail()
         val passwordValidationInfo = PasswordValidationInfo(newTokenValidationData())
-        repo.storeUser(userName, passwordValidationInfo)
+        repo.storeUser(userName, email, passwordValidationInfo)
 
         // and: retrieving a user
         val retrievedUser: User? = repo.getUserByUsername(userName)
@@ -64,8 +66,9 @@ class JdbiUserRepositoryTests {
 
         // and: a createdUser
         val userName = newTestUserName()
+        val email = newTestEmail()
         val passwordValidationInfo = PasswordValidationInfo("not-valid")
-        val userId = repo.storeUser(userName, passwordValidationInfo)
+        val userId = repo.storeUser(userName, email, passwordValidationInfo)
 
         // and: test TokenValidationInfo
         val testTokenValidationInfo = TokenValidationInfo(newTokenValidationData())
@@ -100,6 +103,8 @@ class JdbiUserRepositoryTests {
         private fun runWithHandle(block: (Handle) -> Unit) = jdbi.useTransaction<Exception>(block)
 
         private fun newTestUserName() = "user-${abs(Random.nextLong())}"
+
+        private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
 
         private fun newTokenValidationData() = "token-${abs(Random.nextLong())}"
 

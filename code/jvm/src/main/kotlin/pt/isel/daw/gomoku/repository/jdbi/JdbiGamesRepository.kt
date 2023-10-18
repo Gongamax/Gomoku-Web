@@ -28,8 +28,10 @@ class JdbiGamesRepository(
                games.deadline,
                users_black.id                  as playerBlack_id,
                users_black.username            as playerBlack_username,
+               users_black.email               as playerBlack_email,
                users_black.password_validation as playerBlack_password_validation,
                users_white.id                  as playerWhite_id,
+               users_white.email               as playerWhite_email,
                users_white.username            as playerWhite_username,
                users_white.password_validation as playerWhite_password_validation
             from dbo.Games games
@@ -102,9 +104,11 @@ class JdbiGamesRepository(
                        games.deadline,
                        users_black.id                  as playerBlack_id,
                        users_black.username            as playerBlack_username,
+                       users_black.email               as playerBlack_email,
                        users_black.password_validation as playerBlack_password_validation,
                        users_white.id                  as playerWhite_id,
                        users_white.username            as playerWhite_username,
+                       users_white.email               as playerWhite_email,
                        users_white.password_validation as playerWhite_password_validation
                 from dbo.Games games
                          inner join dbo.Users users_black on games.player_black = users_black.id
@@ -131,9 +135,11 @@ class JdbiGamesRepository(
                        games.deadline,
                        users_black.id                  as playerBlack_id,
                        users_black.username            as playerBlack_username,
+                       users_black.email               as playerBlack_email,
                        users_black.password_validation as playerBlack_password_validation,
                        users_white.id                  as playerWhite_id,
                        users_white.username            as playerWhite_username,
+                       users_white.email               as playerWhite_email,
                        users_white.password_validation as playerWhite_password_validation
                 from dbo.Games games
                          inner join dbo.Users users_black on games.player_black = users_black.id

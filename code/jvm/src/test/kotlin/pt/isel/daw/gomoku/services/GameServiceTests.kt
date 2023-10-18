@@ -8,14 +8,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
+import pt.isel.daw.gomoku.jdbi.JdbiUserRepositoryTests
 import pt.isel.daw.gomoku.repository.jdbi.JdbiTransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.games.GamesService
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
+import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -33,8 +36,9 @@ class GameServiceTests {
         val usersService = createUsersService(testClock)
 
         //when: creating a game
-        val createAliceResult = usersService.createUser(newTestUserName(), "password")
-        val createBobResult = usersService.createUser(newTestUserName(), "password")
+        val AliceEmail = newTestEmail()
+        val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
+        val createBobResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
 
         //when: creating alice and bob
         val aliceId = when (createAliceResult) {
@@ -64,14 +68,12 @@ class GameServiceTests {
         }
 
         // when: getting the game by id
-        val gameById = gamesService.getById(game.id)
+        val gameById = gamesService.getGameById(game.id)
 
         //then: the game is found
         assertNotNull(gameById)
 
         // then: the game is the same
-        println(game)
-        println(gameById)
         assert(gameById == game)
     }
 
@@ -83,8 +85,8 @@ class GameServiceTests {
         val usersService = createUsersService(testClock)
 
         //when: creating a game
-        val createAliceResult = usersService.createUser(newTestUserName(), "password")
-        val createBobResult = usersService.createUser(newTestUserName(), "password")
+        val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
+        val createBobResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
 
         //when: creating alice and bob
         val aliceId = when (createAliceResult) {
@@ -131,8 +133,8 @@ class GameServiceTests {
         val usersService = createUsersService(testClock)
 
         //when: creating a game
-        val createAliceResult = usersService.createUser(newTestUserName(), "password")
-        val createBobResult = usersService.createUser(newTestUserName(), "password")
+        val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
+        val createBobResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
 
         //when: creating alice and bob
         val aliceId = when (createAliceResult) {
@@ -169,14 +171,14 @@ class GameServiceTests {
         assertTrue { playRoundResult is RoundResult.OthersTurn }
 
         //then: the game is updated
-        val gameById = gamesService.getById(game.id)
-        assertTrue { gameById.board.moves[Cell(1,1)] == round.player }
+        val gameById = gamesService.getGameById(game.id)
+        assertTrue { gameById.board.moves[Cell(1, 1)] == round.player }
 
         // then: leaving the game
         gamesService.leaveGame(game.id, alice.id)
 
         // then: the game is updated
-        val gameByIdAfterLeave = gamesService.getById(game.id)
+        val gameByIdAfterLeave = gamesService.getGameById(game.id)
 
         // then: check the winner
         assertTrue { gameByIdAfterLeave.state == Game.State.PLAYER_WHITE_WON }
@@ -188,6 +190,7 @@ class GameServiceTests {
             testClock: TestClock,
         ) = GamesService(
             JdbiTransactionManager(jdbi),
+            matchmaking = Matchmaking(),
             GameDomain(
                 clock = testClock,
                 config = GamesDomainConfig(
@@ -220,6 +223,10 @@ class GameServiceTests {
         )
 
         private fun newTestUserName() = "user-${Math.abs(Random.nextLong())}"
+
+        private fun newTestPassword() = "TestPassword${abs(Random.nextLong())}"
+
+        private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
 
         private val dbUrl = Environment.getDbUrl()
 

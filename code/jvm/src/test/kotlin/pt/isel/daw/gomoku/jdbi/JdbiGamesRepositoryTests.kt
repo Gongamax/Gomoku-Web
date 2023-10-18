@@ -6,6 +6,7 @@ import org.postgresql.ds.PGSimpleDataSource
 import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.repository.jdbi.JdbiGamesRepository
 import pt.isel.daw.gomoku.repository.jdbi.JdbiUsersRepository
@@ -31,9 +32,11 @@ class JdbiGamesRepositoryTests {
         // and: two existing users
         val aliceName = newTestUserName()
         val bobName = newTestUserName()
+        val aliceEmail = newTestEmail()
+        val bobEmail = newTestEmail()
         val passwordValidationInfo = PasswordValidationInfo("not-valid")
-        userRepo.storeUser(aliceName, passwordValidationInfo)
-        userRepo.storeUser(bobName, passwordValidationInfo)
+        userRepo.storeUser(aliceName, aliceEmail, passwordValidationInfo)
+        userRepo.storeUser(bobName, bobEmail, passwordValidationInfo)
 
         // when:
         val alice = userRepo.getUserByUsername(aliceName) ?: fail("user must exist")
@@ -65,6 +68,8 @@ class JdbiGamesRepositoryTests {
         private fun runWithHandle(block: (Handle) -> Unit) = jdbi.useTransaction<Exception>(block)
 
         private fun newTestUserName() = "user-${abs(Random.nextLong())}"
+
+        private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
 
         private val gameConfig = GamesDomainConfig(
             boardSize = 15,

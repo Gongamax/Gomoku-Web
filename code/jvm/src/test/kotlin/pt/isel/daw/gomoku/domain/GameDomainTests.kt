@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
 import kotlin.time.Duration.Companion.minutes
@@ -174,7 +175,7 @@ class GameDomainTests {
             boardSize = 15,
             variant = Variant.STANDARD,
             openingRule = OpeningRule.STANDARD,
-            timeout = 10.minutes
+            timeout = 5.minutes
         )
 
         private val gameDomain = GameDomain(
@@ -183,7 +184,7 @@ class GameDomainTests {
         )
 
         // our test players
-        private val alice = User(1, "alice", PasswordValidationInfo(""))
-        private val bob = User(2, "alice", PasswordValidationInfo(""))
+        private val alice = User(1, "alice", Email("alice@gmail.com"), PasswordValidationInfo(""))
+        private val bob = User(2, "alice", Email("bob@gmail.com"), PasswordValidationInfo(""))
     }
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import pt.isel.daw.gomoku.domain.games.Match
 import pt.isel.daw.gomoku.domain.games.Matchmaking
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
 import kotlin.concurrent.thread
@@ -16,12 +17,12 @@ class MatchmakingTests {
     //test the synchronizer matchmake with 2 users
     fun `matchmake 2 users`() {
         //given: 2 users
-        val user1 = User(1, "user1", PasswordValidationInfo("password1"))
-        val user2 = User(2, "user2", PasswordValidationInfo("password2"))
+        val user1 = User(1, "user1", Email("user1@gmail.com"),PasswordValidationInfo("password1"))
+        val user2 = User(2, "user2", Email("user2@gmail.com"), PasswordValidationInfo("password2"))
         var result : Match? = null
 
         //and: a matchmake
-        val matchmaking = Matchmaking<User>()
+        val matchmaking = Matchmaking()
 
         //when: user makes intent to match
         thread {
