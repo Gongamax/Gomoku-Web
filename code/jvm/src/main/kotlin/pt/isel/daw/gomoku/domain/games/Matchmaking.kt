@@ -28,6 +28,7 @@ class Matchmaking {
                 val localRequest = waiters.pull().value
                 val waitingUser = localRequest.user
                 localRequest.opponent = user
+                localRequest.condition.signalAll()
                 return Match(waitingUser, user)
             }
             // wait-path
