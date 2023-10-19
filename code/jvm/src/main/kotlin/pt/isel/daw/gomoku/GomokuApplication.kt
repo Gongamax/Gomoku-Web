@@ -48,7 +48,6 @@ class GomokuApplication {
 
     @Bean
     fun gamesDomainConfig() = GamesDomainConfig(
-        boardSize = 15,
         variant = Variant.STANDARD,
         openingRule = OpeningRule.STANDARD,
         timeout = 10.minutes

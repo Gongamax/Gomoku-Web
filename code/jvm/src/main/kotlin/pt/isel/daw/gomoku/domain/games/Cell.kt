@@ -9,10 +9,10 @@ package pt.isel.daw.gomoku.domain.games
   * @property colIndex the index of the column of the cell
   * @property values the list of all cells
  */
-@JvmInline
-value class Cell private constructor(private val index: Int) {
-    private val rowIndex get() = index / BOARD_DIM // same value as row.index
-    private val colIndex get() = index % BOARD_DIM // same value as col.index
+class Cell private constructor(private val index: Int) {
+    private val rowIndex get() = index / boardSize // same value as row.index
+    private val colIndex get() = index % boardSize // same value as col.index
+
     val row get() = Row.values[rowIndex]
     val col get() = Column.values[colIndex]
 
@@ -20,12 +20,12 @@ value class Cell private constructor(private val index: Int) {
         if (this == INVALID) "INVALID Cell" else "${row.number}${col.symbol}"
 
     companion object {
-        val values = List(BOARD_DIM * BOARD_DIM) { Cell(it) }
+        val values = List() { Cell(it) }
         val INVALID = Cell(-1)
         private fun isValidCell(row: Int, col: Int): Cell =
             values.firstOrNull { it.row.index == row && it.col.index == col } ?: INVALID
 
-        operator fun invoke(row: Int, col: Int): Cell = isValidCell(row, col)
+        operator fun invoke(row: Int, col: Int, ): Cell = isValidCell(row, col)
         operator fun invoke(row: Row, col: Column): Cell = isValidCell(row.index, col.index)
     }
 }

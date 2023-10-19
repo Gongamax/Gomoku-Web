@@ -17,7 +17,7 @@ class GameDomainTests {
     @Test
     fun `simple game`() {
         // given:a game
-        var game = gameDomain.createGame(alice, bob)
+        var game = gameDomain.createGame(alice, bob, Variant.STANDARD)
 
         // when: alice plays
         var result = gameDomain.playRound(game, Round(Cell(1, 1), Player(alice.id, Piece.BLACK)))
@@ -55,7 +55,7 @@ class GameDomainTests {
     @Test
     fun `cannot play twice`() {
         // given: a game
-        var game = gameDomain.createGame(alice, bob)
+        var game = gameDomain.createGame(alice, bob, Variant.STANDARD)
 
         // when: alice plays
         var result = gameDomain.playRound(game, Round(Cell(1, 1), Player(alice.id, Piece.BLACK)))
@@ -91,7 +91,7 @@ class GameDomainTests {
     @Test
     fun `alice wins`() {
         // given: a game and a list of rounds
-        val game = gameDomain.createGame(alice, bob)
+        val game = gameDomain.createGame(alice, bob, Variant.STANDARD)
 
         val rounds = listOf(
             Round(Cell(1, 1), Player(alice.id, Piece.BLACK)),
@@ -133,7 +133,7 @@ class GameDomainTests {
             testClock,
             gameConfig
         )
-        var game = gameLogic.createGame(alice, bob)
+        var game = gameLogic.createGame(alice, bob, Variant.STANDARD)
 
         // when: alice plays
         testClock.advance(timeout - 1.minutes)
@@ -172,7 +172,6 @@ class GameDomainTests {
 
     companion object {
         private val gameConfig = GamesDomainConfig(
-            boardSize = 15,
             variant = Variant.STANDARD,
             openingRule = OpeningRule.STANDARD,
             timeout = 5.minutes

@@ -29,7 +29,7 @@ class GameController(
 
     @PostMapping(Uris.Games.CREATE_GAME)
     fun create(@RequestBody inputModel: GameStartInputModel): ResponseEntity<*> {
-        return when (val res = gameService.createGame(inputModel.userBlack, inputModel.userWhite)) {
+        return when (val res = gameService.createGame(inputModel.userBlack, inputModel.userWhite, inputModel.variant)) {
             is Success -> ResponseEntity.status(201)
                 .header(
                     "Location",

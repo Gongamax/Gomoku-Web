@@ -33,5 +33,11 @@ data class Game(
         DRAW;
         val isEnded: Boolean
             get() = this == PLAYER_BLACK_WON || this == PLAYER_WHITE_WON || this == DRAW
+
+        fun other() = when (this) {
+            NEXT_PLAYER_BLACK -> NEXT_PLAYER_WHITE
+            NEXT_PLAYER_WHITE -> NEXT_PLAYER_BLACK
+            else -> throw IllegalStateException("Game is ended")
+        }
     }
 }

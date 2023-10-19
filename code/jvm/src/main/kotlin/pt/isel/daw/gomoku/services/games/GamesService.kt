@@ -15,15 +15,17 @@ class GamesService(
     private val matchmaking: Matchmaking,
     private val gamesDomain: GameDomain,
 ) {
-    fun createGame(userBlack: User, userWhite: User): GameCreationResult {
+    fun createGame(userBlack: User, userWhite: User, variant: Variant): GameCreationResult {
         return transactionManager.run {
             if (it.usersRepository.getUserById(userBlack.id) == null ||
                 it.usersRepository.getUserById(userWhite.id) == null
             ) {
                 failure(GameCreationError.UserDoesNotExist)
             }
+            //Needs to do an if condition to see if variant is valid
+            //using something like it.gamesRepository.getVariant(variant) != null
             val gamesRepository = it.gamesRepository
-            val game = gamesDomain.createGame(userBlack, userWhite)
+            val game = gamesDomain.createGame(userBlack, userWhite, variant)
             if (gamesRepository.getGame(game.id) != null) {
                 failure(GameCreationError.GameAlreadyExists)
             } else {

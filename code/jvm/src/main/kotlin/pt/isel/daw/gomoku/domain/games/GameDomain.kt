@@ -1,12 +1,10 @@
 package pt.isel.daw.gomoku.domain.games
 
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.domain.users.User
-import kotlinx.datetime.Instant
 import java.util.*
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 
 /**
  * This class is responsible for the game domain logic.
@@ -25,13 +23,14 @@ class GameDomain(
 ) {
     fun createGame(
         playerBLACK: User,
-        playerWHITE: User
+        playerWHITE: User,
+        variant: Variant
     ): Game {
         val now = clock.now()
         return Game(
             id = UUID.randomUUID(),
             state = Game.State.NEXT_PLAYER_BLACK,
-            board = Board.createBoard(player = Player(playerBLACK.id, Piece.BLACK)),
+            board = Board.createBoard(player = Player(playerBLACK.id, Piece.BLACK), variant = variant),
             created = now,
             updated = now,
             deadline = now.plus(config.timeout),
@@ -48,7 +47,6 @@ class GameDomain(
             return RoundResult.NotAPlayer
         }
         val now = clock.now()
-        println("[PLAY_ROUND] ${game.state}")
         return when (game.state) {
             Game.State.PLAYER_BLACK_WON -> RoundResult.GameAlreadyEnded
             Game.State.PLAYER_WHITE_WON -> RoundResult.GameAlreadyEnded
@@ -72,6 +70,14 @@ class GameDomain(
         } else {
             if (game.board.canPlayOn(round.cell)) {
                 when (val newBoard = game.board.playRound(round.cell, nextPlayer(game, round.player))) {
+                    is BoardOpen -> {
+                        val newGame = game.copy(
+                            board = newBoard,
+                            state = aux.nextPlayer,
+                            deadline = now + config.timeout,
+                        )
+                        RoundResult.OthersTurn(newGame)
+                    }
                     is BoardWin -> {
                         val newGame =
                             game.copy(board = newBoard, state = aux.iWon, deadline = null)
