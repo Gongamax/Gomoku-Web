@@ -31,7 +31,7 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any> {
-        log.info("Handling HttpMessageNotReadableException: {}", ex.message)
+        log.info("Handling HttpMessageNotReadableException: {}", ex.httpInputMessage)
         return Problem.response(400, Problem.invalidRequestContent)
     }
 

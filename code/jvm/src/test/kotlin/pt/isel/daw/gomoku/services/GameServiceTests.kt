@@ -190,7 +190,6 @@ class GameServiceTests {
             testClock: TestClock,
         ) = GamesService(
             JdbiTransactionManager(jdbi),
-            matchmaking = Matchmaking(),
             GameDomain(
                 clock = testClock,
                 config = GamesDomainConfig(

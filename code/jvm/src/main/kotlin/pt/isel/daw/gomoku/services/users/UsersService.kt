@@ -1,7 +1,6 @@
 package pt.isel.daw.gomoku.services.users
 
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import org.springframework.stereotype.Service
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.utils.Token

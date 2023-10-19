@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.repository
 
 import pt.isel.daw.gomoku.domain.games.Game
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingEntry
 import java.util.UUID
 
 interface GamesRepository {
@@ -16,5 +17,10 @@ interface GamesRepository {
     fun getGamesByUser(userId : Int): List<Game>
 
     fun getAll() : List<Game>
-    //fun getGameState(id: UUID): Game.State?
+
+    fun tryMatchmaking(userId: Int) : MatchmakingEntry?
+
+    fun storeMatchmakingEntry(matchmakingEntry: MatchmakingEntry) : Int
+
+    fun exitMatchmakingQueue(id : Int) : Int
 }

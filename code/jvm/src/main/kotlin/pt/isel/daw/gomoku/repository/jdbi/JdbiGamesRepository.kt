@@ -2,6 +2,7 @@ package pt.isel.daw.gomoku.repository.jdbi
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -153,6 +154,39 @@ class JdbiGamesRepository(
                 it.toGame()
             }
 
+    override fun tryMatchmaking(userId: Int): MatchmakingEntry? =
+        handle.createQuery(
+            """
+                select users.id, users.username, created_at
+                from dbo.matchmaking
+                         inner join dbo.Users users on matchmaking.user_id = users.id
+                where users.id != :userId
+                  order by created_at     
+                limit 1
+            """.trimIndent()
+        )
+            .mapTo<MatchmakingEntry>()
+            .singleOrNull()
+
+    override fun storeMatchmakingEntry(matchmakingEntry: MatchmakingEntry) =
+        handle.createUpdate(
+            """
+                insert into dbo.matchmaking(user_id, created_at)
+                values (:user_id, :created_at)
+            """.trimIndent()
+        )
+            .bind("user_id", matchmakingEntry.playerId)
+            .bind("created_at", matchmakingEntry.created.epochSeconds)
+            .execute()
+
+    override fun exitMatchmakingQueue(id : Int) =
+        handle.createUpdate(
+            """
+                delete from dbo.matchmaking where id = :id
+            """.trimIndent()
+        )
+            .bind("id", id)
+            .execute()
 
     companion object {
         private fun Update.bindBoard(name: String, board: Board) = run {
