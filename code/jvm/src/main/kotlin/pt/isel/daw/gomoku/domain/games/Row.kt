@@ -13,8 +13,12 @@ value class Row private constructor (val number: Int) {
     override fun toString() = "Row $number"
     operator fun plus(offset: Int): Row = Row(this.index + offset)
     companion object {
-        val values = List(BOARD_DIM) { Row(it + 1) }
-        operator fun invoke(number: Int): Row = values.first { it.number == number }
+        private var boardDim = 0
+        val values = List(boardDim) { Row(it + 1) }
+        operator fun invoke(number: Int, boardDim: BoardDim): Row = run {
+            this.boardDim = boardDim.toInt()
+            values.first { it.number == number }
+        }
     }
 }
 

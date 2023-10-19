@@ -9,9 +9,9 @@ package pt.isel.daw.gomoku.domain.games
   * @property colIndex the index of the column of the cell
   * @property values the list of all cells
  */
-class Cell private constructor(private val index: Int) {
-    private val rowIndex get() = index / boardSize // same value as row.index
-    private val colIndex get() = index % boardSize // same value as col.index
+class Cell private constructor(private val index: Int, val boardSize: BoardDim = BoardDim.STANDARD) {
+    private val rowIndex get() = index / boardSize.toInt() // same value as row.index
+    private val colIndex get() = index % boardSize.toInt() // same value as col.index
 
     val row get() = Row.values[rowIndex]
     val col get() = Column.values[colIndex]
@@ -20,12 +20,17 @@ class Cell private constructor(private val index: Int) {
         if (this == INVALID) "INVALID Cell" else "${row.number}${col.symbol}"
 
     companion object {
-        val values = List() { Cell(it) }
+        private var boardDim = 0
+
+        val values = List(boardDim) { Cell(it) }
         val INVALID = Cell(-1)
         private fun isValidCell(row: Int, col: Int): Cell =
             values.firstOrNull { it.row.index == row && it.col.index == col } ?: INVALID
 
-        operator fun invoke(row: Int, col: Int, ): Cell = isValidCell(row, col)
+        operator fun invoke(row: Int, col: Int, boardSize: BoardDim): Cell = run {
+            this.boardDim = boardSize.toInt()
+            isValidCell(row, col)
+        }
         operator fun invoke(row: Row, col: Column): Cell = isValidCell(row.index, col.index)
     }
 }
@@ -64,7 +69,7 @@ enum class Direction(val difRow: Int, val difCol: Int) {
  * Adds a direction to a cell resulting in a new cell.
  * @return The cell resulting or [Cell.INVALID] if the cell is out of the board.
  */
-operator fun Cell.plus(dir: Direction) = Cell(row.index + dir.difRow, col.index + dir.difCol)
+operator fun Cell.plus(dir: Direction) = Cell(row.index + dir.difRow, col.index + dir.difCol, boardSize)
 
 /**
  * Returns the cells of the board in a line starting at [from] (excluding) in the direction [dir].

@@ -15,8 +15,12 @@ value class Column private constructor (val symbol: Char) {
     operator fun plus(offset: Int): Column = Column((this.index + offset + 'a'.code).toChar())
 
     companion object {
-        val values = List(BOARD_DIM) { Column('A' + it) }
-        operator fun invoke(symbol: Char): Column = values.first { it.symbol == symbol }
+        private var boardDim = 0
+        val values = List(boardDim) { Column('A' + it) }
+        operator fun invoke(symbol: Char, boardDim: BoardDim): Column = run {
+            this.boardDim = boardDim.toInt()
+            values.first { it.symbol == symbol }
+        }
     }
 }
 

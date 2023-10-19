@@ -17,7 +17,7 @@ data class GamesDomainConfig(
     val openingRule: OpeningRule
 ) {
     init {
-        require(variant.boardDim == 15 || variant.boardDim == 19) { "boardSize must be greater than 0" }
+        require(variant.boardDim.toInt() == 15 || variant.boardDim.toInt() == 19) { "boardSize must be either 15 or 19" }
         require(variant in Variant.values()) { "variant must be a valid game Variant" }
         require(openingRule in OpeningRule.values()) { "opening rule must be a valid Opening Rule" }
     }
