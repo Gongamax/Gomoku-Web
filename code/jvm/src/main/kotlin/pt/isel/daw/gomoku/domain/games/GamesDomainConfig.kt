@@ -12,14 +12,13 @@ import kotlin.time.Duration
  * @throws IllegalArgumentException if the opening rule is not a valid opening rule.
  */
 data class GamesDomainConfig(
-    val boardSize : Int,
     val timeout : Duration,
     val variant: Variant,
     val openingRule: OpeningRule
 ) {
     init {
-        require(boardSize > 0) { "boardSize must be greater than 0" }
-        require(variant in Variant.values()) { "variant must be a valid game Varaint" }
+        require(variant.boardDim.toInt() == 15 || variant.boardDim.toInt() == 19) { "boardSize must be either 15 or 19" }
+        require(variant in Variant.values()) { "variant must be a valid game Variant" }
         require(openingRule in OpeningRule.values()) { "opening rule must be a valid Opening Rule" }
     }
 }

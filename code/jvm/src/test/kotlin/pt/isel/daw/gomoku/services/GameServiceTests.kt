@@ -34,6 +34,7 @@ class GameServiceTests {
         val testClock = TestClock()
         val gamesService = createGamesService(testClock)
         val usersService = createUsersService(testClock)
+        val variant : Variant = Variant.STANDARD
 
         //when: creating a game
         val AliceEmail = newTestEmail()
@@ -59,7 +60,7 @@ class GameServiceTests {
         assertNotNull(bob)
 
         //when: creating a game
-        val createGameResult = gamesService.createGame(alice, bob)
+        val createGameResult = gamesService.createGame(alice, bob, variant)
 
         //then: the game is created
         val game = when (createGameResult) {
@@ -83,6 +84,7 @@ class GameServiceTests {
         val testClock = TestClock()
         val gamesService = createGamesService(testClock)
         val usersService = createUsersService(testClock)
+        val variant : Variant = Variant.STANDARD
 
         //when: creating a game
         val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
@@ -107,7 +109,7 @@ class GameServiceTests {
         assertNotNull(bob)
 
         //when: creating a game
-        val createGameResult = gamesService.createGame(alice, bob)
+        val createGameResult = gamesService.createGame(alice, bob, variant)
 
         //then: the game is created
         val game = when (createGameResult) {
@@ -131,6 +133,7 @@ class GameServiceTests {
         val testClock = TestClock()
         val gamesService = createGamesService(testClock)
         val usersService = createUsersService(testClock)
+        val variant : Variant = Variant.STANDARD
 
         //when: creating a game
         val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
@@ -155,7 +158,7 @@ class GameServiceTests {
         assertNotNull(bob)
 
         //when: creating a game
-        val createGameResult = gamesService.createGame(alice, bob)
+        val createGameResult = gamesService.createGame(alice, bob, variant)
 
         //then: the game is created
         val game = when (createGameResult) {
@@ -190,11 +193,9 @@ class GameServiceTests {
             testClock: TestClock,
         ) = GamesService(
             JdbiTransactionManager(jdbi),
-            matchmaking = Matchmaking(),
             GameDomain(
                 clock = testClock,
                 config = GamesDomainConfig(
-                    boardSize = 15,
                     variant = Variant.STANDARD,
                     openingRule = OpeningRule.STANDARD,
                     timeout = 10.minutes

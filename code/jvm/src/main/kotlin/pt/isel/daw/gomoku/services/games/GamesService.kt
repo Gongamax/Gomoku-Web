@@ -4,7 +4,9 @@ import org.springframework.stereotype.Service
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.repository.TransactionManager
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingEntry
 import pt.isel.daw.gomoku.services.exceptions.NotFoundException
+import pt.isel.daw.gomoku.services.users.UserCreationError
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
 import java.util.UUID
@@ -12,18 +14,19 @@ import java.util.UUID
 @Service
 class GamesService(
     private val transactionManager: TransactionManager,
-    private val matchmaking: Matchmaking,
     private val gamesDomain: GameDomain,
 ) {
-    fun createGame(userBlack: User, userWhite: User): GameCreationResult {
+    fun createGame(userBlack: User, userWhite: User, variant: Variant): GameCreationResult {
         return transactionManager.run {
             if (it.usersRepository.getUserById(userBlack.id) == null ||
                 it.usersRepository.getUserById(userWhite.id) == null
             ) {
                 failure(GameCreationError.UserDoesNotExist)
             }
+            //Needs to do an if condition to see if variant is valid
+            //using something like it.gamesRepository.getVariant(variant) != null
             val gamesRepository = it.gamesRepository
-            val game = gamesDomain.createGame(userBlack, userWhite)
+            val game = gamesDomain.createGame(userBlack, userWhite, variant)
             if (gamesRepository.getGame(game.id) != null) {
                 failure(GameCreationError.GameAlreadyExists)
             } else {
@@ -76,10 +79,16 @@ class GamesService(
         }
     }
 
-//    fun getGameStateById(id: UUID): Game.State {
-//        return transactionManager.run {
-//            val gamesRepository = it.gamesRepository
-//            gamesRepository.getGameState(id) ?: throw NotFoundException("Game with id $id not found")
-//        }
-//    }
+    fun tryMatchmaking(user: User, variant: Variant): MatchmakingResult {
+        return transactionManager.run {
+            val gamesRepository = it.gamesRepository
+            val match = gamesRepository.tryMatchmaking(user.id)
+            val opponent = match?.let { it1 -> it.usersRepository.getUserById(it1.playerId) }
+            if (opponent != null) {
+                success(createGame(user, opponent, variant))
+            } else {
+                failure(MatchmakingError.NoMatchFound)
+            }
+        }
+    }
 }

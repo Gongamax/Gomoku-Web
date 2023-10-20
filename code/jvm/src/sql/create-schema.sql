@@ -38,9 +38,6 @@ create table dbo.Games
     player_white int references dbo.Users (id)
 );
 
--- Objetivo adicional para o Game_Config:
--- Inserir na base de dados dinamicamente, dar possibilidade aos users de inserir
--- as proprias variantes e regras de abertura
 create table dbo.Game_Config
 (
     game_id      UUID references dbo.Games (id),
@@ -57,6 +54,15 @@ create table dbo.Statistics
     rank         int not null,
     games_played int not null
 );
+
+-- Auxiliary table for matchmaking purposes, it works as a synchronizer
+create table dbo.Matchmaking
+(
+    id         serial primary key,
+    user_id    int references dbo.Users (id),
+    created_at int not null
+);
+
 
 -- Trigger for incrementing the games played by a user
 
@@ -84,14 +90,14 @@ create or replace function increment_wins_losses()
     returns trigger as
 $$
 begin
-    if new.state = 'BLACK_WON' then
+    if new.state = 'PLAYER_BLACK_WON' then
         update dbo.Statistics
         set wins = wins + 1
         where user_id = new.player_black;
         update dbo.Statistics
         set losses = losses + 1
         where user_id = new.player_white;
-    elsif new.state = 'WHITE_WON' then
+    elsif new.state = 'PLAYER_WHITE_WON' then
         update dbo.Statistics
         set wins = wins + 1
         where user_id = new.player_white;

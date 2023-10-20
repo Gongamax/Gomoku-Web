@@ -1,15 +1,12 @@
 package pt.isel.daw.gomoku.http.model
 
-import pt.isel.daw.gomoku.domain.games.Board
-import pt.isel.daw.gomoku.domain.games.Game
-import pt.isel.daw.gomoku.domain.games.Round
-import pt.isel.daw.gomoku.domain.games.RoundResult
+import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
 import java.util.*
 
 data class GamePlayInputModel(val gameId : UUID, val round: Round)
 
-data class GameStartInputModel(val userBlack: User, val userWhite: User)
+data class GameStartInputModel(val userBlack: User, val userWhite: User, val variant: Variant)
 
 data class GameRoundOutputModel(val result : RoundResult)
 

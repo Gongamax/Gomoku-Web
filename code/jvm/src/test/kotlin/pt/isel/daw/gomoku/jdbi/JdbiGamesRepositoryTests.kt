@@ -41,7 +41,7 @@ class JdbiGamesRepositoryTests {
         // when:
         val alice = userRepo.getUserByUsername(aliceName) ?: fail("user must exist")
         val bob = userRepo.getUserByUsername(bobName) ?: fail("user must exist")
-        val game = gameDomain.createGame(alice, bob)
+        val game = gameDomain.createGame(alice, bob, Variant.STANDARD)
         gameRepo.createGame(game)
 
         // and: retrieving the game
@@ -72,7 +72,6 @@ class JdbiGamesRepositoryTests {
         private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
 
         private val gameConfig = GamesDomainConfig(
-            boardSize = 15,
             variant = Variant.STANDARD,
             openingRule = OpeningRule.STANDARD,
             timeout = 10.minutes

@@ -5,7 +5,6 @@ package pt.isel.daw.gomoku.domain.games
   * Each column is identified by a symbol.
   * @property symbol the symbol of the column
   * @property index the index of the column
-  * @property values the list of all columns
  */
 
 @JvmInline
@@ -15,11 +14,12 @@ value class Column private constructor (val symbol: Char) {
     operator fun plus(offset: Int): Column = Column((this.index + offset + 'a'.code).toChar())
 
     companion object {
-        val values = List(BOARD_DIM) { Column('A' + it) }
-        operator fun invoke(symbol: Char): Column = values.first { it.symbol == symbol }
+        operator fun invoke(symbol: Char): Column = Column(symbol)
+
+        operator fun invoke(index: Int): Column = Column((index + 'A'.code).toChar())
     }
 }
 
 //Column Extension functions
-fun Char.toColumnOrNull(): Column? = Column.values.firstOrNull { it.symbol == this }
+fun Char.toColumnOrNull(): Column? = if (this in 'A'..'Z') Column(this) else null
 fun Char.toColumn(): Column = toColumnOrNull() ?: throw IllegalArgumentException("Invalid column $this")

@@ -7,8 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 
 object CellKeyDeserializer : KeyDeserializer() {
     override fun deserializeKey(parser: String, context: DeserializationContext): Any {
-        val cellStr = parser
-        return cellStr.toCell()
+        return parser.toCell()
     }
 }
 
@@ -33,14 +32,24 @@ object BoardSerializer {
         objectMapper.registerModule(module)
     }
 
-    data class BoardData(var kind: String = "", var player: String = "", var moves: Moves = mapOf())
+    private data class BoardData(var kind: String = "", var piece: String = "", var moves: Moves = mapOf())
 
     fun serialize(data: Board): String {
         val boardData = BoardData()
-        boardData.kind = when (data) {
-            is BoardRun -> "Run:${data.turn.userId}"
-            is BoardWin -> "Win:${data.winner.userId}"
-            is BoardDraw -> "Draw"
+         when (data) {
+            is BoardOpen -> {
+                boardData.kind ="Open:${data.turn.userId}:${data.variant}"
+                boardData.piece = data.turn.piece.name
+            }
+            is BoardRun -> {
+                boardData.kind ="Run:${data.turn.userId}:${data.variant}"
+                boardData.piece = data.turn.piece.name
+            }
+            is BoardWin -> {
+                boardData.kind = "Win:${data.winner.userId}"
+                boardData.piece = data.winner.piece.name
+            }
+            is BoardDraw -> boardData.kind = "Draw"
         }
         boardData.moves = data.moves.entries.associate { (k, v) -> k to v }
         return objectMapper.writeValueAsString(boardData)
@@ -48,29 +57,29 @@ object BoardSerializer {
 
     fun deserialize(stream: String): Board {
         val boardData = objectMapper.readValue(stream, BoardData::class.java)
-
-        return when (boardData.kind.split(":").first()) {
-            "Run" -> {
-                val playerPart = boardData.kind.substringAfter(":")
+        val info = boardData.kind.split(":")
+        return when (info[0]) {
+            "Open" -> {
+                val playerPart = info[1]
+                val variantPart = info[2]
                 val player = if (playerPart.isNotEmpty()) playerPart.toInt() else -1
-                BoardRun(boardData.moves, Player(player, Piece.BLACK))
+                val variant = if (variantPart.isNotEmpty()) Variant.valueOf(variantPart) else Variant.STANDARD
+                BoardOpen(boardData.moves, Player(player, Piece.valueOf(boardData.piece)), variant)
+            }
+            "Run" -> {
+                val playerPart = info[1]
+                val variantPart = info[2]
+                val player = if (playerPart.isNotEmpty()) playerPart.toInt() else -1
+                val variant = if (variantPart.isNotEmpty()) Variant.valueOf(variantPart) else Variant.STANDARD
+                BoardRun(boardData.moves, Player(player, Piece.valueOf(boardData.piece)), variant)
             }
             "Win" -> {
                 val playerPart = boardData.kind.substringAfter(":")
                 val player = if (playerPart.isNotEmpty()) playerPart.toInt() else -1
-                BoardWin(boardData.moves, Player(player, Piece.BLACK))
+                BoardWin(boardData.moves, Player(player, Piece.valueOf(boardData.piece)))
             }
             "Draw" -> BoardDraw(boardData.moves)
             else -> error("Invalid board kind: ${boardData.kind}")
         }
     }
-
-//    private data class BoardData(private val board: Board) {
-//        val kind: String = when (board) {
-//            is BoardRun -> "Run:${board.turn.userId}"
-//            is BoardWin -> "Win:${board.winner.userId}"
-//            is BoardDraw -> "Draw"
-//        }
-//        val moves: Moves = board.moves.entries.associate { (k, v) -> k to v }
-//    }
 }

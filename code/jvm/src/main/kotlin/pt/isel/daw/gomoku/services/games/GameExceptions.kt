@@ -9,3 +9,11 @@ sealed class GameCreationError {
 }
 
 typealias GameCreationResult = Either<GameCreationError, Game>
+
+sealed class MatchmakingError {
+    object NoMatchFound : MatchmakingError()
+    object InvalidUser : MatchmakingError()
+
+}
+
+typealias MatchmakingResult = Either<MatchmakingError, GameCreationResult>
