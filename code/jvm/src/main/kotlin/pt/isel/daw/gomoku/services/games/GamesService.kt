@@ -91,11 +91,4 @@ class GamesService(
             }
         }
     }
-
-//    fun getGameStateById(id: UUID): Game.State {
-//        return transactionManager.run {
-//            val gamesRepository = it.gamesRepository
-//            gamesRepository.getGameState(id) ?: throw NotFoundException("Game with id $id not found")
-//        }
-//    }
 }

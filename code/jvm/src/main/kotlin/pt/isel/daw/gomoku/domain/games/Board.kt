@@ -56,7 +56,7 @@ class BoardDraw(moves: Moves) : Board(moves)
  */
 fun Board.playRound(cell: Cell, nextPlayer: Player): Board {
     return when (this) {
-        is BoardOpen ->{ BoardRun(moves, nextPlayer, variant) }
+        is BoardOpen -> BoardRun(moves, nextPlayer, variant)
         is BoardRun -> {
             require(moves[cell] == null) { "Position $cell used" }
             val moves = moves + (cell to turn)
@@ -79,9 +79,9 @@ private fun BoardRun.isWin(cell: Cell) =
             (moves.filter { it.value == turn }.keys + cell).run {
                 any { winningCell ->
                     directions.any { (forwardDir, backwardDir) ->
-                        val forwardCells = cellsInDirection(winningCell, forwardDir)
+                        val forwardCells = cellsInDirection(winningCell, forwardDir, size)
                             .takeWhile { it in this }
-                        val backwardCells = cellsInDirection(winningCell, backwardDir)
+                        val backwardCells = cellsInDirection(winningCell, backwardDir, size)
                             .takeWhile { it in this }
 
                         val consecutiveCells = (backwardCells + listOf(winningCell) + forwardCells)

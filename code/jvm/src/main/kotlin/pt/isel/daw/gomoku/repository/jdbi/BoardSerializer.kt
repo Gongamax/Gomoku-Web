@@ -82,13 +82,4 @@ object BoardSerializer {
             else -> error("Invalid board kind: ${boardData.kind}")
         }
     }
-
-//    private data class BoardData(private val board: Board) {
-//        val kind: String = when (board) {
-//            is BoardRun -> "Run:${board.turn.userId}"
-//            is BoardWin -> "Win:${board.winner.userId}"
-//            is BoardDraw -> "Draw"
-//        }
-//        val moves: Moves = board.moves.entries.associate { (k, v) -> k to v }
-//    }
 }

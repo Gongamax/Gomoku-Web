@@ -1,37 +1,26 @@
 package pt.isel.daw.gomoku.domain.games
 
 /**
-  * Class Cell represents a cell in the board.
-  * Each cell is identified by a row and a column.
-  * @property row the row of the cell
-  * @property col the column of the cell
-  * @property rowIndex the index of the row of the cell
-  * @property colIndex the index of the column of the cell
-  * @property values the list of all cells
+ * Class Cell represents a cell in the board.
+ * Each cell is identified by a row and a column.
+ * @property row the row of the cell
+ * @property col the column of the cell
  */
-class Cell private constructor(private val index: Int, val boardSize: BoardDim = BoardDim.STANDARD) {
-    private val rowIndex get() = index / boardSize.toInt() // same value as row.index
-    private val colIndex get() = index % boardSize.toInt() // same value as col.index
-
-    val row get() = Row.values[rowIndex]
-    val col get() = Column.values[colIndex]
-
-    override fun toString(): String =
-        if (this == INVALID) "INVALID Cell" else "${row.number}${col.symbol}"
+data class Cell(val row: Row, val col: Column) {
+    override fun toString(): String = "${row.number}${col.symbol}"
+    operator fun rangeTo(cell: Cell): List<Cell> {
+        val cells = mutableListOf<Cell>()
+        for (r in row.number..cell.row.number) {
+            for (c in col.symbol..cell.col.symbol) {
+                cells.add(Cell(Row(r), Column(c)))
+            }
+        }
+        return cells
+    }
 
     companion object {
-        private var boardDim = 0
-
-        val values = List(boardDim) { Cell(it) }
-        val INVALID = Cell(-1)
-        private fun isValidCell(row: Int, col: Int): Cell =
-            values.firstOrNull { it.row.index == row && it.col.index == col } ?: INVALID
-
-        operator fun invoke(row: Int, col: Int, boardSize: BoardDim): Cell = run {
-            this.boardDim = boardSize.toInt()
-            isValidCell(row, col)
-        }
-        operator fun invoke(row: Row, col: Column): Cell = isValidCell(row.index, col.index)
+        operator fun invoke(rowIndex: Int, colIndex: Int) =
+            Cell(Row(rowIndex), Column(colIndex))
     }
 }
 
@@ -69,7 +58,7 @@ enum class Direction(val difRow: Int, val difCol: Int) {
  * Adds a direction to a cell resulting in a new cell.
  * @return The cell resulting or [Cell.INVALID] if the cell is out of the board.
  */
-operator fun Cell.plus(dir: Direction) = Cell(row.index + dir.difRow, col.index + dir.difCol, boardSize)
+operator fun Cell.plus(dir: Direction) = Cell(row.index + dir.difRow, col.index + dir.difCol)
 
 /**
  * Returns the cells of the board in a line starting at [from] (excluding) in the direction [dir].
@@ -77,7 +66,8 @@ operator fun Cell.plus(dir: Direction) = Cell(row.index + dir.difRow, col.index 
  * @param dir the direction of the line starting at [from]
  * @return The list of cells in the line.
  */
-fun cellsInDirection(from: Cell, dir: Direction) = buildList {
+fun cellsInDirection(from: Cell, dir: Direction, boardDim: Int) = buildList {
     var cell = from
-    while ((cell + dir).also { cell = it } != Cell.INVALID) add(cell)
+    val range = Cell(0, 0)..Cell(boardDim, boardDim)
+    while ((cell + dir).also { cell = it } in range) add(cell)
 }
