@@ -7,7 +7,7 @@ import pt.isel.daw.gomoku.domain.games.RoundResult
 import pt.isel.daw.gomoku.domain.users.User
 import java.util.*
 
-data class GamePlayInputModel(val userId : UUID, val round: Round)
+data class GamePlayInputModel(val gameId : UUID, val round: Round)
 
 data class GameStartInputModel(val userBlack: User, val userWhite: User)
 

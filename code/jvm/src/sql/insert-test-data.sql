@@ -1,7 +1,7 @@
-INSERT INTO dbo.Users (username, password_validation)
-VALUES ('alice', 'hash1'),
-       ('bob', 'hash2'),
-       ('charlie', 'hash3');
+INSERT INTO dbo.Users (username, password_validation, email)
+VALUES ('alice', 'Hash1', 'alicepereira@gmail.com'),
+       ('bob', 'Hash2', 'boboconstrutor@hotmail.com'),
+       ('charlie', 'Hash3', 'charliebrown@yahoo.com');
 
 INSERT INTO dbo.Tokens (token_validation, user_id, created_at, last_used_at)
 VALUES ('token1', 1, 1634260800, 1634260810),

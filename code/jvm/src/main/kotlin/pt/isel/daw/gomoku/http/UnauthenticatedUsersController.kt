@@ -22,4 +22,9 @@ class UnauthenticatedUsersController(
 
     @GetMapping(Uris.NonUsers.RANKING_INFO)
     fun getRankingInfo(): RankingInfoOutputModel = RankingInfoOutputModel()
+
+    @GetMapping(Uris.HOME)
+    fun getHome() {
+
+    }
 }

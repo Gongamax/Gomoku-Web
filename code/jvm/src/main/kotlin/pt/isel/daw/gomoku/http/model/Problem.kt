@@ -17,27 +17,27 @@ class Problem(
 
         val userAlreadyExists = Problem(
             URI(
-                "https://github.com/isel-leic-daw/s2223i-51d-51n-public/tree/main/code/tic-tac-tow-service/" +
+                "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/code/tic-tac-tow-service/" +
                         "docs/problems/user-already-exists"
             )
         )
         val insecurePassword = Problem(
             URI(
-                "https://github.com/isel-leic-daw/s2223i-51d-51n-public/tree/main/code/tic-tac-tow-service/" +
+                "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/" +
                         "docs/problems/insecure-password"
             )
         )
 
         val userOrPasswordAreInvalid = Problem(
             URI(
-                "https://github.com/isel-leic-daw/s2223i-51d-51n-public/tree/main/code/tic-tac-tow-service/" +
+                "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/" +
                         "docs/problems/user-or-password-are-invalid"
             )
         )
 
         val invalidRequestContent = Problem(
             URI(
-                "https://github.com/isel-leic-daw/s2223i-51d-51n-public/tree/main/code/tic-tac-tow-service/" +
+                "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main" +
                         "docs/problems/invalid-request-content"
             )
         )

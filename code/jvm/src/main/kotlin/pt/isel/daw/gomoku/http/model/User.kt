@@ -3,8 +3,8 @@ package pt.isel.daw.gomoku.http.model
 import pt.isel.daw.gomoku.domain.users.Email
 
 data class UserCreateInputModel(
-    val email: Email,
     val username: String,
+    val email: Email,
     val password: String
 )
 

@@ -45,7 +45,7 @@ class GameController(
 
     @PutMapping(Uris.Games.PLAY)
     fun play(@RequestBody inputModel: GamePlayInputModel): ResponseEntity<GameRoundOutputModel> {
-        val res = gameService.play(inputModel.userId, inputModel.round)
+        val res = gameService.play(inputModel.gameId, inputModel.round)
         return res.let {
             ResponseEntity.ok(GameRoundOutputModel(it))
         }

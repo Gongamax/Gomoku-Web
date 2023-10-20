@@ -13,7 +13,7 @@ object Uris {
 
     object  NonUsers {
         const val SYSTEM_INFO = "$PREFIX/system"
-        const val RANKING_INFO = "$PREFIX/ranks"
+        const val RANKING_INFO = "$PREFIX/statistic"
 
         fun systemInfo(): URI = URI(SYSTEM_INFO)
         fun rankingInfo(): URI = URI(RANKING_INFO)
@@ -35,7 +35,7 @@ object Uris {
     object Games {
         const val CREATE_GAME = "$PREFIX/games"
         const val GET_GAME_BY_ID = "$PREFIX/games/{id}"
-        const val PLAY = "$PREFIX/games/{id}/play"
+        const val PLAY = "$PREFIX/games/play"
         const val GAME_STATE = "$PREFIX/games/{id}/state"
 
         fun byId(id: UUID) = UriTemplate(GET_GAME_BY_ID).expand(id)
