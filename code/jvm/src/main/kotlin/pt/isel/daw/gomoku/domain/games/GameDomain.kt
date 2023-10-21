@@ -10,7 +10,7 @@ import java.util.*
  * This class is responsible for the game domain logic.
  * It is responsible for creating a game and applying rounds.
  * @property clock The clock used to get the current time.
- * @property timeout The timeout for each round.
+ * @property config The configuration of the game.
  *
  * This implementation is based on the one provided by the teacher
  * in gitHub repository: https://github.com/isel-leic-daw/s2223i-51d-51n-public
@@ -24,13 +24,13 @@ class GameDomain(
     fun createGame(
         playerBLACK: User,
         playerWHITE: User,
-        variant: Variant
+        variant: Variants
     ): Game {
         val now = clock.now()
         return Game(
             id = UUID.randomUUID(),
             state = Game.State.NEXT_PLAYER_BLACK,
-            board = Board.createBoard(player = Player(playerBLACK.id, Piece.BLACK), variant = variant),
+            board = Board.createBoard(piece = Piece.BLACK, variant = variant),
             created = now,
             updated = now,
             deadline = now.plus(config.timeout),
@@ -48,12 +48,34 @@ class GameDomain(
         }
         val now = clock.now()
         return when (game.state) {
+            Game.State.SWAPPING_PIECES -> swapPieces(game, round, now)
             Game.State.PLAYER_BLACK_WON -> RoundResult.GameAlreadyEnded
             Game.State.PLAYER_WHITE_WON -> RoundResult.GameAlreadyEnded
             Game.State.DRAW -> RoundResult.GameAlreadyEnded
             Game.State.NEXT_PLAYER_BLACK -> playRound(game, round, now, PLAYER_BLACK_LOGIC)
             Game.State.NEXT_PLAYER_WHITE -> playRound(game, round, now, PLAYER_WHITE_LOGIC)
         }
+    }
+
+    private fun swapPieces(game: Game, round: Round, now: Instant): RoundResult {
+        if (round.player.userId != game.playerWHITE.id) {
+            return RoundResult.NotYourTurn
+        }
+        if (game.deadline != null && now > game.deadline) {
+            val newGame = game.copy(state = PLAYER_WHITE_LOGIC.otherWon, deadline = null)
+            return RoundResult.TooLate(newGame)
+        }
+        val newGame = if(round.wantsToSwap)
+            game.copy(
+            state = PLAYER_WHITE_LOGIC.nextPlayer,
+            deadline = now + config.timeout,
+            playerBLACK = game.playerWHITE,
+            playerWHITE = game.playerBLACK,
+        ) else game.copy(
+            state = PLAYER_WHITE_LOGIC.nextPlayer,
+            deadline = now + config.timeout,
+        )
+        return RoundResult.OthersTurn(newGame)
     }
 
     private fun playRound(
@@ -69,13 +91,20 @@ class GameDomain(
             RoundResult.TooLate(newGame)
         } else {
             if (game.board.canPlayOn(round.cell)) {
-                when (val newBoard = game.board.playRound(round.cell, nextPlayer(game, round.player))) {
+                when (val newBoard = game.board.playRound(round.cell, nextPiece(game, round.player))) {
                     is BoardOpen -> {
-                        val newGame = game.copy(
-                            board = newBoard,
-                            state = aux.nextPlayer,
-                            deadline = now + config.timeout,
-                        )
+                        val newGame = when(game.board.variant.openingRule) {
+                            OpeningRule.STANDARD -> game.copy(
+                                board = newBoard,
+                                state = aux.nextPlayer,
+                                deadline = now + config.timeout,
+                            )
+                            OpeningRule.SWAP -> game.copy(
+                                board = newBoard,
+                                state = Game.State.SWAPPING_PIECES,
+                                deadline = now + config.timeout,
+                            )
+                        }
                         RoundResult.OthersTurn(newGame)
                     }
                     is BoardWin -> {
@@ -108,9 +137,9 @@ class GameDomain(
         }
     }
 
-    private fun nextPlayer(game: Game, player: Player): Player =
-        if (player.userId == game.playerBLACK.id) Player(game.playerWHITE.id, Piece.WHITE)
-        else Player(game.playerBLACK.id, Piece.BLACK)
+    private fun nextPiece(game: Game, player: Player): Piece =
+        if (player.userId == game.playerBLACK.id) Piece.WHITE
+        else Piece.BLACK
 
     companion object {
         private val PLAYER_BLACK_LOGIC = PlayerDomain(

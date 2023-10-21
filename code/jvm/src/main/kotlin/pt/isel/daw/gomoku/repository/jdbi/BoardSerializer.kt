@@ -32,26 +32,17 @@ object BoardSerializer {
         objectMapper.registerModule(module)
     }
 
-    private data class BoardData(var kind: String = "", var piece: String = "", var moves: Moves = mapOf())
+    private data class BoardData(val kind: String = "", val piece: String = "", val moves: Moves = mapOf())
 
     fun serialize(data: Board): String {
-        val boardData = BoardData()
-         when (data) {
-            is BoardOpen -> {
-                boardData.kind ="Open:${data.turn.userId}:${data.variant}"
-                boardData.piece = data.turn.piece.name
-            }
-            is BoardRun -> {
-                boardData.kind ="Run:${data.turn.userId}:${data.variant}"
-                boardData.piece = data.turn.piece.name
-            }
-            is BoardWin -> {
-                boardData.kind = "Win:${data.winner.userId}"
-                boardData.piece = data.winner.piece.name
-            }
-            is BoardDraw -> boardData.kind = "Draw"
+        var boardData = BoardData()
+        boardData = when (data) {
+            is BoardOpen -> boardData.copy(kind = "Open:${data.variant.name}", piece = data.turn.name)
+            is BoardRun -> boardData.copy(kind = "Run:${data.variant.name}", piece = data.turn.name)
+            is BoardWin -> boardData.copy(kind = "Win", piece = data.winner.name)
+            is BoardDraw -> boardData.copy(kind = "Draw")
         }
-        boardData.moves = data.moves.entries.associate { (k, v) -> k to v }
+        boardData = boardData.copy( moves = data.moves.entries.associate { (k, v) -> k to v })
         return objectMapper.writeValueAsString(boardData)
     }
 
@@ -60,24 +51,16 @@ object BoardSerializer {
         val info = boardData.kind.split(":")
         return when (info[0]) {
             "Open" -> {
-                val playerPart = info[1]
-                val variantPart = info[2]
-                val player = if (playerPart.isNotEmpty()) playerPart.toInt() else -1
-                val variant = if (variantPart.isNotEmpty()) Variant.valueOf(variantPart) else Variant.STANDARD
-                BoardOpen(boardData.moves, Player(player, Piece.valueOf(boardData.piece)), variant)
+                val variantPart = info[1]
+                val variant = if (variantPart.isNotEmpty()) Variants.valueOf(variantPart) else Variants.STANDARD
+                BoardOpen(boardData.moves, Piece.valueOf(boardData.piece), variant)
             }
             "Run" -> {
-                val playerPart = info[1]
-                val variantPart = info[2]
-                val player = if (playerPart.isNotEmpty()) playerPart.toInt() else -1
-                val variant = if (variantPart.isNotEmpty()) Variant.valueOf(variantPart) else Variant.STANDARD
-                BoardRun(boardData.moves, Player(player, Piece.valueOf(boardData.piece)), variant)
+                val variantPart = info[1]
+                val variant = if (variantPart.isNotEmpty()) Variants.valueOf(variantPart) else Variants.STANDARD
+                BoardRun(boardData.moves, Piece.valueOf(boardData.piece), variant)
             }
-            "Win" -> {
-                val playerPart = boardData.kind.substringAfter(":")
-                val player = if (playerPart.isNotEmpty()) playerPart.toInt() else -1
-                BoardWin(boardData.moves, Player(player, Piece.valueOf(boardData.piece)))
-            }
+            "Win" -> BoardWin(boardData.moves, Piece.valueOf(boardData.piece))
             "Draw" -> BoardDraw(boardData.moves)
             else -> error("Invalid board kind: ${boardData.kind}")
         }

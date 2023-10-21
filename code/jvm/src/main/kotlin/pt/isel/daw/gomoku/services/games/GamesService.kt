@@ -24,7 +24,7 @@ class GamesService(
             // TODO() Needs to do an if condition to see if variant is valid
             //using something like it.gamesRepository.getVariant(variant) != null
             val gamesRepository = it.gamesRepository
-            val game = gamesDomain.createGame(userBlack, userWhite, Variant.valueOf(variant))
+            val game = gamesDomain.createGame(userBlack, userWhite, Variants.valueOf(variant))
             if (gamesRepository.getGame(game.id) != null) {
                 failure(GameCreationError.GameAlreadyExists)
             } else {

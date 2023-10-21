@@ -26,6 +26,7 @@ data class Game(
     val playerWHITE : User,
 ){
     enum class State {
+        SWAPPING_PIECES,
         NEXT_PLAYER_BLACK,
         NEXT_PLAYER_WHITE,
         PLAYER_BLACK_WON,
@@ -42,6 +43,7 @@ data class Game(
 
         override fun toString(): String {
             return when (this) {
+                SWAPPING_PIECES -> "SWAPPING_PIECES"
                 NEXT_PLAYER_BLACK -> "NEXT_PLAYER_BLACK"
                 NEXT_PLAYER_WHITE -> "NEXT_PLAYER_WHITE"
                 PLAYER_BLACK_WON -> "PLAYER_BLACK_WON"

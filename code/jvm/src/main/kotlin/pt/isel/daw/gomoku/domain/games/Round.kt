@@ -8,5 +8,6 @@ package pt.isel.daw.gomoku.domain.games
 
 class Round (
     val cell: Cell,
-    val player: Player
+    val player: Player,
+    val wantsToSwap: Boolean = false,
 )

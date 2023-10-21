@@ -11,7 +11,6 @@ import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.repository.jdbi.JdbiGamesRepository
 import pt.isel.daw.gomoku.repository.jdbi.JdbiUsersRepository
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
-import java.util.UUID
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.Test
@@ -41,7 +40,7 @@ class JdbiGamesRepositoryTests {
         // when:
         val alice = userRepo.getUserByUsername(aliceName) ?: fail("user must exist")
         val bob = userRepo.getUserByUsername(bobName) ?: fail("user must exist")
-        val game = gameDomain.createGame(alice, bob, Variant.STANDARD)
+        val game = gameDomain.createGame(alice, bob, Variants.STANDARD)
         gameRepo.createGame(game)
 
         // and: retrieving the game
@@ -51,7 +50,7 @@ class JdbiGamesRepositoryTests {
         assertEquals(game, retrievedGame)
 
         // when: updating the game
-        val newGame = game.copy(board = game.board.playRound(Cell(1,1), Player(bob.id, Piece.BLACK)))
+        val newGame = game.copy(board = game.board.playRound(Cell(1,1), Piece.BLACK))
 
         // and: storing the game
         gameRepo.updateGame(newGame)
@@ -72,8 +71,6 @@ class JdbiGamesRepositoryTests {
         private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
 
         private val gameConfig = GamesDomainConfig(
-            variant = Variant.STANDARD,
-            openingRule = OpeningRule.STANDARD,
             timeout = 10.minutes
         )
 

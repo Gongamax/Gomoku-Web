@@ -17,7 +17,7 @@ class GameDomainTests {
     @Test
     fun `simple game`() {
         // given:a game
-        var game = gameDomain.createGame(alice, bob, Variant.STANDARD)
+        var game = gameDomain.createGame(alice, bob, Variants.STANDARD)
 
         // when: alice plays
         var result = gameDomain.playRound(game, Round(Cell(1, 1), Player(alice.id, Piece.BLACK)))
@@ -55,7 +55,7 @@ class GameDomainTests {
     @Test
     fun `cannot play twice`() {
         // given: a game
-        var game = gameDomain.createGame(alice, bob, Variant.STANDARD)
+        var game = gameDomain.createGame(alice, bob, Variants.STANDARD)
 
         // when: alice plays
         var result = gameDomain.playRound(game, Round(Cell(1, 1), Player(alice.id, Piece.BLACK)))
@@ -91,7 +91,7 @@ class GameDomainTests {
     @Test
     fun `alice wins`() {
         // given: a game and a list of rounds
-        val game = gameDomain.createGame(alice, bob, Variant.STANDARD)
+        val game = gameDomain.createGame(alice, bob, Variants.STANDARD)
 
         val rounds = listOf(
             Round(Cell(1, 1), Player(alice.id, Piece.BLACK)),
@@ -107,7 +107,7 @@ class GameDomainTests {
 
         // when: the rounds are applied
         // then: alice wins
-        when (val result = play(gameDomain, game, rounds)) {
+        when (val result = play(game, rounds)) {
             is RoundResult.YouWon -> assertEquals(Game.State.PLAYER_BLACK_WON, result.game.state)
             else -> fail("Unexpected round result $result")
         }
@@ -133,7 +133,7 @@ class GameDomainTests {
             testClock,
             gameConfig
         )
-        var game = gameLogic.createGame(alice, bob, Variant.STANDARD)
+        var game = gameLogic.createGame(alice, bob, Variants.STANDARD)
 
         // when: alice plays
         testClock.advance(timeout - 1.minutes)
@@ -157,7 +157,7 @@ class GameDomainTests {
         assertEquals(Game.State.PLAYER_BLACK_WON, game.state)
     }
 
-    private fun play(domain: GameDomain, initialGame: Game, rounds: List<Round>): RoundResult? {
+    private fun play(initialGame: Game, rounds: List<Round>): RoundResult? {
         var previousResult: RoundResult? = null
         for (round in rounds) {
             val game = when (previousResult) {
@@ -165,15 +165,13 @@ class GameDomainTests {
                 is RoundResult.OthersTurn -> previousResult.game
                 else -> fail("Unexpected round result $previousResult")
             }
-            previousResult = domain.playRound(game, round)
+            previousResult = gameDomain.playRound(game, round)
         }
         return previousResult
     }
 
     companion object {
         private val gameConfig = GamesDomainConfig(
-            variant = Variant.STANDARD,
-            openingRule = OpeningRule.STANDARD,
             timeout = 5.minutes
         )
 

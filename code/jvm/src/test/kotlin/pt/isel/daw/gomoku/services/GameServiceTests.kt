@@ -32,7 +32,7 @@ class GameServiceTests {
         val testClock = TestClock()
         val gamesService = createGamesService(testClock)
         val usersService = createUsersService(testClock)
-        val variant : Variant = Variant.STANDARD
+        val variant : Variants = Variants.STANDARD
 
         //when: creating a game
         val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
@@ -84,7 +84,7 @@ class GameServiceTests {
         val testClock = TestClock()
         val gamesService = createGamesService(testClock)
         val usersService = createUsersService(testClock)
-        val variant : Variant = Variant.STANDARD
+        val variant : Variants = Variants.STANDARD
 
         //when: creating a game
         val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
@@ -125,7 +125,7 @@ class GameServiceTests {
         val testClock = TestClock()
         val gamesService = createGamesService(testClock)
         val usersService = createUsersService(testClock)
-        val variant : Variant = Variant.STANDARD
+        val variant : Variants = Variants.STANDARD
 
         //when: creating a game
         val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
@@ -151,7 +151,7 @@ class GameServiceTests {
         val round = Round(Cell(1, 1), Player(aliceId, Piece.BLACK))
 
 
-        val playRoundResult = when(val playRoundResult = gamesService.play(game.id, aliceId, 1, 1)) {
+        when(val playRoundResult = gamesService.play(game.id, aliceId, 1, 1)) {
             is Either.Left -> fail("Failed to play round for $playRoundResult")
             is Either.Right -> playRoundResult.value
         }
@@ -161,7 +161,7 @@ class GameServiceTests {
             is Either.Left -> fail("Failed to get game by id for $gameById")
             is Either.Right -> gameById.value
         }
-        assertTrue { gameById.board.moves[Cell(1, 1)] == round.player }
+        assertTrue { gameById.board.moves[Cell(1, 1)] == round.player.piece }
 
         // then: leaving the game
         gamesService.leaveGame(game.id, aliceId)
@@ -184,8 +184,6 @@ class GameServiceTests {
             GameDomain(
                 clock = testClock,
                 config = GamesDomainConfig(
-                    variant = Variant.STANDARD,
-                    openingRule = OpeningRule.STANDARD,
                     timeout = 10.minutes
                 )
             ),

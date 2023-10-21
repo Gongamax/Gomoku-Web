@@ -1,7 +1,7 @@
 package pt.isel.daw.gomoku.domain.games
 
 private const val WIN_LENGTH = 5
-typealias Moves = Map<Cell, Player>
+typealias Moves = Map<Cell, Piece>
 
 /**
  * Represents a board of the game.
@@ -10,7 +10,7 @@ typealias Moves = Map<Cell, Player>
  * There are four possible states of board: [BoardRun], [BoardWin] and [BoardDraw]
  * These hierarchies are to be used by pattern matching.
  */
-sealed class Board(val moves: Moves, val variant: Variant = Variant.STANDARD) {
+sealed class Board(val moves: Moves, val variant: Variants = Variants.STANDARD) {
     private val boardSize = variant.boardDim.toInt()
     val maxMoves = boardSize * boardSize
 
@@ -33,20 +33,20 @@ sealed class Board(val moves: Moves, val variant: Variant = Variant.STANDARD) {
             is BoardWin -> "Win:$winner"
             is BoardDraw -> "Draw:-"
         } + moves.entries.joinToString(" ") {
-            "${it.key}:${it.value.piece.name}"
+            "${it.key}:${it.value.name}"
         }
     }
 
     override fun hashCode(): Int = moves.hashCode()
 
     companion object {
-        fun createBoard(player: Player, variant: Variant) = BoardRun(emptyMap(), player, variant)
+        fun createBoard(piece: Piece, variant: Variants) = BoardOpen(emptyMap(), piece, variant)
     }
 }
 
-open class BoardOpen(moves: Moves, val turn: Player, variant: Variant) : Board(moves, variant)
-open class BoardRun(moves: Moves, val turn: Player, variant: Variant) : Board(moves, variant )
-class BoardWin(moves: Moves, val winner: Player) : Board(moves)
+open class BoardOpen(moves: Moves, val turn: Piece, variant: Variants) : Board(moves, variant)
+open class BoardRun(moves: Moves, val turn: Piece, variant: Variants) : Board(moves, variant )
+class BoardWin(moves: Moves, val winner: Piece) : Board(moves)
 class BoardDraw(moves: Moves) : Board(moves)
 
 /**
@@ -54,27 +54,12 @@ class BoardDraw(moves: Moves) : Board(moves)
  * @throws IllegalArgumentException if the [cell] is already used.
  * @throws IllegalStateException if the game is over (Draw or Win).
  */
-fun Board.playRound(cell: Cell, nextPlayer: Player): Board {
-    return when (this) {
-        is BoardOpen -> BoardRun(moves, nextPlayer, variant)
-        is BoardRun -> {
-            require(moves[cell] == null) { "Position $cell used" }
-            val moves = moves + (cell to turn)
-            when {
-                isWin(cell) -> BoardWin(moves, winner = turn)
-                isDraw() -> BoardDraw(moves)
-                else -> BoardRun(moves, nextPlayer, variant)
-            }
-        }
-
-        is BoardWin, is BoardDraw -> error("Game over")
-    }
-}
+fun Board.playRound(cell: Cell, nextPiece: Piece): Board = variant.play(this, cell, nextPiece)
 
 /**
  * Checks if the move in [cell] position is a winning move.
  */
-private fun BoardRun.isWin(cell: Cell) =
+fun BoardRun.isWin(cell: Cell) =
     moves.size >= WIN_LENGTH * 2 - 2 &&
             (moves.filter { it.value == turn }.keys + cell).run {
                 any { winningCell ->
@@ -91,7 +76,7 @@ private fun BoardRun.isWin(cell: Cell) =
                 }
             }
 
-fun Board.canPlayOn(cell: Cell) = (cell !in moves)
+fun Board.canPlayOn(cell: Cell) = variant.validPlay(this, cell)
 
 private val directions = listOf(
     Pair(Direction.DOWN_LEFT, Direction.UP_RIGHT),
@@ -103,4 +88,4 @@ private val directions = listOf(
 /**
  * Checks if the state of the board will end the game as a Draw.
  */
-private fun BoardRun.isDraw() = moves.size == maxMoves
+fun BoardRun.isDraw() = moves.size == maxMoves

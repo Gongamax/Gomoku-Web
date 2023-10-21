@@ -13,12 +13,4 @@ import kotlin.time.Duration
  */
 data class GamesDomainConfig(
     val timeout : Duration,
-    val variant: Variant,
-    val openingRule: OpeningRule
-) {
-    init {
-        require(variant.boardDim.toInt() == 15 || variant.boardDim.toInt() == 19) { "boardSize must be either 15 or 19" }
-        require(variant in Variant.values()) { "variant must be a valid game Variant" }
-        require(openingRule in OpeningRule.values()) { "opening rule must be a valid Opening Rule" }
-    }
-}
+)

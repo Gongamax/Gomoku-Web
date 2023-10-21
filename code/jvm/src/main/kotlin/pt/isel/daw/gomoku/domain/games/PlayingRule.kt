@@ -1,6 +1,6 @@
 package pt.isel.daw.gomoku.domain.games
 
-enum class OpeningRule {
+enum class PlayingRule {
     STANDARD,
-    SWAP
+    THREE_AND_THREE,
 }
