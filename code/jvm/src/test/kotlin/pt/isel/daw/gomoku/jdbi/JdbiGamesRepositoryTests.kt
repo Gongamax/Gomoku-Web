@@ -8,6 +8,7 @@ import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
+import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.repository.jdbi.JdbiGamesRepository
 import pt.isel.daw.gomoku.repository.jdbi.JdbiUsersRepository
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
@@ -40,14 +41,11 @@ class JdbiGamesRepositoryTests {
         // when:
         val alice = userRepo.getUserByUsername(aliceName) ?: fail("user must exist")
         val bob = userRepo.getUserByUsername(bobName) ?: fail("user must exist")
-        val game = gameDomain.createGame(alice, bob, Variants.STANDARD)
-        gameRepo.createGame(game)
+        val g = gameRepo.createGame(gameDomain.createGameModel(alice, bob, Variants.STANDARD))
+
 
         // and: retrieving the game
-        val retrievedGame = gameRepo.getGame(game.id) ?: fail("game must exist")
-
-        // then: the retrieved game must be the same as the created one
-        assertEquals(game, retrievedGame)
+        val game = gameRepo.getGame(g) ?: fail("game must exist")
 
         // when: updating the game
         val newGame = game.copy(board = game.board.playRound(Cell(1,1), Piece.BLACK))
@@ -56,7 +54,7 @@ class JdbiGamesRepositoryTests {
         gameRepo.updateGame(newGame)
 
         // and: retrieving the game again
-        val newRetrievedGame = gameRepo.getGame(newGame.id) ?: fail("game must exist")
+        val newRetrievedGame = gameRepo.getGame(newGame.id.value) ?: fail("game must exist")
 
         // then: the two games are equal
         assertEquals(newGame, newRetrievedGame)

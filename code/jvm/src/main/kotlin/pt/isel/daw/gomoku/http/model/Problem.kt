@@ -32,6 +32,9 @@ class Problem(
         val invalidTurn = Problem(URI(BASE_URL + "invalid-turn"))
         val invalidPosition = Problem(URI(BASE_URL + "invalid-position"))
         val gameAlreadyEnded = Problem(URI(BASE_URL + "game-already-ended"))
+        val invalidToken = Problem(URI(BASE_URL + "invalid-token"))
+        val tokenExpired = Problem(URI(BASE_URL + "token-expired"))
+        val userIsNotAuthenticated = Problem(URI(BASE_URL + "user-is-not-authenticated"))
 
     }
 }

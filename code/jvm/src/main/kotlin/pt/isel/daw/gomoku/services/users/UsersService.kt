@@ -8,6 +8,7 @@ import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.repository.TransactionManager
 import pt.isel.daw.gomoku.utils.Either
+import pt.isel.daw.gomoku.utils.Success
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
 
@@ -49,11 +50,9 @@ class UsersService(
             val usersRepository = it.usersRepository
             val user: User = usersRepository.getUserByUsername(username)
                 ?: return@run failure(TokenCreationError.UserOrPasswordAreInvalid)
-            if (!usersDomain.validatePassword(password, user.passwordValidation)) {
-                if (!usersDomain.validatePassword(password, user.passwordValidation)) {
-                    return@run failure(TokenCreationError.UserOrPasswordAreInvalid)
-                }
-            }
+            if (!usersDomain.validatePassword(password, user.passwordValidation))
+                return@run failure(TokenCreationError.UserOrPasswordAreInvalid)
+
             val tokenValue = usersDomain.generateTokenValue()
             val now = clock.now()
             val newToken = Token(
@@ -63,7 +62,7 @@ class UsersService(
                 lastUsedAt = now
             )
             usersRepository.createToken(newToken, usersDomain.maxNumberOfTokensPerUser)
-            Either.Right(
+            Success(
                 TokenExternalInfo(
                     tokenValue,
                     usersDomain.getTokenExpiration(newToken)
@@ -72,27 +71,31 @@ class UsersService(
         }
     }
 
-    fun getUserById(id: Int): User? {
+    fun getUserById(id: Int): UserGetByIdResult {
         return transactionManager.run {
-            val usersRepository = it.usersRepository
-            val userAndId = usersRepository.getUserById(id)
-            userAndId
+            val userAndId = it.usersRepository.getUserById(id)
+            if (userAndId != null)
+                success(userAndId)
+            else
+                failure(UserGetError.UserDoesNotExist)
         }
     }
 
-    fun getUserByToken(token: String): User? {
+    fun getUserByToken(token: String): UserGetByIdResult {
         if (!usersDomain.canBeToken(token)) {
-            return null
+            return failure(UserGetError.InvalidToken)
         }
         return transactionManager.run {
             val usersRepository = it.usersRepository
             val tokenValidationInfo = usersDomain.createTokenValidationInformation(token)
             val userAndToken = usersRepository.getTokenByTokenValidationInfo(tokenValidationInfo)
-            if (userAndToken != null && usersDomain.isTokenTimeValid(clock, userAndToken.second)) {
+            if (userAndToken != null ) {
+                if (!usersDomain.isTokenTimeValid(clock, userAndToken.second))
+                    return@run failure(UserGetError.TokenExpired)
                 usersRepository.updateTokenLastUsed(userAndToken.second, clock.now())
-                userAndToken.first
+                success(userAndToken.first)
             } else {
-                null
+                failure(UserGetError.InvalidToken)
             }
         }
     }

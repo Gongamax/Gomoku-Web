@@ -10,7 +10,7 @@ sealed class GameCreationError {
     object VariantDoesNotExist : GameCreationError()
 }
 
-typealias GameCreationResult = Either<GameCreationError, Game>
+typealias GameCreationResult = Either<GameCreationError, Int>
 
 sealed class GamePlayError {
     object GameDoesNotExist : GamePlayError()

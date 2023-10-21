@@ -12,6 +12,7 @@ fun Jdbi.configureWithAppRequirements(): Jdbi {
     registerColumnMapper(PasswordValidationInfoMapper())
     registerColumnMapper(TokenValidationInfoMapper())
     registerColumnMapper(EmailMapper())
+    registerColumnMapper(IdMapper())
     registerColumnMapper(BoardMapper())
     registerColumnMapper(InstantMapper())
 

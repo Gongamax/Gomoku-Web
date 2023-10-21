@@ -2,6 +2,7 @@ package pt.isel.daw.gomoku.domain.games
 
 import pt.isel.daw.gomoku.domain.users.User
 import kotlinx.datetime.Instant
+import pt.isel.daw.gomoku.domain.utils.Id
 import java.util.UUID
 
 /**
@@ -16,7 +17,7 @@ import java.util.UUID
  * @property playerWHITE the player that is using the white piece.
  */
 data class Game(
-    val id : UUID,
+    val id : Id,
     val state: State,
     val board : Board,
     val created: Instant,

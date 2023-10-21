@@ -14,6 +14,8 @@ import pt.isel.daw.gomoku.repository.jdbi.JdbiTransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
+import pt.isel.daw.gomoku.utils.Failure
+import pt.isel.daw.gomoku.utils.Success
 import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
@@ -60,7 +62,10 @@ class UserServiceTests {
         assertEquals(256 / 8, tokenBytes.size)
 
         // when: retrieving the user by token
-        val user = userService.getUserByToken(token)
+        val user = when (val res = userService.getUserByToken(token)) {
+            is Either.Left -> fail("Unexpected $res")
+            is Either.Right -> res.value
+        }
 
         // then: a user is found
         assertNotNull(user)
@@ -101,7 +106,8 @@ class UserServiceTests {
         val startInstant = testClock.now()
         while (true) {
             testClock.advance(tokenRollingTtl.minus(1.seconds))
-            userService.getUserByToken(token) ?: break
+            if (userService.getUserByToken(token) is Failure)
+                break
         }
 
         // then: user is not found only after the absolute TTL has elapsed
@@ -157,7 +163,7 @@ class UserServiceTests {
         assertNotNull(userService.getUserByToken(newToken.tokenValue))
 
         // and: the first token (the least recently used) is not valid
-        assertNull(userService.getUserByToken(tokens[0].tokenValue))
+        assertTrue { userService.getUserByToken(tokens[0].tokenValue) is Failure }
 
         // and: the remaining tokens are still valid
         (1 until tokens.size).forEach {
@@ -217,7 +223,7 @@ class UserServiceTests {
         assertEquals(
             maxTokensPerUser - 1,
             tokens.count {
-                userService.getUserByToken(it.tokenValue) != null
+                userService.getUserByToken(it.tokenValue) is Success
             }
         )
     }
@@ -261,7 +267,7 @@ class UserServiceTests {
         maybeUser = userService.getUserByToken(token.tokenValue)
 
         // then: token usage is successful
-        assertNull(maybeUser)
+        assertTrue { maybeUser is Failure }
     }
 
     companion object {

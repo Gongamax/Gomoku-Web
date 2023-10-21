@@ -4,7 +4,6 @@ import kotlin.time.Duration
 
 /**
  * Represents the game configuration and variant rules.
- * @property boardSize the size of the board.
  * @property variant the variant of the game.
  * @property openingRule the opening rule of the game.
  * @throws IllegalArgumentException if the board size is not greater than 0.
