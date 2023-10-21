@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.MissingPathVariableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
@@ -35,8 +36,29 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         return Problem.response(400, Problem.invalidRequestContent)
     }
 
+    override fun handleExceptionInternal(
+        ex: Exception,
+        body: Any?,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        log.info("Handling ExceptionInternal: {}", ex.message)
+        return Problem.response(500, Problem.internalServerError)
+    }
+
+    override fun handleMissingPathVariable(
+        ex: MissingPathVariableException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        log.info("Handling MissingPathVariableException: {}", ex.message)
+        return Problem.response(400, Problem.invalidRequestContent)
+    }
+
     @ExceptionHandler(
-        Exception::class
+        Exception::class,
     )
     fun handleAll(): ResponseEntity<Unit> {
         return ResponseEntity.status(500).build()

@@ -38,7 +38,7 @@ class JdbiUsersRepository(
         )
             .bind("id", user.id)
             .bind("username", user.username)
-            .bind("email", user.email.mail)
+            .bind("email", user.email.value)
             .bind("password_validation", user.passwordValidation.validationInfo)
             .execute()
 
@@ -64,7 +64,7 @@ class JdbiUsersRepository(
             """
         )
             .bind("username", username)
-            .bind("email", email.mail)
+            .bind("email", email.value)
             .bind("password_validation", passwordValidation.validationInfo)
             .executeAndReturnGeneratedKeys()
             .mapTo<Int>()

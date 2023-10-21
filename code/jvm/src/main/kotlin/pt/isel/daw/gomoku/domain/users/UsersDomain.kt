@@ -76,5 +76,11 @@ class UsersDomain(
                 && password.contains(Regex("[A-Z]"))
                 && password.contains(Regex("[0-9]"))
 
-    val maxNumberOfTokensPerUser = config.maxTokensPerUser
+    fun isSafeEmail(email: Email): Boolean =
+        email.value.length in 3..64
+                && email.value.contains(Regex("[a-zA-Z0-9]"))
+                && email.value.contains('@')
+                && email.value.contains('.')
+
+    val maxNumberOfTokensPerUser get() = config.maxTokensPerUser
 }

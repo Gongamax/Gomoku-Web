@@ -75,7 +75,7 @@ class UserTests {
         val result = client.post().uri("/users/token")
             .bodyValue(
                 mapOf(
-                    "email" to email.mail,
+                    "email" to email,
                     "username" to username,
                     "password" to password
                 )
@@ -120,7 +120,7 @@ class UserTests {
     }
 
     companion object {
-        private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
+        private fun newTestEmail() = "email-${abs(Random.nextLong())}@test.com"
 
         private fun newTestUserName() = "user-${abs(Random.nextLong())}"
 

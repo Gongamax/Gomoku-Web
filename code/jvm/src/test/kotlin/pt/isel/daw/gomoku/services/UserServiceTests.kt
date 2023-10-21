@@ -290,7 +290,7 @@ class UserServiceTests {
 
         private fun newTestPassword() = "TestPassword${abs(Random.nextLong())}"
 
-        private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
+        private fun newTestEmail() = "email-${abs(Random.nextLong())}@test.com"
 
         private val dbUrl = Environment.getDbUrl()
 

@@ -18,9 +18,20 @@ class Problem(
 
         val userAlreadyExists = Problem(URI(BASE_URL + "user-already-exists"))
         val insecurePassword = Problem(URI(BASE_URL + "insecure-password"))
+        val insecureEmail = Problem(URI(BASE_URL + "insecure-email"))
         val userOrPasswordAreInvalid = Problem(URI(BASE_URL + "user-or-password-are-invalid"))
         val invalidRequestContent = Problem(URI(BASE_URL + "invalid-request-content"))
         val gameAlreadyExists = Problem(URI(BASE_URL + "game-already-exists"))
         val userDoesNotExists = Problem(URI(BASE_URL + "user-does-not-exists"))
+        val variantDoesNotExists = Problem(URI(BASE_URL + "variant-does-not-exists"))
+        val internalServerError = Problem(URI(BASE_URL + "internal-server-error"))
+        val gameDoesNotExists = Problem(URI(BASE_URL + "game-does-not-exists"))
+        val invalidUser = Problem(URI(BASE_URL + "invalid-user"))
+        val invalidState = Problem(URI(BASE_URL + "invalid-state"))
+        val invalidTime = Problem(URI(BASE_URL + "invalid-time"))
+        val invalidTurn = Problem(URI(BASE_URL + "invalid-turn"))
+        val invalidPosition = Problem(URI(BASE_URL + "invalid-position"))
+        val gameAlreadyEnded = Problem(URI(BASE_URL + "game-already-ended"))
+
     }
 }

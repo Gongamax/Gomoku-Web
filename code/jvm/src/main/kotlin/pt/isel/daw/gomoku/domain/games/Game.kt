@@ -39,5 +39,15 @@ data class Game(
             NEXT_PLAYER_WHITE -> NEXT_PLAYER_BLACK
             else -> throw IllegalStateException("Game is ended")
         }
+
+        override fun toString(): String {
+            return when (this) {
+                NEXT_PLAYER_BLACK -> "NEXT_PLAYER_BLACK"
+                NEXT_PLAYER_WHITE -> "NEXT_PLAYER_WHITE"
+                PLAYER_BLACK_WON -> "PLAYER_BLACK_WON"
+                PLAYER_WHITE_WON -> "PLAYER_WHITE_WON"
+                DRAW -> "DRAW"
+            }
+        }
     }
 }

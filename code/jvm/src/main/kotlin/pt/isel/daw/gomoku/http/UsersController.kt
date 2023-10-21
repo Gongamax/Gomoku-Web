@@ -1,5 +1,6 @@
 package pt.isel.daw.gomoku.http
 
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
+import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.services.users.TokenCreationError
 import pt.isel.daw.gomoku.services.users.UserCreationError
@@ -33,6 +35,7 @@ class UsersController(
             is Failure -> when (res.value) {
                 UserCreationError.InsecurePassword -> Problem.response(400, Problem.insecurePassword)
                 UserCreationError.UserAlreadyExists -> Problem.response(400, Problem.userAlreadyExists)
+                UserCreationError.InsecureEmail -> Problem.response(400, Problem.insecureEmail)
             }
         }
     }

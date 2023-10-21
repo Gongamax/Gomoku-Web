@@ -4,7 +4,7 @@ import pt.isel.daw.gomoku.domain.users.Email
 
 data class UserCreateInputModel(
     val username: String,
-    val email: Email,
+    val email: String,
     val password: String
 )
 

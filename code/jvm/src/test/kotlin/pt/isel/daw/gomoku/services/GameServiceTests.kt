@@ -8,11 +8,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
-import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
-import pt.isel.daw.gomoku.jdbi.JdbiUserRepositoryTests
 import pt.isel.daw.gomoku.repository.jdbi.JdbiTransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.games.GamesService
@@ -37,7 +35,6 @@ class GameServiceTests {
         val variant : Variant = Variant.STANDARD
 
         //when: creating a game
-        val AliceEmail = newTestEmail()
         val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
         val createBobResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
 
@@ -60,7 +57,7 @@ class GameServiceTests {
         assertNotNull(bob)
 
         //when: creating a game
-        val createGameResult = gamesService.createGame(alice, bob, variant)
+        val createGameResult = gamesService.createGame(alice.id, bob.id, variant.name)
 
         //then: the game is created
         val game = when (createGameResult) {
@@ -69,13 +66,16 @@ class GameServiceTests {
         }
 
         // when: getting the game by id
-        val gameById = gamesService.getGameById(game.id)
+        val gameByIdValidated = when (val gameById = gamesService.getGameById(game.id)) {
+            is Either.Left -> fail("Failed to get game by id for $gameById")
+            is Either.Right -> gameById.value
+        }
 
         //then: the game is found
-        assertNotNull(gameById)
+        assertNotNull(gameByIdValidated)
 
         // then: the game is the same
-        assert(gameById == game)
+        assert(gameByIdValidated == game)
     }
 
     @Test
@@ -100,16 +100,8 @@ class GameServiceTests {
             is Either.Right -> createBobResult.value
         }
 
-        //when: getting alice and bob
-        val alice = usersService.getUserById(aliceId)
-        val bob = usersService.getUserById(bobId)
-
-        //then: alice and bob are not null
-        assertNotNull(alice)
-        assertNotNull(bob)
-
         //when: creating a game
-        val createGameResult = gamesService.createGame(alice, bob, variant)
+        val createGameResult = gamesService.createGame(aliceId, bobId, variant.name)
 
         //then: the game is created
         val game = when (createGameResult) {
@@ -149,40 +141,36 @@ class GameServiceTests {
             is Either.Right -> createBobResult.value
         }
 
-        //when: getting alice and bob
-        val alice = usersService.getUserById(aliceId)
-        val bob = usersService.getUserById(bobId)
-
-        //then: alice and bob are not null
-        assertNotNull(alice)
-        assertNotNull(bob)
-
         //when: creating a game
-        val createGameResult = gamesService.createGame(alice, bob, variant)
-
-        //then: the game is created
-        val game = when (createGameResult) {
+        val game = when (val createGameResult = gamesService.createGame(aliceId, bobId, variant.name)) {
             is Either.Left -> fail("Game creation failed for $createGameResult")
             is Either.Right -> createGameResult.value
         }
 
         // when: playing a round
-        val round = Round(Cell(1, 1), Player(alice.id, Piece.BLACK))
-        val playRoundResult = gamesService.play(game.id, round)
+        val round = Round(Cell(1, 1), Player(aliceId, Piece.BLACK))
 
-        //then: the round is played
-        assertTrue { playRoundResult is RoundResult.OthersTurn }
+
+        val playRoundResult = when(val playRoundResult = gamesService.play(game.id, aliceId, 1, 1)) {
+            is Either.Left -> fail("Failed to play round for $playRoundResult")
+            is Either.Right -> playRoundResult.value
+        }
 
         //then: the game is updated
-        val gameById = gamesService.getGameById(game.id)
+        val gameById = when (val gameById = gamesService.getGameById(game.id)) {
+            is Either.Left -> fail("Failed to get game by id for $gameById")
+            is Either.Right -> gameById.value
+        }
         assertTrue { gameById.board.moves[Cell(1, 1)] == round.player }
 
         // then: leaving the game
-        gamesService.leaveGame(game.id, alice.id)
+        gamesService.leaveGame(game.id, aliceId)
 
         // then: the game is updated
-        val gameByIdAfterLeave = gamesService.getGameById(game.id)
-
+        val gameByIdAfterLeave = when(val gameByIdAfterLeave = gamesService.getGameById(game.id)) {
+            is Either.Left -> fail("Failed to get game by id for $gameByIdAfterLeave")
+            is Either.Right -> gameByIdAfterLeave.value
+        }
         // then: check the winner
         assertTrue { gameByIdAfterLeave.state == Game.State.PLAYER_WHITE_WON }
     }
@@ -227,7 +215,7 @@ class GameServiceTests {
 
         private fun newTestPassword() = "TestPassword${abs(Random.nextLong())}"
 
-        private fun newTestEmail() = Email("email-${abs(Random.nextLong())}@test.com")
+        private fun newTestEmail() = "email-${abs(Random.nextLong())}@test.com"
 
         private val dbUrl = Environment.getDbUrl()
 

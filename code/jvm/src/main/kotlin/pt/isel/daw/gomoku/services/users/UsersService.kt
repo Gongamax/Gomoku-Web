@@ -18,19 +18,24 @@ class UsersService(
     private val clock: Clock
 ) {
 
-    fun createUser(username: String, email: Email, password: String): UserCreationResult {
+    fun createUser(username: String, email: String, password: String): UserCreationResult {
         if (!usersDomain.isSafePassword(password)) {
             return failure(UserCreationError.InsecurePassword)
         }
 
         val passwordValidationInfo = usersDomain.createPasswordValidationInformation(password)
 
+        val emailValidation = Email(email)
+        if (!usersDomain.isSafeEmail(emailValidation)) {
+            return failure(UserCreationError.InsecureEmail)
+        }
+
         return transactionManager.run {
             val usersRepository = it.usersRepository
             if (usersRepository.isUserStoredByUsername(username)) {
                 failure(UserCreationError.UserAlreadyExists)
             } else {
-                val id = usersRepository.storeUser(username, email, passwordValidationInfo)
+                val id = usersRepository.storeUser(username, emailValidation, passwordValidationInfo)
                 success(id)
             }
         }

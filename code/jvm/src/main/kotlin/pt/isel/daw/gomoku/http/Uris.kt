@@ -35,12 +35,21 @@ object Uris {
     object Games {
         const val CREATE_GAME = "$PREFIX/games"
         const val GET_GAME_BY_ID = "$PREFIX/games/{id}"
-        const val PLAY = "$PREFIX/games/play"
+        const val PLAY = "$PREFIX/games/{id}/play"
         const val GAME_STATE = "$PREFIX/games/{id}/state"
+        const val MATCHMAKING = "$PREFIX/games/matchmaking"
+        const val LEAVE = "$PREFIX/games/{id}/leave"
+        const val GET_ALL_GAMES = "$PREFIX/games"
 
         fun byId(id: UUID) = UriTemplate(GET_GAME_BY_ID).expand(id)
-        fun play(): URI = URI(PLAY)
+        fun play(id : UUID): URI = UriTemplate(PLAY).expand(id)
         fun create(): URI = URI(CREATE_GAME)
         fun state(): URI = URI(GAME_STATE)
+
+        fun matchmaking(): URI = URI(MATCHMAKING)
+
+        fun leave(id: UUID): URI = UriTemplate(LEAVE).expand(id)
+
+        fun getAllGames(): URI = URI(GET_ALL_GAMES)
     }
 }

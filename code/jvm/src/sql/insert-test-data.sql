@@ -26,3 +26,9 @@ VALUES ('4c7159cc-a146-46c4-8158-920b4e6d7ddb', 19, '{
 }', '{
   "opening_rule_data": "your_opening_rule_json_data"
 }');
+
+
+delete from dbo.games where id = '43d2f42c-18cd-45e0-b47a-91b233a295cd';
+delete from dbo.games where id = 'aeeed79f-db13-412e-870f-9c77014070a2';
+delete from dbo.games where id = '8a9964cd-be46-42ec-b1ae-ed28232cf831';
+delete from dbo.games where id = 'e7d8105c-e66a-4f19-87bb-346abf6e449e';
