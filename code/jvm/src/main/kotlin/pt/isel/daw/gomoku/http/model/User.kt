@@ -16,7 +16,7 @@ data class UserCreateTokenInputModel(
 class UserGetByIdOutputModel(
     val id: Int,
     val username: String,
-    val email: Email
+    val email: String
 )
 
 class UserHomeOutputModel(

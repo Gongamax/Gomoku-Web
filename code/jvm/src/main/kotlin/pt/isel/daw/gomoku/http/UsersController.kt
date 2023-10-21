@@ -67,7 +67,7 @@ class UsersController(
     fun getById(@PathVariable id: String): ResponseEntity<UserGetByIdOutputModel> {
         val user = userService.getUserById(id.toInt())
         return user?.let {
-            ResponseEntity.ok(UserGetByIdOutputModel(it.id, it.username, it.email))
+            ResponseEntity.ok(UserGetByIdOutputModel(it.id, it.username, it.email.value))
         } ?: ResponseEntity.notFound().build()
     }
 

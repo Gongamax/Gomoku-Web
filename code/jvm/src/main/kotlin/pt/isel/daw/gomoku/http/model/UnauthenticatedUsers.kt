@@ -18,3 +18,5 @@ data class SystemInfoOutputModel(
     val systemAuthors: String = "Diogo Guerra, Gonçalo Frutuoso, Daniel Carvalho",
     val systemVersion: String = "0.1.0"
 )
+
+data class HomeOutputModel(val message: String = "Welcome to Gomoku! Please log in to play.")
