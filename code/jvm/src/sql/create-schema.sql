@@ -2,6 +2,13 @@ create schema dbo;
 
 -- Table Dropping
 
+drop trigger if exists update_rank on dbo.games cascade;
+drop trigger if exists increment_wins_losses on dbo.games cascade;
+drop trigger if exists increment_games_played on dbo.games cascade;
+drop function if exists update_rank() cascade;
+drop function if exists increment_wins_losses() cascade;
+drop function if exists increment_games_played() cascade;
+drop table if exists dbo.matchmaking cascade;
 drop table if exists dbo.tokens cascade;
 drop table if exists dbo.statistics cascade;
 drop table if exists dbo.users cascade;
@@ -28,7 +35,7 @@ create table dbo.Tokens
 
 create table dbo.Games
 (
-    id           UUID primary key,
+    id           serial primary key,
     state        VARCHAR(64) not null,
     board        jsonb       not null,
     created      int         not null,
@@ -40,7 +47,7 @@ create table dbo.Games
 
 create table dbo.Game_Config
 (
-    game_id      UUID references dbo.Games (id),
+    game_id      int references dbo.Games (id),
     board_size   int   not null,
     variant      jsonb not null,
     opening_rule jsonb not null

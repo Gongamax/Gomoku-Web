@@ -11,6 +11,7 @@ import org.jdbi.v3.core.statement.Update
 import org.postgresql.util.PGobject
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.repository.GamesRepository
 import java.util.*
 
@@ -18,7 +19,7 @@ class JdbiGamesRepository(
     private val handle: Handle
 ) : GamesRepository {
 
-    override fun getGame(id: UUID) =
+    override fun getGame(id: Int) =
         handle.createQuery(
             """
             select games.id,
@@ -57,7 +58,7 @@ class JdbiGamesRepository(
             where id=:id
         """
         )
-            .bind("id", game.id)
+            .bind("id", game.id.value)
             .bind("state", game.state)
             .bindBoard("board", game.board)
             .bind("updated", game.updated.epochSeconds)
@@ -65,25 +66,26 @@ class JdbiGamesRepository(
             .execute()
     }
 
-    override fun createGame(game: Game) {
+    override fun createGame(game : GameCreationModel) : Int =
         handle.createUpdate(
             """
-                insert into dbo.Games(id, state, board, created, updated, deadline, player_black, player_white)
-                values (:id, :state, :board, :created, :updated, :deadline, :player_black , :player_white)
+                insert into dbo.Games(state, board, created, updated, deadline, player_black, player_white)
+                values (:state, :board, :created, :updated, :deadline, :player_black , :player_white)
             """.trimIndent()
         )
-            .bind("id", game.id)
             .bind("state", game.state)
             .bindBoard("board", game.board)
             .bind("created", game.created.epochSeconds)
             .bind("updated", game.updated.epochSeconds)
             .bind("deadline", game.deadline?.epochSeconds)
-            .bind("player_black", game.playerBLACK.id)
-            .bind("player_white", game.playerWHITE.id)
-            .execute()
-    }
+            .bind("player_black", game.playerBLACK.id.value)
+            .bind("player_white", game.playerWHITE.id.value)
+            .executeAndReturnGeneratedKeys()
+            .mapTo<Int>()
+            .one()
 
-    override fun deleteGame(id: UUID) {
+
+    override fun deleteGame(id:Int) {
         handle.createUpdate(
             """
             delete from dbo.Games
@@ -154,6 +156,16 @@ class JdbiGamesRepository(
                 it.toGame()
             }
 
+    override fun isGameStoredById(id: Int): Boolean =
+        handle.createQuery(
+            """
+                select count(*) from dbo.Games where id = :id
+            """.trimIndent()
+        )
+            .bind("id", id)
+            .mapTo<Int>()
+            .single() == 1
+
     override fun tryMatchmaking(userId: Int): MatchmakingEntry? =
         handle.createQuery(
             """
@@ -199,8 +211,6 @@ class JdbiGamesRepository(
             )
         }
 
-        private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
-
         private fun serializeBoardToJson(board: Board): String = BoardSerializer.serialize(board)
 
         fun deserializeBoardFromJson(json: String) = BoardSerializer.deserialize(json)
@@ -209,7 +219,7 @@ class JdbiGamesRepository(
 
 // Class that represents the game in the database
 class GameDbModel(
-    val id: UUID,
+    val id: Int,
     val state: Game.State,
     val board: Board,
     val created: Instant,
@@ -220,5 +230,5 @@ class GameDbModel(
     @Nested("playerWhite")
     val playerWhite: User
 ) {
-    fun toGame() : Game = Game(id, state, board, created, updated, deadline, playerBlack, playerWhite)
+    fun toGame() : Game = Game(Id(id), state, board, created, updated, deadline, playerBlack, playerWhite)
 }

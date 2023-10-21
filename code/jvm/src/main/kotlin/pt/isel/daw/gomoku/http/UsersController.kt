@@ -1,6 +1,5 @@
 package pt.isel.daw.gomoku.http
 
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -8,10 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
-import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.services.users.TokenCreationError
 import pt.isel.daw.gomoku.services.users.UserCreationError
+import pt.isel.daw.gomoku.services.users.UserGetError
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Failure
 import pt.isel.daw.gomoku.utils.Success
@@ -20,7 +19,6 @@ import pt.isel.daw.gomoku.utils.Success
 class UsersController(
     private val userService: UsersService
 ) {
-
     @PostMapping(Uris.Users.CREATE_USER)
     fun create(@RequestBody input: UserCreateInputModel): ResponseEntity<*> {
         val res = userService.createUser(input.username, input.email, input.password)
@@ -41,7 +39,7 @@ class UsersController(
     }
 
     @PostMapping(Uris.Users.TOKEN)
-    fun token(
+    fun login(
         @RequestBody input: UserCreateTokenInputModel
     ): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
@@ -57,24 +55,27 @@ class UsersController(
     }
 
     @PostMapping(Uris.Users.LOGOUT)
-    fun logout(
-        user: AuthenticatedUser
-    ) {
+    fun logout(user: AuthenticatedUser) {
         userService.revokeToken(user.token)
     }
 
     @GetMapping(Uris.Users.GET_USER_BY_ID)
-    fun getById(@PathVariable id: String): ResponseEntity<UserGetByIdOutputModel> {
-        val user = userService.getUserById(id.toInt())
-        return user?.let {
-            ResponseEntity.ok(UserGetByIdOutputModel(it.id, it.username, it.email.value))
-        } ?: ResponseEntity.notFound().build()
+    fun getById(@PathVariable id: String): ResponseEntity<*> {
+        return when (val user = userService.getUserById(id.toInt())) {
+            is Success -> ResponseEntity.ok(UserGetByIdOutputModel(user.value.id.value, user.value.username, user.value.email))
+            is Failure -> when (user.value) {
+                UserGetError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)
+                UserGetError.InvalidToken -> Problem.response(400, Problem.invalidToken)
+                UserGetError.TokenExpired -> Problem.response(400, Problem.tokenExpired)
+                UserGetError.UserIsNotAuthenticated -> Problem.response(400, Problem.userIsNotAuthenticated)
+            }
+        }
     }
 
     @GetMapping(Uris.Users.HOME)
     fun getUserHome(userAuthenticatedUser: AuthenticatedUser): UserHomeOutputModel {
         return UserHomeOutputModel(
-            id = userAuthenticatedUser.user.id,
+            id = userAuthenticatedUser.user.id.value,
             username = userAuthenticatedUser.user.username
         )
     }

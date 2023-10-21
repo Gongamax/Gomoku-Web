@@ -12,6 +12,7 @@ import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import kotlin.math.abs
 import kotlin.random.Random
@@ -42,7 +43,7 @@ class JdbiUserRepositoryTests {
         assertNotNull(retrievedUser)
         assertEquals(userName, retrievedUser.username)
         assertEquals(passwordValidationInfo, retrievedUser.passwordValidation)
-        assertTrue(retrievedUser.id >= 0)
+        assertTrue(retrievedUser.id.value >= 0)
 
         // when: asking if the user exists
         val isUserIsStored = repo.isUserStoredByUsername(userName)
@@ -77,7 +78,7 @@ class JdbiUserRepositoryTests {
         val tokenCreationInstant = clock.now()
         val token = Token(
             testTokenValidationInfo,
-            userId,
+            Id(userId),
             createdAt = tokenCreationInstant,
             lastUsedAt = tokenCreationInstant
         )

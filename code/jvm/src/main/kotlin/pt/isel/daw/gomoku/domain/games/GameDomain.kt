@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.utils.Id
 import java.util.*
 
 /**
@@ -21,21 +22,20 @@ class GameDomain(
     private val clock: Clock,
     private val config: GamesDomainConfig
 ) {
-    fun createGame(
-        playerBLACK: User,
-        playerWHITE: User,
-        variant: Variants
-    ): Game {
+    fun createGameModel(
+        playerBlack: User,
+        playerWhite: User,
+        variants: Variants,
+    ): GameCreationModel {
         val now = clock.now()
-        return Game(
-            id = UUID.randomUUID(),
+        return GameCreationModel(
             state = Game.State.NEXT_PLAYER_BLACK,
-            board = Board.createBoard(piece = Piece.BLACK, variant = variant),
+            board = Board.createBoard(piece = Piece.BLACK, variant = variants),
             created = now,
             updated = now,
-            deadline = now.plus(config.timeout),
-            playerBLACK = playerBLACK,
-            playerWHITE = playerWHITE
+            deadline = now + config.timeout,
+            playerBLACK = playerBlack,
+            playerWHITE = playerWhite,
         )
     }
 
@@ -159,10 +159,10 @@ class GameDomain(
     }
 }
 
-private fun Game.isPlayerBLACK(player: Int) = run {
+private fun Game.isPlayerBLACK(player: Id) = run {
     this.playerBLACK.id == player
 }
 
-private fun Game.isPlayerWHITE(player: Int) = run {
+private fun Game.isPlayerWHITE(player: Id) = run {
     this.playerWHITE.id == player
 }

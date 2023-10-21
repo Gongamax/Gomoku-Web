@@ -7,13 +7,14 @@ import pt.isel.daw.gomoku.domain.games.Variants
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.repository.jdbi.BoardSerializer
 import kotlin.test.assertEquals
 
 class BoardTests {
 
     private val mockUser = User(
-        1,
+        Id(1),
         "mockUser",
         Email("mock@mock.pt"),
         PasswordValidationInfo("mockPassword")
@@ -26,7 +27,7 @@ class BoardTests {
 
         val board = BoardRun(emptyMap(), Piece.BLACK, Variants.STANDARD)
         val boardString = board.toString()
-        assertEquals(boardString, "Run:Player(userId=1, piece=BLACK)")
+        assertEquals(boardString, "Run:BLACK")
 
         val serialized = boardSerializer.serialize(board)
 

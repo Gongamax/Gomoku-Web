@@ -1,6 +1,6 @@
 package pt.isel.daw.gomoku.domain.games
 
-import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.utils.Id
 
 /**
  * This class is responsible for the player domain logic.
@@ -12,7 +12,7 @@ import pt.isel.daw.gomoku.domain.users.User
  * */
 
 class PlayerDomain(
-    val isTurn: (game: Game, userId: Int) -> Boolean,
+    val isTurn: (game: Game, userId: Id) -> Boolean,
     val otherWon: Game.State,
     val iWon: Game.State,
     val nextPlayer: Game.State,

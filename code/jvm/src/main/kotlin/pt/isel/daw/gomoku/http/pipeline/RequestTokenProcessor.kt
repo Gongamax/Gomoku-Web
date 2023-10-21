@@ -3,6 +3,8 @@ package pt.isel.daw.gomoku.http.pipeline
 import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.services.users.UsersService
+import pt.isel.daw.gomoku.utils.Failure
+import pt.isel.daw.gomoku.utils.Success
 
 @Component
 class RequestTokenProcessor(
@@ -20,7 +22,11 @@ class RequestTokenProcessor(
         if (parts[0].lowercase() != SCHEME) {
             return null
         }
-        return usersService.getUserByToken(parts[1])?.let {
+        val user = when (val result = usersService.getUserByToken(parts[1])) {
+            is Success -> result.value
+            is Failure -> null
+        }
+        return user?.let {
             AuthenticatedUser(
                 it,
                 parts[1]

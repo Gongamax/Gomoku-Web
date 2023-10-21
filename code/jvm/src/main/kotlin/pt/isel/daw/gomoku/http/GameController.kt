@@ -8,25 +8,22 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import pt.isel.daw.gomoku.domain.games.RoundResult
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.services.games.*
-import pt.isel.daw.gomoku.utils.Either
 import pt.isel.daw.gomoku.utils.Failure
 import pt.isel.daw.gomoku.utils.Success
-import java.util.*
 
 @RestController
 class GameController(
     private val gameService: GamesService
 ) {
     @GetMapping(Uris.Games.GET_GAME_BY_ID) //user: AuthenticatedUser
-    fun getGameById(@PathVariable id: String): ResponseEntity<*> {
-        return when (val game = gameService.getGameById(UUID.fromString(id))) {
+    fun getGameById(@PathVariable id: Int): ResponseEntity<*> {
+        return when (val game = gameService.getGameById(id)) {
             is Success -> ResponseEntity.ok(
                 GameGetByIdOutputModel(
-                    GameOutputModel(game.value.id, game.value.board, game.value.playerBLACK, game.value.playerWHITE)
+                    GameOutputModel(game.value.id.value, game.value.board, game.value.playerBLACK, game.value.playerWHITE)
                 )
             )
 
@@ -42,12 +39,12 @@ class GameController(
             is Success -> ResponseEntity.status(201)
                 .header(
                     "Location",
-                    Uris.Games.byId(res.value.id).toASCIIString()
+                    Uris.Games.byId(res.value).toASCIIString()
                 ).build<Unit>()
 
             is Failure -> when (res.value) {
-                GameCreationError.GameAlreadyExists -> Problem.response(400, Problem.gameAlreadyExists)
-                GameCreationError.UserDoesNotExist -> Problem.response(400, Problem.userDoesNotExists)
+                GameCreationError.GameAlreadyExists -> Problem.response(422, Problem.gameAlreadyExists)
+                GameCreationError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)
                 GameCreationError.VariantDoesNotExist -> Problem.response(400, Problem.variantDoesNotExists)
             }
         }
@@ -55,15 +52,15 @@ class GameController(
 
     @PutMapping(Uris.Games.PLAY) //user: AuthenticatedUser
     fun play(
-        @PathVariable id: String,
+        @PathVariable id: Int,
         @Valid @RequestBody inputModel: GamePlayInputModel
     ): ResponseEntity<*> {
-        val res = gameService.play(UUID.fromString(id), inputModel.userId, inputModel.row, inputModel.column)
+        val res = gameService.play(id, inputModel.userId, inputModel.row, inputModel.column)
         return when (res) {
             is Success -> ResponseEntity.ok(
                 GameRoundOutputModel(
                     GameOutputModel(
-                        res.value.id,
+                        res.value.id.value,
                         res.value.board,
                         res.value.playerBLACK,
                         res.value.playerWHITE
@@ -91,7 +88,7 @@ class GameController(
             ResponseEntity.ok(it.map { game ->
                 GameGetByIdOutputModel(
                     GameOutputModel(
-                        game.id,
+                        game.id.value,
                         game.board,
                         game.playerBLACK,
                         game.playerWHITE
@@ -102,8 +99,8 @@ class GameController(
     }
 
     @PutMapping(Uris.Games.LEAVE)
-    fun leave(@PathVariable id: String, authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
-        return when(val res = gameService.leaveGame(UUID.fromString(id), authenticatedUser.user.id)) {
+    fun leave(@PathVariable id: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
+        return when(val res = gameService.leaveGame(id, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok().build<Unit>()
             is Failure -> when(res.value) {
                 LeaveGameError.GameAlreadyEnded -> Problem.response(422, Problem.gameAlreadyEnded)
@@ -112,7 +109,6 @@ class GameController(
             }
         }
     }
-
 
 //    @GetMapping(Uris.Games.GAME_STATE)
 //    fun gameState(@PathVariable id: String): ResponseEntity<GameStateGetByIdOutputModel> {

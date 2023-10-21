@@ -3,11 +3,8 @@ package pt.isel.daw.gomoku.services.games
 import org.springframework.stereotype.Service
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.repository.TransactionManager
-import pt.isel.daw.gomoku.services.exceptions.InvalidStateException
-import pt.isel.daw.gomoku.services.exceptions.NotFoundException
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
-import java.util.UUID
 
 @Service
 class GamesService(
@@ -24,17 +21,13 @@ class GamesService(
             // TODO() Needs to do an if condition to see if variant is valid
             //using something like it.gamesRepository.getVariant(variant) != null
             val gamesRepository = it.gamesRepository
-            val game = gamesDomain.createGame(userBlack, userWhite, Variants.valueOf(variant))
-            if (gamesRepository.getGame(game.id) != null) {
-                failure(GameCreationError.GameAlreadyExists)
-            } else {
-                gamesRepository.createGame(game)
-                success(game)
-            }
+            val gameModel = gamesDomain.createGameModel(userBlack, userWhite, Variants.valueOf(variant))
+            val id = gamesRepository.createGame(gameModel)
+            success(id)
         }
     }
 
-    fun getGameById(id: UUID): GameGetResult {
+    fun getGameById(id: Int): GameGetResult {
         return transactionManager.run {
             val game = it.gamesRepository.getGame(id)
             if (game == null)
@@ -44,7 +37,7 @@ class GamesService(
         }
     }
 
-    fun play(id: UUID, userId: Int, row: Int, column: Int): GamePlayResult {
+    fun play(id: Int, userId: Int, row: Int, column: Int): GamePlayResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             val usersRepository = it.usersRepository
@@ -77,18 +70,18 @@ class GamesService(
         }
     }
 
-    fun leaveGame(id: UUID, userId: Int) : LeaveGameResult {
+    fun leaveGame(id: Int, userId: Int) : LeaveGameResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             val game = gamesRepository.getGame(id) ?: return@run failure(LeaveGameError.GameDoesNotExist)
 
-            if (game.playerBLACK.id != userId && game.playerWHITE.id != userId)
+            if (game.playerBLACK.id.value != userId && game.playerWHITE.id.value != userId)
                 return@run failure(LeaveGameError.InvalidUser)
 
             if (game.state.isEnded)
                 failure(LeaveGameError.GameAlreadyEnded)
             else {
-                val newGame = if (game.playerBLACK.id == userId) game.copy(state = Game.State.PLAYER_WHITE_WON)
+                val newGame = if (game.playerBLACK.id.value == userId) game.copy(state = Game.State.PLAYER_WHITE_WON)
                 else game.copy(state = Game.State.PLAYER_BLACK_WON)
                 success(gamesRepository.updateGame(newGame))
             }
@@ -118,7 +111,7 @@ class GamesService(
             val match = gamesRepository.tryMatchmaking(userId) ?: return@run failure(MatchmakingError.NoMatchFound)
             val opponent = it.usersRepository.getUserById(match.playerId)
             if (opponent != null) {
-                success(createGame(userId, opponent.id, variant))
+                success(createGame(userId, opponent.id.value, variant))
             } else {
                 failure(MatchmakingError.NoMatchFound)
             }

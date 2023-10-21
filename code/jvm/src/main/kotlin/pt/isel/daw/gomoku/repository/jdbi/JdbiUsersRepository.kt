@@ -10,6 +10,7 @@ import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UserStatistics
+import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.repository.UsersRepository
 
 class JdbiUsersRepository(
@@ -36,7 +37,7 @@ class JdbiUsersRepository(
             where id=:id
         """
         )
-            .bind("id", user.id)
+            .bind("id", user.id.value)
             .bind("username", user.username)
             .bind("email", user.email.value)
             .bind("password_validation", user.passwordValidation.validationInfo)
@@ -87,7 +88,7 @@ class JdbiUsersRepository(
                 )
             """.trimIndent()
         )
-            .bind("user_id", token.userId)
+            .bind("user_id", token.userId.value)
             .bind("offset", maxTokens - 1)
             .execute()
 
@@ -99,7 +100,7 @@ class JdbiUsersRepository(
                 values (:user_id, :token_validation, :created_at, :last_used_at)
             """.trimIndent()
         )
-            .bind("user_id", token.userId)
+            .bind("user_id", token.userId.value)
             .bind("token_validation", token.tokenValidationInfo.validationInfo)
             .bind("created_at", token.createdAt.epochSeconds)
             .bind("last_used_at", token.lastUsedAt.epochSeconds)
@@ -156,10 +157,10 @@ class JdbiUsersRepository(
     ) {
         val userAndToken: Pair<User, Token>
             get() = Pair(
-                User(id, username, email, passwordValidation),
+                User(Id(id), username, email, passwordValidation),
                 Token(
                     tokenValidation,
-                    id,
+                    Id(id),
                     Instant.fromEpochSeconds(createdAt),
                     Instant.fromEpochSeconds(lastUsedAt)
                 )

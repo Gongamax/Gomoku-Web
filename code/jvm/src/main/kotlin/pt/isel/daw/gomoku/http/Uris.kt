@@ -2,7 +2,6 @@ package pt.isel.daw.gomoku.http
 
 import org.springframework.web.util.UriTemplate
 import java.net.URI
-import java.util.UUID
 
 object Uris {
 
@@ -41,14 +40,14 @@ object Uris {
         const val LEAVE = "$PREFIX/games/{id}/leave"
         const val GET_ALL_GAMES = "$PREFIX/games"
 
-        fun byId(id: UUID) = UriTemplate(GET_GAME_BY_ID).expand(id)
-        fun play(id : UUID): URI = UriTemplate(PLAY).expand(id)
+        fun byId(id: Int) = UriTemplate(GET_GAME_BY_ID).expand(id)
+        fun play(id : Int): URI = UriTemplate(PLAY).expand(id)
         fun create(): URI = URI(CREATE_GAME)
         fun state(): URI = URI(GAME_STATE)
 
         fun matchmaking(): URI = URI(MATCHMAKING)
 
-        fun leave(id: UUID): URI = UriTemplate(LEAVE).expand(id)
+        fun leave(id: Int): URI = UriTemplate(LEAVE).expand(id)
 
         fun getAllGames(): URI = URI(GET_ALL_GAMES)
     }

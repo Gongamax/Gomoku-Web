@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
 import pt.isel.daw.gomoku.domain.games.*
 import com.fasterxml.jackson.databind.module.SimpleModule
+import pt.isel.daw.gomoku.domain.utils.Id
 
 object CellKeyDeserializer : KeyDeserializer() {
     override fun deserializeKey(parser: String, context: DeserializationContext): Any {
@@ -17,7 +18,7 @@ object PlayerDeserializer : JsonDeserializer<Player>() {
         val node: JsonNode = objectMapper.readTree(parser)
         val userId = node.get("userId").asInt()
         val piece = Piece.valueOf(node.get("piece").asText())
-        return Player(userId, piece)
+        return Player(Id(userId), piece)
     }
 }
 

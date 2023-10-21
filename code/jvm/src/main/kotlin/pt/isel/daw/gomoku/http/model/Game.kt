@@ -10,7 +10,7 @@ data class GameStartInputModel(val userBlack: Int, val userWhite: Int, val varia
 
 data class GameRoundOutputModel(val game : GameOutputModel, val state : String)
 
-data class GameOutputModel(val id : UUID?, val board : Board?, val userBlack: User?, val userWhite: User?)
+data class GameOutputModel(val id : Int, val board : Board, val userBlack: User, val userWhite: User)
 
 data class GameGetByIdOutputModel(val game: GameOutputModel)
 
