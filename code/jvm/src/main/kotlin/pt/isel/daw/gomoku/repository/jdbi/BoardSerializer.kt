@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
 import pt.isel.daw.gomoku.domain.games.*
 import com.fasterxml.jackson.databind.module.SimpleModule
-import pt.isel.daw.gomoku.domain.utils.Id
 
 object CellKeyDeserializer : KeyDeserializer() {
     override fun deserializeKey(parser: String, context: DeserializationContext): Any {
@@ -12,13 +11,19 @@ object CellKeyDeserializer : KeyDeserializer() {
     }
 }
 
-object PlayerDeserializer : JsonDeserializer<Player>() {
-    override fun deserialize(parser: JsonParser, context: DeserializationContext): Player {
+object VariantDeserializer : JsonDeserializer<Variants>() {
+    override fun deserialize(parser: JsonParser, context: DeserializationContext): Variants {
         val objectMapper = parser.codec as ObjectMapper
         val node: JsonNode = objectMapper.readTree(parser)
-        val userId = node.get("userId").asInt()
-        val piece = Piece.valueOf(node.get("piece").asText())
-        return Player(Id(userId), piece)
+        return Variants.valueOf(node.asText())
+    }
+}
+
+object PieceDeserializer : JsonDeserializer<Piece>() {
+    override fun deserialize(parser: JsonParser, context: DeserializationContext): Piece {
+        val objectMapper = parser.codec as ObjectMapper
+        val node: JsonNode = objectMapper.readTree(parser)
+        return Piece.valueOf(node.asText())
     }
 }
 
@@ -29,11 +34,12 @@ object BoardSerializer {
     init {
         val module = SimpleModule()
         module.addKeyDeserializer(Cell::class.java, CellKeyDeserializer)
-        module.addDeserializer(Player::class.java, PlayerDeserializer)
+        module.addDeserializer(Piece::class.java, PieceDeserializer)
+        module.addDeserializer(Variants::class.java, VariantDeserializer)
         objectMapper.registerModule(module)
     }
 
-    private data class BoardData(val kind: String = "", val piece: String = "", val moves: Moves = mapOf())
+    private data class BoardData(val kind: String = "", val piece: String = "", val moves: Moves = mapOf()){}
 
     fun serialize(data: Board): String {
         var boardData = BoardData()
@@ -43,7 +49,7 @@ object BoardSerializer {
             is BoardWin -> boardData.copy(kind = "Win", piece = data.winner.name)
             is BoardDraw -> boardData.copy(kind = "Draw")
         }
-        boardData = boardData.copy( moves = data.moves.entries.associate { (k, v) -> k to v })
+        boardData = boardData.copy(moves = data.moves.entries.associate { (k, v) -> k to v })
         return objectMapper.writeValueAsString(boardData)
     }
 

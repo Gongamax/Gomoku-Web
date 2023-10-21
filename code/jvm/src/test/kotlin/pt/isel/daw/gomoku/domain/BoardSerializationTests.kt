@@ -1,6 +1,6 @@
 package pt.isel.daw.gomoku.domain
 
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import pt.isel.daw.gomoku.domain.games.BoardRun
 import pt.isel.daw.gomoku.domain.games.Piece
 import pt.isel.daw.gomoku.domain.games.Variants
