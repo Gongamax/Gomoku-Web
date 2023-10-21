@@ -62,7 +62,7 @@ class UsersController(
     @GetMapping(Uris.Users.GET_USER_BY_ID)
     fun getById(@PathVariable id: String): ResponseEntity<*> {
         return when (val user = userService.getUserById(id.toInt())) {
-            is Success -> ResponseEntity.ok(UserGetByIdOutputModel(user.value.id.value, user.value.username, user.value.email))
+            is Success -> ResponseEntity.ok(UserGetByIdOutputModel(user.value.id.value, user.value.username, user.value.email.value))
             is Failure -> when (user.value) {
                 UserGetError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)
                 UserGetError.InvalidToken -> Problem.response(400, Problem.invalidToken)
