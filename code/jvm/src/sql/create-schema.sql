@@ -47,10 +47,8 @@ create table dbo.Games
 
 create table dbo.Game_Config
 (
-    game_id      int references dbo.Games (id),
-    board_size   int   not null,
-    variant      jsonb not null,
-    opening_rule jsonb not null
+    game_id   int references dbo.Games (id),
+    timeout   int   not null
 );
 
 create table dbo.Statistics

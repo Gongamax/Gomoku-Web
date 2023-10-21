@@ -21,9 +21,5 @@ VALUES ('99999', 'NEXT_PLAYER_WHITE',
         }', 1634260800, 1634260820, 1634260840, 1, 2);
 
 
-INSERT INTO dbo.Game_Config (game_id, board_size, variant, opening_rule)
-VALUES ('99999', 19, '{
-  "variant_data": "your_variant_json_data"
-}', '{
-  "opening_rule_data": "your_opening_rule_json_data"
-}');
+INSERT INTO dbo.Game_Config (game_id, timeout)
+VALUES ('99999', 10);

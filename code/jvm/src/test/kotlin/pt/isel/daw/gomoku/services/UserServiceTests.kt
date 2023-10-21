@@ -6,7 +6,6 @@ import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import pt.isel.daw.gomoku.Environment
 import pt.isel.daw.gomoku.TestClock
-import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
@@ -21,7 +20,6 @@ import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.Duration
@@ -40,19 +38,15 @@ class UserServiceTests {
         // when: creating a user
         val username = newTestUserName()
         val password = newTestPassword()
-        val createUserResult = userService.createUser(username, newTestEmail(), password)
-
         // then: the creation is successful
-        when (createUserResult) {
+        when (val createUserResult = userService.createUser(username, newTestEmail(), password)) {
             is Either.Left -> fail("Unexpected $createUserResult")
             is Either.Right -> assertTrue(createUserResult.value > 0)
         }
 
         // when: creating a token
-        val createTokenResult = userService.createToken(username, password)
-
         // then: the creation is successful
-        val token = when (createTokenResult) {
+        val token = when (val createTokenResult = userService.createToken(username, password)) {
             is Either.Left -> fail(createTokenResult.toString())
             is Either.Right -> createTokenResult.value.tokenValue
         }
@@ -85,19 +79,15 @@ class UserServiceTests {
         // when: creating a user
         val username = newTestUserName()
         val password = newTestPassword()
-        val createUserResult = userService.createUser(username, newTestEmail(), password)
-
         // then: the creation is successful
-        when (createUserResult) {
+        when (val createUserResult = userService.createUser(username, newTestEmail(), password)) {
             is Either.Left -> fail("Unexpected $createUserResult")
             is Either.Right -> assertTrue(createUserResult.value > 0)
         }
 
         // when: creating a token
-        val createTokenResult = userService.createToken(username, password)
-
         // then: the creation is successful
-        val token = when (createTokenResult) {
+        val token = when (val createTokenResult = userService.createToken(username, password)) {
             is Either.Left -> fail(createTokenResult.toString())
             is Either.Right -> createTokenResult.value.tokenValue
         }
@@ -124,10 +114,8 @@ class UserServiceTests {
         // when: creating a user
         val username = newTestUserName()
         val password = newTestPassword()
-        val createUserResult = userService.createUser(username, newTestEmail(), password)
-
         // then: the creation is successful
-        when (createUserResult) {
+        when (val createUserResult = userService.createUser(username, newTestEmail(), password)) {
             is Either.Left -> fail("Unexpected $createUserResult")
             is Either.Right -> assertTrue(createUserResult.value > 0)
         }
@@ -181,10 +169,8 @@ class UserServiceTests {
         // when: creating a user
         val username = newTestUserName()
         val password = newTestPassword()
-        val createUserResult = userService.createUser(username, newTestEmail(), password)
-
         // then: the creation is successful
-        when (createUserResult) {
+        when (val createUserResult = userService.createUser(username, newTestEmail(), password)) {
             is Either.Left -> fail("Unexpected $createUserResult")
             is Either.Right -> assertTrue(createUserResult.value > 0)
         }
@@ -238,19 +224,15 @@ class UserServiceTests {
         // when: creating a user
         val username = newTestUserName()
         val password = newTestPassword()
-        val createUserResult = userService.createUser(username, newTestEmail(), password)
-
         // then: the creation is successful
-        when (createUserResult) {
+        when (val createUserResult = userService.createUser(username, newTestEmail(), password)) {
             is Either.Left -> fail("Unexpected $createUserResult")
             is Either.Right -> assertTrue(createUserResult.value > 0)
         }
 
         // when: creating a token
-        val tokenCreationResult = userService.createToken(username, password)
-
         // then: token creation is successful
-        val token = when (tokenCreationResult) {
+        val token = when (val tokenCreationResult = userService.createToken(username, password)) {
             is Either.Left -> fail("Token creation should be successful: '${tokenCreationResult.value}'")
             is Either.Right -> tokenCreationResult.value
         }
@@ -292,7 +274,7 @@ class UserServiceTests {
             testClock
         )
 
-        private fun newTestUserName() = "user-${Math.abs(Random.nextLong())}"
+        private fun newTestUserName() = "user-${abs(Random.nextLong())}"
 
         private fun newTestPassword() = "TestPassword${abs(Random.nextLong())}"
 
