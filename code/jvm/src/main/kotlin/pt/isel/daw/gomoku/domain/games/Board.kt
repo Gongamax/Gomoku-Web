@@ -1,6 +1,6 @@
 package pt.isel.daw.gomoku.domain.games
 
-private const val WIN_LENGTH = 5
+
 typealias Moves = Map<Cell, Piece>
 
 /**
@@ -44,8 +44,8 @@ sealed class Board(val moves: Moves, val variant: Variants = Variants.STANDARD) 
     }
 }
 
-open class BoardOpen(moves: Moves, val turn: Piece, variant: Variants) : Board(moves, variant)
-open class BoardRun(moves: Moves, val turn: Piece, variant: Variants) : Board(moves, variant )
+class BoardOpen(moves: Moves, val turn: Piece, variant: Variants) : Board(moves, variant)
+class BoardRun(moves: Moves, val turn: Piece, variant: Variants) : Board(moves, variant )
 class BoardWin(moves: Moves, val winner: Piece) : Board(moves)
 class BoardDraw(moves: Moves) : Board(moves)
 
@@ -59,31 +59,12 @@ fun Board.playRound(cell: Cell, nextPiece: Piece): Board = variant.play(this, ce
 /**
  * Checks if the move in [cell] position is a winning move.
  */
-fun BoardRun.isWin(cell: Cell) =
-    moves.size >= WIN_LENGTH * 2 - 2 &&
-            (moves.filter { it.value == turn }.keys + cell).run {
-                any { winningCell ->
-                    directions.any { (forwardDir, backwardDir) ->
-                        val forwardCells = cellsInDirection(winningCell, forwardDir, size)
-                            .takeWhile { it in this }
-                        val backwardCells = cellsInDirection(winningCell, backwardDir, size)
-                            .takeWhile { it in this }
+fun BoardRun.isWin(cell: Cell) = variant.isWin(this, cell)
 
-                        val consecutiveCells = (backwardCells + listOf(winningCell) + forwardCells)
-
-                        consecutiveCells.size >= WIN_LENGTH
-                    }
-                }
-            }
-
+/**
+ * Checks if the move in [cell] position is a valid move according to the play rule.
+ */
 fun Board.canPlayOn(cell: Cell) = variant.validPlay(this, cell)
-
-private val directions = listOf(
-    Pair(Direction.DOWN_LEFT, Direction.UP_RIGHT),
-    Pair(Direction.DOWN_RIGHT, Direction.UP_LEFT),
-    Pair(Direction.UP, Direction.DOWN),
-    Pair(Direction.LEFT, Direction.RIGHT)
-)
 
 /**
  * Checks if the state of the board will end the game as a Draw.
