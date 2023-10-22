@@ -1,8 +1,11 @@
 package pt.isel.daw.gomoku.services.games
 
+import kotlinx.datetime.Clock
 import org.springframework.stereotype.Service
+//import org.springframework.transaction.annotation.Transactional
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.repository.TransactionManager
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
 
@@ -18,8 +21,9 @@ class GamesService(
             if (userBlack == null || userWhite == null)
                 return@run failure(GameCreationError.UserDoesNotExist)
 
-            // TODO() Needs to do an if condition to see if variant is valid
-            //using something like it.gamesRepository.getVariant(variant) != null
+            if (variant !in Variants.values().map { variant -> variant.name })
+                return@run failure(GameCreationError.VariantDoesNotExist)
+
             val gamesRepository = it.gamesRepository
             val gameModel = gamesDomain.createGameModel(userBlack, userWhite, Variants.valueOf(variant))
             val id = gamesRepository.createGame(gameModel)
@@ -105,16 +109,43 @@ class GamesService(
         }
     }
 
+    //@Transactional
     fun tryMatchmaking(userId: Int, variant: String): MatchmakingResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
-            val match = gamesRepository.tryMatchmaking(userId) ?: return@run failure(MatchmakingError.NoMatchFound)
-            val opponent = it.usersRepository.getUserById(match.playerId)
-            if (opponent != null) {
-                success(createGame(userId, opponent.id.value, variant))
+            if (variant !in Variants.values().map { variant -> variant.name })
+                return@run failure(MatchmakingError.VariantDoesNotExist)
+            val match = gamesRepository.getMatchmakingEntry(userId)
+            if (match != null && match.status == MatchmakingStatus.PENDING) {
+                gamesRepository.updateMatchmakingEntry(match.id, MatchmakingStatus.MATCHED)
+                val opponent = it.usersRepository.getUserById(match.playerId)
+                if (opponent != null) {
+                    val user = it.usersRepository.getUserById(userId)!!
+                    val gameModel = gamesDomain.createGameModel(user, opponent, Variants.valueOf(variant))
+                    val id = gamesRepository.createGame(gameModel)
+                    success(id)
+                }
+                else
+                    failure(MatchmakingError.InvalidUser)
             } else {
+                gamesRepository.storeMatchmakingEntry(userId, MatchmakingStatus.PENDING, Clock.System.now())
                 failure(MatchmakingError.NoMatchFound)
             }
+        }
+    }
+
+    //@Transactional
+    fun exitMatchmakingQueue(userId: Int): LeaveMatchmakingResult {
+        return transactionManager.run {
+            val gamesRepository = it.gamesRepository
+            if (it.usersRepository.getUserById(userId) == null)
+                return@run failure(LeaveMatchmakingError.InvalidUser)
+            val match = gamesRepository.getMatchmakingEntry(userId)
+            if (match != null) {
+                gamesRepository.exitMatchmakingQueue(match.id)
+                success(Unit)
+            } else
+                failure(LeaveMatchmakingError.MatchDoesNotExist)
         }
     }
 }

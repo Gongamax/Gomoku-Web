@@ -65,6 +65,7 @@ create table dbo.Matchmaking
 (
     id         serial primary key,
     user_id    int references dbo.Users (id),
+    status     VARCHAR(64) not null,
     created_at int not null
 );
 

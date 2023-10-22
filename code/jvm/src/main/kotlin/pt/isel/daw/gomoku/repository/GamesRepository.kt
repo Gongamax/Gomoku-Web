@@ -1,8 +1,10 @@
 package pt.isel.daw.gomoku.repository
 
+import kotlinx.datetime.Instant
 import pt.isel.daw.gomoku.domain.games.Game
 import pt.isel.daw.gomoku.domain.games.GameCreationModel
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingEntry
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
 
 interface GamesRepository {
 
@@ -20,9 +22,11 @@ interface GamesRepository {
 
     fun isGameStoredById(id: Int): Boolean
 
-    fun tryMatchmaking(userId: Int) : MatchmakingEntry?
+    fun getMatchmakingEntry(userId: Int) : MatchmakingEntry?
 
-    fun storeMatchmakingEntry(matchmakingEntry: MatchmakingEntry) : Int
+    fun updateMatchmakingEntry(id: Int, status: MatchmakingStatus) : Int
+
+    fun storeMatchmakingEntry(userId: Int, status: MatchmakingStatus, created: Instant) : Int
 
     fun exitMatchmakingQueue(id : Int) : Int
 }

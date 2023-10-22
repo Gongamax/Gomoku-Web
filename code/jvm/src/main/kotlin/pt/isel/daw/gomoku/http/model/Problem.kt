@@ -35,6 +35,7 @@ class Problem(
         val invalidToken = Problem(URI(BASE_URL + "invalid-token"))
         val tokenExpired = Problem(URI(BASE_URL + "token-expired"))
         val userIsNotAuthenticated = Problem(URI(BASE_URL + "user-is-not-authenticated"))
+        val matchNotFound = Problem(URI(BASE_URL + "match-not-found"))
 
     }
 }

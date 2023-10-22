@@ -25,8 +25,14 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
 
+    // For transactions
+    //implementation("org.springframework.boot:spring-boot-starter-data-jdbc:3.1.4")
+
     // For validation
     implementation("org.springframework.boot:spring-boot-starter-validation:3.0.4")
+
+    // For JWT
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
 
     // for JDBI
     implementation("org.jdbi:jdbi3-core:3.37.1")
@@ -40,8 +46,8 @@ dependencies {
     // To get password encode
     implementation("org.springframework.security:spring-security-core:6.0.2")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.1.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux:3.0.4")
     testImplementation(kotlin("test"))
 }
 

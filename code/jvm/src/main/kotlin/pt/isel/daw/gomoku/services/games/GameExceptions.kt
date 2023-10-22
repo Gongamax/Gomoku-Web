@@ -29,12 +29,6 @@ sealed class GameGetError {
 
 typealias GameGetResult = Either<GameGetError, Game>
 
-sealed class GameStateGetError {
-    object GameDoesNotExist : GameStateGetError()
-}
-
-typealias GameStateGetResult = Either<GameStateGetError, Game.State>
-
 sealed class GameListError {
     object UserDoesNotExist : GameListError()
 }
@@ -52,6 +46,14 @@ typealias LeaveGameResult = Either<LeaveGameError, Unit>
 sealed class MatchmakingError {
     object NoMatchFound : MatchmakingError()
     object InvalidUser : MatchmakingError()
+    object VariantDoesNotExist : MatchmakingError()
 }
 
-typealias MatchmakingResult = Either<MatchmakingError, GameCreationResult>
+typealias MatchmakingResult = Either<MatchmakingError, Int>
+
+sealed class LeaveMatchmakingError {
+    object InvalidUser : LeaveMatchmakingError()
+    object MatchDoesNotExist : LeaveMatchmakingError()
+}
+
+typealias LeaveMatchmakingResult = Either<LeaveMatchmakingError, Unit>

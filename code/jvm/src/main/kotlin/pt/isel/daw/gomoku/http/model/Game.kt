@@ -14,7 +14,9 @@ data class GameOutputModel(val id : Int, val board : Board, val userBlack: User,
 
 data class GameGetByIdOutputModel(val game: GameOutputModel)
 
-data class GameStateGetByIdOutputModel(val gameState: Game.State)
+data class GameMatchmakingInputModel(val userId : Int, val variant : String)
+
+data class GameMatchmakingOutputModel(val gameId : Int)
 
 data class GameGetAllOutputModel(val games : List<GameOutputModel>)
 

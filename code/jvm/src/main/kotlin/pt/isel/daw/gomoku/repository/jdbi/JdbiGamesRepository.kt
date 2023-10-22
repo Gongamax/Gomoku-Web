@@ -1,8 +1,5 @@
 package pt.isel.daw.gomoku.repository.jdbi
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -13,7 +10,6 @@ import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.repository.GamesRepository
-import java.util.*
 
 class JdbiGamesRepository(
     private val handle: Handle
@@ -166,7 +162,7 @@ class JdbiGamesRepository(
             .mapTo<Int>()
             .single() == 1
 
-    override fun tryMatchmaking(userId: Int): MatchmakingEntry? =
+    override fun getMatchmakingEntry(userId: Int): MatchmakingEntry? =
         handle.createQuery(
             """
                 select users.id, users.username, created_at
@@ -175,20 +171,34 @@ class JdbiGamesRepository(
                 where users.id != :userId
                   order by created_at     
                 limit 1
+                for update skip locked
             """.trimIndent()
         )
             .mapTo<MatchmakingEntry>()
             .singleOrNull()
 
-    override fun storeMatchmakingEntry(matchmakingEntry: MatchmakingEntry) =
+    override fun updateMatchmakingEntry(id: Int, status: MatchmakingStatus) =
         handle.createUpdate(
             """
-                insert into dbo.matchmaking(user_id, created_at)
-                values (:user_id, :created_at)
+                update dbo.matchmaking
+                set status = :status
+                where id = :id
             """.trimIndent()
         )
-            .bind("user_id", matchmakingEntry.playerId)
-            .bind("created_at", matchmakingEntry.created.epochSeconds)
+            .bind("id", id)
+            .bind("status", status)
+            .execute()
+
+    override fun storeMatchmakingEntry(userId: Int, status: MatchmakingStatus, created: Instant) =
+        handle.createUpdate(
+            """
+                insert into dbo.matchmaking(user_id, status, created_at)
+                values (:user_id, :status, :created_at)
+            """.trimIndent()
+        )
+            .bind("user_id", userId)
+            .bind("status", status)
+            .bind("created_at", created.epochSeconds)
             .execute()
 
     override fun exitMatchmakingQueue(id : Int) =
