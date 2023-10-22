@@ -26,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
 
     // For transactions
-    //implementation("org.springframework.boot:spring-boot-starter-data-jdbc:3.1.4")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc:3.1.4")
 
     // For validation
     implementation("org.springframework.boot:spring-boot-starter-validation:3.0.4")

@@ -47,8 +47,8 @@ create table dbo.Games
 
 create table dbo.Game_Config
 (
-    game_id   int references dbo.Games (id),
-    timeout   int   not null
+    game_id int references dbo.Games (id),
+    timeout int not null
 );
 
 create table dbo.Statistics
@@ -63,10 +63,10 @@ create table dbo.Statistics
 -- Auxiliary table for matchmaking purposes, it works as a synchronizer
 create table dbo.Matchmaking
 (
-    id         serial primary key,
-    user_id    int references dbo.Users (id),
-    status     VARCHAR(64) not null,
-    created_at int not null
+    id      serial primary key,
+    user_id int references dbo.Users (id),
+    status  VARCHAR(64) not null,
+    created int         not null
 );
 
 

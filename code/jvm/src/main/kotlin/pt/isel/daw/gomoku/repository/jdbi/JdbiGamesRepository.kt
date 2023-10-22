@@ -165,17 +165,21 @@ class JdbiGamesRepository(
     override fun getMatchmakingEntry(userId: Int): MatchmakingEntry? =
         handle.createQuery(
             """
-                select users.id, users.username, created_at
-                from dbo.matchmaking
-                         inner join dbo.Users users on matchmaking.user_id = users.id
-                where users.id != :userId
-                  order by created_at     
+                select m.id, m.user_id, m.status, m.created
+                from dbo.matchmaking m
+                         inner join dbo.Users users on m.user_id = users.id
+                where users.id != :userId and m.status = 'PENDING'
+                  order by m.created    
                 limit 1
                 for update skip locked
             """.trimIndent()
         )
-            .mapTo<MatchmakingEntry>()
+            .bind("userId", userId)
+            .mapTo<MatchmakingEntryDbModel>()
             .singleOrNull()
+            ?.run {
+                toMatchmakingEntry()
+            }
 
     override fun updateMatchmakingEntry(id: Int, status: MatchmakingStatus) =
         handle.createUpdate(
@@ -192,13 +196,13 @@ class JdbiGamesRepository(
     override fun storeMatchmakingEntry(userId: Int, status: MatchmakingStatus, created: Instant) =
         handle.createUpdate(
             """
-                insert into dbo.matchmaking(user_id, status, created_at)
-                values (:user_id, :status, :created_at)
+                insert into dbo.matchmaking(user_id, status, created)
+                values (:user_id, :status, :created)
             """.trimIndent()
         )
             .bind("user_id", userId)
             .bind("status", status)
-            .bind("created_at", created.epochSeconds)
+            .bind("created", created.epochSeconds)
             .execute()
 
     override fun exitMatchmakingQueue(id : Int) =
@@ -241,4 +245,14 @@ class GameDbModel(
     val playerWhite: User
 ) {
     fun toGame() : Game = Game(Id(id), state, board, created, updated, deadline, playerBlack, playerWhite)
+}
+
+// Class that represents the matchmaking entry in the database
+class MatchmakingEntryDbModel(
+    val id: Int,
+    val user_id: Int,
+    val status: String,
+    val created: Instant
+) {
+    fun toMatchmakingEntry() : MatchmakingEntry = MatchmakingEntry(id, user_id, MatchmakingStatus.valueOf(status), created)
 }

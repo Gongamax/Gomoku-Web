@@ -146,6 +146,11 @@ class JdbiUsersRepository(
             .execute()
     }
 
+    override fun getAllUsers(): List<User> =
+        handle.createQuery("select * from dbo.Users")
+            .mapTo<User>()
+            .list()
+
     private data class UserAndTokenModel(
         val id: Int,
         val username: String,

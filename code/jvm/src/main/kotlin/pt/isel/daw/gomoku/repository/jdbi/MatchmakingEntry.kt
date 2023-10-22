@@ -4,7 +4,7 @@ import kotlinx.datetime.Instant
 
 data class MatchmakingEntry (
     val id: Int,
-    val playerId: Int,
+    val userId: Int,
     val status : MatchmakingStatus,
     val created : Instant
 )

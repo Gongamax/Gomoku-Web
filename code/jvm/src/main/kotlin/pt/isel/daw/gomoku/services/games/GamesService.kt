@@ -2,7 +2,7 @@ package pt.isel.daw.gomoku.services.games
 
 import kotlinx.datetime.Clock
 import org.springframework.stereotype.Service
-//import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.annotation.Transactional
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.repository.TransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
@@ -109,16 +109,19 @@ class GamesService(
         }
     }
 
-    //@Transactional
+    @Transactional
     fun tryMatchmaking(userId: Int, variant: String): MatchmakingResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             if (variant !in Variants.values().map { variant -> variant.name })
                 return@run failure(MatchmakingError.VariantDoesNotExist)
             val match = gamesRepository.getMatchmakingEntry(userId)
+
             if (match != null && match.status == MatchmakingStatus.PENDING) {
+                // Match found
                 gamesRepository.updateMatchmakingEntry(match.id, MatchmakingStatus.MATCHED)
-                val opponent = it.usersRepository.getUserById(match.playerId)
+
+                val opponent = it.usersRepository.getUserById(match.userId)
                 if (opponent != null) {
                     val user = it.usersRepository.getUserById(userId)!!
                     val gameModel = gamesDomain.createGameModel(user, opponent, Variants.valueOf(variant))
@@ -134,7 +137,7 @@ class GamesService(
         }
     }
 
-    //@Transactional
+    @Transactional
     fun exitMatchmakingQueue(userId: Int): LeaveMatchmakingResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository

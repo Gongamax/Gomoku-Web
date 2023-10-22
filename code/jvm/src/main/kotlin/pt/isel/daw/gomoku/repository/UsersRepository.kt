@@ -34,4 +34,6 @@ interface UsersRepository {
     fun updateTokenLastUsed(token: Token, now: Instant)
 
     fun removeTokenByValidationInfo(tokenValidationInfo: TokenValidationInfo): Int
+
+    fun getAllUsers(): List<User>
 }
