@@ -1,6 +1,6 @@
 create schema dbo;
 
--- Table Dropping
+-- Table and Trigger Dropping
 
 drop trigger if exists add_user_to_statistics on dbo.users cascade;
 drop trigger if exists update_rank on dbo.games cascade;
@@ -10,6 +10,7 @@ drop function if exists dbo.add_user_to_statistics() cascade;
 drop function if exists dbo.update_rank() cascade;
 drop function if exists dbo.increment_wins_losses() cascade;
 drop function if exists dbo.increment_games_played() cascade;
+drop table if exists dbo.variant cascade;
 drop table if exists dbo.matchmaking cascade;
 drop table if exists dbo.tokens cascade;
 drop table if exists dbo.statistics cascade;
@@ -44,13 +45,16 @@ create table dbo.Games
     updated      int         not null,
     deadline     int,
     player_black int references dbo.Users (id),
-    player_white int references dbo.Users (id)
+    player_white int references dbo.Users (id),
+    variant      VARCHAR(64) references dbo.Variant (variant_name)
 );
 
-create table dbo.Game_Config
+create table dbo.Variant
 (
-    game_id int references dbo.Games (id),
-    timeout int not null
+    variant_name VARCHAR(64) primary key,
+    board_dim    int         not null,
+    play_rule    VARCHAR(64) not null,
+    opening_rule VARCHAR(64) not null
 );
 
 create table dbo.Statistics
@@ -71,6 +75,18 @@ create table dbo.Matchmaking
     created int         not null
 );
 
+-- Inserting default values for the variant table
+
+insert into dbo.Variant (variant_name, board_dim, play_rule, opening_rule)
+values ('STANDARD', 15, 'STANDARD', 'STANDARD'),
+       ('SWAP', 15, 'STANDARD', 'SWAP'),
+       ('RENJU', 15, 'THREE_AND_THREE', 'STANDARD'),
+       ('CARO', 15, 'STANDARD', 'STANDARD'),
+       ('PENTE', 19, 'STANDARD', 'STANDARD'),
+       ('OMOK', 19, 'THREE_AND_THREE', 'STANDARD'),
+       ('NINUKI_RENJU', 15, 'THREE_AND_THREE', 'STANDARD');
+
+
 -- Triggers
 
 -- Trigger to add a new user to the statistics table
@@ -80,8 +96,8 @@ create or replace function dbo.add_user_to_statistics()
 $$
 begin
     insert into dbo.Statistics (user_id, wins, losses, rank, games_played)
-values (new.id, 0, 0, 0, 0);
-return new;
+    values (new.id, 0, 0, 0, 0);
+    return new;
 end;
 $$ language plpgsql;
 
