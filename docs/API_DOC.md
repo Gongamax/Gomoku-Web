@@ -17,7 +17,7 @@ Retrieve information about the Gomoku game system.
 
 **Response Example:**
 
-``` json
+```json
 	{
 
 		"systemInfo": "Gomoku Game",
@@ -79,8 +79,9 @@ Create a new user to be able to play Gomoku.
 **Endpoint:** `/api/users`
  **Method:** POST
 
-- **First Example**:
-	- **Request Example:**
+- **Success**	
+	- **First Example**:
+	**Request Example:**
 		```json
 		{
 			"email": "jcbackfire@gmail.com",
@@ -90,11 +91,11 @@ Create a new user to be able to play Gomoku.
 			"password": "Abacate345"
 		}
 		```
-	- **Header location Example**: 
+	
+		**Header location Example**: 
 	/api/users/20
-
-- **Second Example**:
-	- **Request Example:**
+	- **Second Example**:
+	 **Request Example:**
 		```json
 		{
 			"email": "mrdeluxe@gmail.com",
@@ -105,8 +106,13 @@ Create a new user to be able to play Gomoku.
 
 		}
 		```
-	- **Header location Example**: 
+		**Header location Example**: 
 	/api/users/21
+
+- **Failure**
+		- Insecure password
+		- User already exists
+		- Insecure email
 
 ### Create Token
 
@@ -114,9 +120,9 @@ Create an authentication token for a user.
 
 **Endpoint:** `/api/users/token`
  **Method:** POST
-
-- **First Example**:
-	- **Request Example:**
+- **Success**
+	- **First Example**:
+		**Request Example:**
 		```json
 		{
 
@@ -126,17 +132,18 @@ Create an authentication token for a user.
 
 		}
 		```
-	- **Response Example**: 
-	```json
-	{
 
-		"token": "BjnKFNheLckuGFfEfoitK6ab0MFSIa3UTgBTQNu8iJU="
+		**Response Example**: 
+		```json
+		{
 
-	}
-	```
+			"token": "BjnKFNheLckuGFfEfoitK6ab0MFSIa3UTgBTQNu8iJU="
 
-- **Second Example**:
-	- **Request Example:**
+		}
+		```
+
+	- **Second Example**:
+	**Request Example:**
 		```json
 		{
 
@@ -146,17 +153,19 @@ Create an authentication token for a user.
 
 		}
 		```
-	- **Response Example**: 
-	```json
-	{
 
-		"token": "G4KinKS2Lg5hcxY_077Xqv5xsYQgmElo3sh2f_ZKT3I="
+		**Response Example**:  
+		```json
+		{
 
-	}
-	```
+			"token": "G4KinKS2Lg5hcxY_077Xqv5xsYQgmElo3sh2f_ZKT3I="
 
-### Logout
+		}
+		```
+- **Failure**
+	- User or password are invalid 
 
+### Logout 
 Log out a user and invalidate their token.
 
 **Endpoint:** `/api/users/logout` 
@@ -176,19 +185,24 @@ Retrieve user information by their ID.
 
 -   `userId` (integer, path) - The ID of the user 
 e.g: {userId} = 21.
-
+- **Success**
 **Response Example:**
-```json
-{
+	```json
+	{
 
-	"id": 23,
+		"id": 23,
 
-	"email": "mrdeluxe@gmail.com",
+		"email": "mrdeluxe@gmail.com",
 
-	"username": "mrdeluxe",
+		"username": "mrdeluxe",
 
-}
-```
+	}
+	```
+- **Failure**
+	- User does not exist
+	- Invalid token
+	- Token expired
+	-  User is not authenticated
 
 #### Get Home Page with User Login
 
@@ -223,21 +237,25 @@ Retrieve information about a specific Gomoku game by its ID.
 
 -   `gameId` (integer, path) - The ID of the game.
 
+**Success**:
 **Response Example:**
-```json
-{
+	```json
+	{
 
-	"userBlack": 20,
+		"userBlack": 20,
 
-	"userWhite": 21,
+		"userWhite": 21,
 
-	"variant": "STANDARD"
+		"variant": "STANDARD"
 
-}
-```
+	}
+	```
 
 **Header location example:**
 /api/games/fc72a831-eec5-45da-a77a-b7b39b5ba8d4
+
+**Failure**
+- Game does not exist
 
 ### Play a Round
 
