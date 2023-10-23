@@ -1,10 +1,29 @@
-# DAW project
+# Gomoku Royale
 
-Please edit this document with an introduction to your project, including links to all the existing documentation.
-
-In addition, please add a [`.mailmap`](https://git-scm.com/docs/gitmailmap) file, mapping the emails used in the commits to your ISEL email and student number
-Example:
+## Professor
 
 ```
-12345 <a12345@alunos.isel.pt> <mygithubuser@whatever.com>
+- Pedro Félix
 ```
+
+## Authors
+
+```
+- Gonçalo Frutuoso - 49495
+- Daniel Carvalho - 49419
+- Diogo Guerra - 49149
+```
+
+## Introduction
+
+Gomoku Royale is a web application that allows users to play Gomoku games. The application is composed of a server and a client. The server is responsible for handling the business logic of the application and the client is responsible for handling the user interface.
+
+## Project structure
+
+The project is organized in 2 phases:
+
+- Phase 1 - Development of the Web API, meaning the backend of the application;
+  - [code](../2023-daw-leic51d-02/docs/Gomoku-Backend-Doc.md) - contains the backend documentation of the application;
+  - [HTTP API](../2023-daw-leic51d-02/docs/API_DOC.md) - contains the HTTP API documentation of the application;
+- Phase 2 - Development of the Web User Interface, meaning the frontend of the application;
+  - (UNDER DEVELOPMENT)
