@@ -6,8 +6,6 @@ import java.net.URI
 class Problem(
     typeUri: URI
 ) {
-    val type = typeUri.toASCIIString()
-
     companion object {
         private const val MEDIA_TYPE = "application/problem+json"
         private const val BASE_URL = "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/problems/"
@@ -36,6 +34,8 @@ class Problem(
         val tokenExpired = Problem(URI(BASE_URL + "token-expired"))
         val userIsNotAuthenticated = Problem(URI(BASE_URL + "user-is-not-authenticated"))
         val matchNotFound = Problem(URI(BASE_URL + "match-not-found"))
-
+        val tokenNotRevoked = Problem(URI(BASE_URL + "token-not-revoked"))
+        val rankingNotFound = Problem(URI(BASE_URL + "ranking-not-found"))
+        val statsNotFound = Problem(URI(BASE_URL + "stats-not-found"))
     }
 }

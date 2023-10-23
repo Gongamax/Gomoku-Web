@@ -19,7 +19,3 @@ VALUES ('99999', 'NEXT_PLAYER_WHITE',
             "3C": "BLACK"
           }
         }', 1634260800, 1634260820, 1634260840, 1, 2);
-
-
-INSERT INTO dbo.Game_Config (game_id, timeout)
-VALUES ('99999', 10);

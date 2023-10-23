@@ -12,7 +12,7 @@ import pt.isel.daw.gomoku.domain.utils.TokenValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UserStatistics
 import pt.isel.daw.gomoku.domain.utils.Id
-import pt.isel.daw.gomoku.repository.UsersRepository
+import pt.isel.daw.gomoku.repository.util.UsersRepository
 
 class JdbiUsersRepository(
     private val handle: Handle
@@ -47,7 +47,7 @@ class JdbiUsersRepository(
     override fun getUserStatsById(id: Int): UserStatistics? =
         handle.createQuery(
             """
-                select users.id, users.username, users.password_validation, statistics.wins, statistics.losses
+                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, rank. points
                 from dbo.Users as users
                 inner join dbo.Statistics as statistics
                 on users.id = statistics.user_id
@@ -55,8 +55,10 @@ class JdbiUsersRepository(
             """.trimIndent()
         )
             .bind("id", id)
-            .mapTo<UserStatistics>()
-            .singleOrNull()
+            .mapTo<UserStatsDBModel>()
+            .singleOrNull()?.run {
+                toUserStatistics()
+            }
 
 
     override fun storeUser(username: String, email: Email, passwordValidation: PasswordValidationInfo): Int =
@@ -155,7 +157,7 @@ class JdbiUsersRepository(
     override fun getRanking(): List<UserStatistics> =
         handle.createQuery(
             """
-                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, rank
+                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, rank. points
                 from dbo.Users as users
                 inner join dbo.Statistics as statistics
                 on users.id = statistics.user_id
@@ -198,7 +200,8 @@ class JdbiUsersRepository(
         val gamesPlayed: Int,
         val wins: Int,
         val losses: Int,
-        val rank: Int
+        val rank: Int,
+        val points: Int
     ) {
         fun toUserStatistics(): UserStatistics =
             UserStatistics(
@@ -206,7 +209,8 @@ class JdbiUsersRepository(
                 gamesPlayed,
                 wins,
                 losses,
-                rank
+                rank,
+                points
             )
     }
 

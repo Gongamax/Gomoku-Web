@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.services.users
 
 import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.domain.users.UserStatistics
 import pt.isel.daw.gomoku.utils.Either
 
 sealed class UserCreationError {
@@ -22,3 +23,11 @@ sealed class UserGetError {
 }
 
 typealias UserGetByIdResult = Either<UserGetError, User>
+
+
+sealed class UserStatsError {
+    object UserStatsDoesNotExist : UserStatsError()
+    object UserDoesNotExist: UserStatsError()
+}
+
+typealias UserStatsResult = Either<UserStatsError, UserStatistics>

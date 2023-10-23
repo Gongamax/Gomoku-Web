@@ -6,8 +6,10 @@ import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UsersDomain
-import pt.isel.daw.gomoku.repository.TransactionManager
-import pt.isel.daw.gomoku.utils.Either
+import pt.isel.daw.gomoku.domain.utils.RankingEntry
+import pt.isel.daw.gomoku.repository.util.TransactionManager
+import pt.isel.daw.gomoku.services.others.RankingError
+import pt.isel.daw.gomoku.services.others.RankingResult
 import pt.isel.daw.gomoku.utils.Success
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
@@ -100,11 +102,39 @@ class UsersService(
         }
     }
 
-    fun revokeToken(token: String): Boolean {
+    fun revokeToken(token: String): TokenRemovalResult {
         val tokenValidationInfo = usersDomain.createTokenValidationInformation(token)
         return transactionManager.run {
-            it.usersRepository.removeTokenByValidationInfo(tokenValidationInfo)
-            true
+            val res = it.usersRepository.removeTokenByValidationInfo(tokenValidationInfo)
+            if (res == 0) failure(TokenRemovalError.TokenDoesNotExist)
+            else success(Unit)
         }
     }
+
+    fun getRanking(): RankingResult =
+        transactionManager.run {
+            val usersRepository = it.usersRepository
+            val ranking = usersRepository.getRanking().filterIndexed { index, _ ->
+                index < 10
+            }.map { userStats ->
+                RankingEntry(
+                    userStats.rank,
+                    userStats.user.username,
+                    userStats.points
+                ) }
+            if (ranking.isEmpty()) failure(RankingError.RankingDoesNotExist)
+            else success(ranking)
+        }
+
+    fun getUserStatsById(id: Int): UserStatsResult =
+        transactionManager.run {
+            val usersRepository = it.usersRepository
+            val user = usersRepository.getUserById(id)
+            if (user == null) failure(UserStatsError.UserDoesNotExist)
+            else {
+                val userStats = usersRepository.getUserStatsById(id)
+                if (userStats != null) success(userStats)
+                else failure(UserStatsError.UserStatsDoesNotExist)
+            }
+        }
 }

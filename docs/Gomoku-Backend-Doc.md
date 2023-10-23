@@ -1,4 +1,4 @@
-# Technical Document
+# Gomoku Royal - Backend Documentation
 
 
 ## Backend Application Architecture:

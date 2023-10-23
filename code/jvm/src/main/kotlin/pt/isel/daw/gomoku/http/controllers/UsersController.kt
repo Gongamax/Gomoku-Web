@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.http
+package pt.isel.daw.gomoku.http.controllers
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.http.model.*
-import pt.isel.daw.gomoku.services.users.TokenCreationError
-import pt.isel.daw.gomoku.services.users.UserCreationError
-import pt.isel.daw.gomoku.services.users.UserGetError
-import pt.isel.daw.gomoku.services.users.UsersService
+import pt.isel.daw.gomoku.http.util.Uris
+import pt.isel.daw.gomoku.services.users.*
 import pt.isel.daw.gomoku.utils.Failure
 import pt.isel.daw.gomoku.utils.Success
 
@@ -27,7 +25,7 @@ class UsersController(
             is Success -> ResponseEntity.status(201)
                 .header(
                     "Location",
-                    Uris.Users.byId(res.value).toASCIIString()
+                    Uris.Users.getUsersById(res.value).toASCIIString()
                 ).build<Unit>()
 
             is Failure -> when (res.value) {
@@ -55,14 +53,23 @@ class UsersController(
     }
 
     @PostMapping(Uris.Users.LOGOUT)
-    fun logout(user: AuthenticatedUser) {
-        userService.revokeToken(user.token)
-    }
+    fun logout(user: AuthenticatedUser): ResponseEntity<*> =
+        when (userService.revokeToken(user.token)) {
+            is Success -> ResponseEntity.ok(UserTokenRemoveOutputModel("Token ${user.token} revoked. Logout succeeded"))
+            is Failure -> Problem.response(400, Problem.tokenNotRevoked)
+        }
 
     @GetMapping(Uris.Users.GET_USER_BY_ID)
     fun getById(@PathVariable id: String): ResponseEntity<*> {
         return when (val user = userService.getUserById(id.toInt())) {
-            is Success -> ResponseEntity.ok(UserGetByIdOutputModel(user.value.id.value, user.value.username, user.value.email.value))
+            is Success -> ResponseEntity.ok(
+                UserGetByIdOutputModel(
+                    user.value.id.value,
+                    user.value.username,
+                    user.value.email.value
+                )
+            )
+
             is Failure -> when (user.value) {
                 UserGetError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)
                 UserGetError.InvalidToken -> Problem.response(400, Problem.invalidToken)
@@ -72,11 +79,39 @@ class UsersController(
         }
     }
 
-    @GetMapping(Uris.Users.HOME)
-    fun getUserHome(userAuthenticatedUser: AuthenticatedUser): UserHomeOutputModel {
-        return UserHomeOutputModel(
-            id = userAuthenticatedUser.user.id.value,
-            username = userAuthenticatedUser.user.username
-        )
-    }
+    @GetMapping(Uris.Users.AUTH_HOME)
+    fun getAuthHome(userAuthenticatedUser: AuthenticatedUser): ResponseEntity<*> =
+        ResponseEntity.ok(UserHomeOutputModel(userAuthenticatedUser.user.id.value, userAuthenticatedUser.user.username))
+
+    @GetMapping(Uris.Users.RANKING_INFO)
+    fun getRankingInfo(): ResponseEntity<*> =
+        when (val res = userService.getRanking()) {
+            is Success -> ResponseEntity.ok(RankingInfoOutputModel(res.value))
+            is Failure -> Problem.response(404, Problem.rankingNotFound)
+        }
+
+
+    @GetMapping(Uris.Users.GET_STATS_BY_ID)
+    fun getStatsById(@PathVariable id: String, user: AuthenticatedUser): ResponseEntity<*> =
+        when (val stats = userService.getUserStatsById(id.toInt())) {
+            is Success -> ResponseEntity.ok(
+                StatsGetByIdOutputModel(
+                    stats.value.user.id.value,
+                    stats.value.user.username,
+                    stats.value.gamesPlayed,
+                    stats.value.wins,
+                    stats.value.losses,
+                    stats.value.rank,
+                    stats.value.points
+                )
+            )
+
+            is Failure ->
+                when (stats.value) {
+                    UserStatsError.UserDoesNotExist -> Problem.response(400, Problem.userDoesNotExists)
+                    UserStatsError.UserStatsDoesNotExist -> Problem.response(404, Problem.statsNotFound)
+                }
+        }
+
 }
+

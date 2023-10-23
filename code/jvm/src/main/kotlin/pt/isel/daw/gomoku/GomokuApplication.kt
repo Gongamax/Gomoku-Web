@@ -12,13 +12,12 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import pt.isel.daw.gomoku.domain.games.GamesDomainConfig
-import pt.isel.daw.gomoku.domain.games.OpeningRule
-import pt.isel.daw.gomoku.domain.games.Variants
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.http.pipeline.AuthenticatedUserArgumentResolver
 import pt.isel.daw.gomoku.http.pipeline.AuthenticationInterceptor
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
+import pt.isel.daw.gomoku.utils.Environment
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 

@@ -5,9 +5,8 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import pt.isel.daw.gomoku.Environment
+import pt.isel.daw.gomoku.utils.Environment
 import pt.isel.daw.gomoku.TestClock
-import pt.isel.daw.gomoku.domain.games.Game
 import pt.isel.daw.gomoku.domain.games.GameDomain
 import pt.isel.daw.gomoku.domain.games.GamesDomainConfig
 import pt.isel.daw.gomoku.domain.games.Variants
@@ -19,13 +18,8 @@ import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.games.GamesService
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
-import pt.isel.daw.gomoku.utils.Failure
-import pt.isel.daw.gomoku.utils.Success
 import kotlin.math.abs
 import kotlin.random.Random
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -57,10 +51,8 @@ class MatchmakingTests {
         }
 
         //when: creating a matchmaking entry
-        val matchmakingEntry = gamesService.tryMatchmaking(aliceId, variant.name)
-
         //then: the matchmaking entry is valid
-        val matchmakingEntryId = when (matchmakingEntry) {
+        val matchmakingEntryId = when (val matchmakingEntry = gamesService.tryMatchmaking(aliceId, variant.name)) {
             is Either.Left -> null
             is Either.Right -> matchmakingEntry.value
         }

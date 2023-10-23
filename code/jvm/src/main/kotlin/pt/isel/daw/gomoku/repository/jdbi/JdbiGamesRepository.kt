@@ -9,7 +9,7 @@ import org.postgresql.util.PGobject
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.utils.Id
-import pt.isel.daw.gomoku.repository.GamesRepository
+import pt.isel.daw.gomoku.repository.util.GamesRepository
 
 class JdbiGamesRepository(
     private val handle: Handle
@@ -214,6 +214,18 @@ class JdbiGamesRepository(
             .bind("id", id)
             .execute()
 
+    override fun getVariant(variant: String): Variants? =
+        handle.createQuery(
+            """
+                select v.variant_name from dbo.Variant v where v.variant_name = :variant
+            """.trimIndent()
+        )
+            .bind("variant", variant)
+            .mapTo<VariantsDbModel>()
+            .singleOrNull()?.run {
+                toVariant()
+            }
+
     companion object {
         private fun Update.bindBoard(name: String, board: Board) = run {
             bind(
@@ -255,4 +267,11 @@ class MatchmakingEntryDbModel(
     val created: Instant
 ) {
     fun toMatchmakingEntry() : MatchmakingEntry = MatchmakingEntry(id, user_id, MatchmakingStatus.valueOf(status), created)
+}
+
+// Class that represents the variant in the database
+class VariantsDbModel(
+   val variant_name: String
+) {
+    fun toVariant() : Variants = Variants.valueOf(variant_name)
 }

@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku
+package pt.isel.daw.gomoku.utils
 
 object Environment {
 

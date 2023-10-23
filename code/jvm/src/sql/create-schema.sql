@@ -36,6 +36,14 @@ create table dbo.Tokens
     last_used_at     bigint not null
 );
 
+create table dbo.Variant
+(
+    variant_name VARCHAR(64) primary key,
+    board_dim    int         not null,
+    play_rule    VARCHAR(64) not null,
+    opening_rule VARCHAR(64) not null
+);
+
 create table dbo.Games
 (
     id           serial primary key,
@@ -49,21 +57,14 @@ create table dbo.Games
     variant      VARCHAR(64) references dbo.Variant (variant_name)
 );
 
-create table dbo.Variant
-(
-    variant_name VARCHAR(64) primary key,
-    board_dim    int         not null,
-    play_rule    VARCHAR(64) not null,
-    opening_rule VARCHAR(64) not null
-);
-
 create table dbo.Statistics
 (
     user_id      int references dbo.Users (id),
     wins         int not null,
     losses       int not null,
     rank         int not null,
-    games_played int not null
+    games_played int not null,
+    points       int not null
 );
 
 -- Auxiliary table for matchmaking purposes, it works as a synchronizer
@@ -95,8 +96,8 @@ create or replace function dbo.add_user_to_statistics()
     returns trigger as
 $$
 begin
-    insert into dbo.Statistics (user_id, wins, losses, rank, games_played)
-    values (new.id, 0, 0, 0, 0);
+    insert into dbo.Statistics (user_id, wins, losses, rank, games_played, points)
+    values (new.id, 0, 0, 0, 0, 0);
     return new;
 end;
 $$ language plpgsql;
@@ -136,17 +137,17 @@ $$
 begin
     if new.state = 'PLAYER_BLACK_WON' then
         update dbo.Statistics
-        set wins = wins + 1
+        set wins = wins + 1, points = points + 12
         where user_id = new.player_black;
         update dbo.Statistics
-        set losses = losses + 1
+        set losses = losses + 1, points = points + 3
         where user_id = new.player_white;
     elsif new.state = 'PLAYER_WHITE_WON' then
         update dbo.Statistics
-        set wins = wins + 1
+        set wins = wins + 1, points = points + 12
         where user_id = new.player_white;
         update dbo.Statistics
-        set losses = losses + 1
+        set losses = losses + 1, points = points + 3
         where user_id = new.player_black;
     end if;
     return new;
@@ -169,7 +170,7 @@ $$
 begin
     with ranked_users
              as (select user_id,
-                        row_number() over (order by 1000 + 100 * (Wins - Losses) + 10 * (games_played) desc) as rank
+                        row_number() over (order by points desc) as rank
                  from dbo.Statistics)
     update dbo.Statistics as s
     set rank = ru.rank

@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.repository
+package pt.isel.daw.gomoku.repository.util
 
 interface Transaction {
 

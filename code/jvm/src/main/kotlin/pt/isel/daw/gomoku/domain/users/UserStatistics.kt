@@ -5,5 +5,6 @@ data class UserStatistics(
     val gamesPlayed: Int,
     val wins: Int,
     val losses: Int,
-    val rank: Int
+    val rank: Int,
+    val points: Int
 )

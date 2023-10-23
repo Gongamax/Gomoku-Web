@@ -1,34 +1,31 @@
-package pt.isel.daw.gomoku.http
+package pt.isel.daw.gomoku.http.util
 
 import org.springframework.web.util.UriTemplate
 import java.net.URI
 
 object Uris {
 
-    const val PREFIX = "/api"
+    private const val PREFIX = "/api"
+    //private const val AUTH_PREFIX = "$PREFIX/auth"
     const val HOME = PREFIX
-
+    const val SYSTEM_INFO = "$PREFIX/system"
     fun home(): URI = URI(HOME)
-
-    object  NonUsers {
-        const val SYSTEM_INFO = "$PREFIX/system"
-        const val RANKING_INFO = "$PREFIX/statistic"
-
-        fun systemInfo(): URI = URI(SYSTEM_INFO)
-        fun rankingInfo(): URI = URI(RANKING_INFO)
-    }
-
+    fun systemInfo(): URI = URI(SYSTEM_INFO)
     object Users {
         const val CREATE_USER = "$PREFIX/users"
         const val TOKEN = "$PREFIX/users/token"
         const val LOGOUT = "$PREFIX/logout"
         const val GET_USER_BY_ID = "$PREFIX/users/{id}"
-        const val HOME = "$PREFIX/me"
+        const val AUTH_HOME = "$PREFIX/me"
+        const val RANKING_INFO = "$PREFIX/ranking"
+        const val GET_STATS_BY_ID = "$PREFIX/stats/{id}"
 
-        fun byId(id: Int) = UriTemplate(GET_USER_BY_ID).expand(id)
-        fun home(): URI = URI(HOME)
+        fun getUsersById(id: Int) = UriTemplate(GET_USER_BY_ID).expand(id)
+        fun getStatsById(id: Int) = UriTemplate(GET_STATS_BY_ID).expand(id)
+        fun authHome(): URI = URI(HOME)
         fun login(): URI = URI(TOKEN)
         fun register(): URI = URI(CREATE_USER)
+        fun rankingInfo(): URI = URI(RANKING_INFO)
     }
 
     object Games {

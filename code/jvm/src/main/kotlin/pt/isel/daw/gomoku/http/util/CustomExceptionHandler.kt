@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.http
+package pt.isel.daw.gomoku.http.util
 
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders

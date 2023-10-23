@@ -8,6 +8,12 @@ data class TokenExternalInfo(
     val tokenExpiration: Instant
 )
 
+sealed class TokenRemovalError {
+    object TokenDoesNotExist : TokenRemovalError()
+}
+
+typealias TokenRemovalResult = Either<TokenRemovalError, Unit>
+
 sealed class TokenCreationError {
     object UserOrPasswordAreInvalid : TokenCreationError()
 }

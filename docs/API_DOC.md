@@ -33,23 +33,25 @@ Retrieve information about the Gomoku game system.
 
 Retrieve the statistic information for all Gomoku players.
 
-**Endpoint:** `/api/statistic`
+**Endpoint:** `/api/ranking`
  **Method:** GET
 
 **Response Example:**:
 
 ```json
 {
-
-	"username": "Mario Matos",
-
-	"userRank": "Bronze",
-
-	"wins": 3,
-
-	"losses": 8,
-
-	"nofPlayedGames": 8
+	"rankingTable": [
+		{
+			"rank": 1,
+			"username": "MarioMatos",
+			"points": 120
+		},
+		{
+			"rank": 2,
+			"username": "mrdeluxe",
+			"points": 100
+		}
+	]
 
 }
 ```

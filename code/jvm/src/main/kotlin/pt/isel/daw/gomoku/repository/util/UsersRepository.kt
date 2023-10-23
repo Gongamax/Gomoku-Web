@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.repository
+package pt.isel.daw.gomoku.repository.util
 
 import kotlinx.datetime.Instant
 import pt.isel.daw.gomoku.domain.users.Email
