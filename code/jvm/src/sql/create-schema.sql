@@ -2,12 +2,14 @@ create schema dbo;
 
 -- Table Dropping
 
+drop trigger if exists add_user_to_statistics on dbo.users cascade;
 drop trigger if exists update_rank on dbo.games cascade;
 drop trigger if exists increment_wins_losses on dbo.games cascade;
 drop trigger if exists increment_games_played on dbo.games cascade;
-drop function if exists update_rank() cascade;
-drop function if exists increment_wins_losses() cascade;
-drop function if exists increment_games_played() cascade;
+drop function if exists dbo.add_user_to_statistics() cascade;
+drop function if exists dbo.update_rank() cascade;
+drop function if exists dbo.increment_wins_losses() cascade;
+drop function if exists dbo.increment_games_played() cascade;
 drop table if exists dbo.matchmaking cascade;
 drop table if exists dbo.tokens cascade;
 drop table if exists dbo.statistics cascade;
@@ -69,10 +71,30 @@ create table dbo.Matchmaking
     created int         not null
 );
 
+-- Triggers
+
+-- Trigger to add a new user to the statistics table
+
+create or replace function dbo.add_user_to_statistics()
+    returns trigger as
+$$
+begin
+    insert into dbo.Statistics (user_id, wins, losses, rank, games_played)
+values (new.id, 0, 0, 0, 0);
+return new;
+end;
+$$ language plpgsql;
+
+create trigger add_user_to_statistics
+    after insert
+    on dbo.Users
+    for each row
+execute procedure dbo.add_user_to_statistics();
+
 
 -- Trigger for incrementing the games played by a user
 
-create or replace function increment_games_played()
+create or replace function dbo.increment_games_played()
     returns trigger as
 $$
 begin
@@ -88,11 +110,11 @@ create trigger increment_games_played
     after insert
     on dbo.Games
     for each row
-execute procedure increment_games_played();
+execute procedure dbo.increment_games_played();
 
 -- Trigger for incrementing the wins and losses of a user
 
-create or replace function increment_wins_losses()
+create or replace function dbo.increment_wins_losses()
     returns trigger as
 $$
 begin
@@ -119,13 +141,13 @@ create trigger increment_wins_losses
     after update
     on dbo.Games
     for each row
-execute procedure increment_wins_losses();
+execute procedure dbo.increment_wins_losses();
 
 -- Trigger for updating the rank of a user
 -- Rank is calculated by the formula:
 -- Rank = 1000 + 100 * (Wins - Losses) + 10 * (Games Played)
 -- The rank is updated after every game
-create or replace function update_rank()
+create or replace function dbo.update_rank()
     returns trigger as
 $$
 begin
@@ -146,7 +168,6 @@ create trigger update_rank
     after update
     on dbo.Games
     for each row
-    when ( new.state = 'Game is Over' )
-execute procedure update_rank();
-
+    when ( new.state = 'PLAYER_BLACK_WON' or new.state = 'PLAYER_WHITE_WON' )
+execute procedure dbo.update_rank();
 

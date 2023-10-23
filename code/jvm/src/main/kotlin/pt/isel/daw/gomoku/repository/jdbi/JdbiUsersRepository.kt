@@ -3,6 +3,7 @@ package pt.isel.daw.gomoku.repository.jdbi
 import kotlinx.datetime.Instant
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
+import org.jdbi.v3.core.mapper.reflect.ColumnName
 import org.slf4j.LoggerFactory
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
@@ -151,6 +152,21 @@ class JdbiUsersRepository(
             .mapTo<User>()
             .list()
 
+    override fun getRanking(): List<UserStatistics> =
+        handle.createQuery(
+            """
+                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, rank
+                from dbo.Users as users
+                inner join dbo.Statistics as statistics
+                on users.id = statistics.user_id
+                order by rank desc
+            """.trimIndent()
+        )
+            .mapTo<UserStatsDBModel>()
+            .map { it.toUserStatistics() }
+            .list()
+
+
     private data class UserAndTokenModel(
         val id: Int,
         val username: String,
@@ -169,6 +185,28 @@ class JdbiUsersRepository(
                     Instant.fromEpochSeconds(createdAt),
                     Instant.fromEpochSeconds(lastUsedAt)
                 )
+            )
+    }
+
+    private data class UserStatsDBModel(
+        val id: Int,
+        val username: String,
+        val email: String,
+        @ColumnName("password_validation")
+        val passwordValidation: String,
+        @ColumnName("games_played")
+        val gamesPlayed: Int,
+        val wins: Int,
+        val losses: Int,
+        val rank: Int
+    ) {
+        fun toUserStatistics(): UserStatistics =
+            UserStatistics(
+                User(Id(id), username, Email(email), PasswordValidationInfo(passwordValidation)),
+                gamesPlayed,
+                wins,
+                losses,
+                rank
             )
     }
 

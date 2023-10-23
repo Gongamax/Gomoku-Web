@@ -36,4 +36,6 @@ interface UsersRepository {
     fun removeTokenByValidationInfo(tokenValidationInfo: TokenValidationInfo): Int
 
     fun getAllUsers(): List<User>
+
+    fun getRanking(): List<UserStatistics>
 }
