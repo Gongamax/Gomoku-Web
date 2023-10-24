@@ -29,6 +29,9 @@ interface GamesRepository {
 
     fun storeMatchmakingEntry(userId: Int, status: MatchmakingStatus, created: Instant) : Int
 
+    fun isUserInMatchmakingQueue(userId: Int) : Boolean
+
     fun exitMatchmakingQueue(id : Int) : Int
+
     fun getVariant(variant: String): Variants?
 }
