@@ -75,7 +75,6 @@ class UserTests {
         val result = client.post().uri("/users/token")
             .bodyValue(
                 mapOf(
-                    "email" to email,
                     "username" to username,
                     "password" to password
                 )
@@ -145,7 +144,6 @@ class UserTests {
         val token = client.post().uri("/users/token")
             .bodyValue(
                 mapOf(
-                    "email" to email,
                     "username" to username,
                     "password" to password
                 )

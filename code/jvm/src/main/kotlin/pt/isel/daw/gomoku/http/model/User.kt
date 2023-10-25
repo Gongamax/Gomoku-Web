@@ -10,7 +10,6 @@ data class UserCreateInputModel(
 )
 
 data class UserCreateTokenInputModel(
-    val email: String,
     val username: String,
     val password: String
 )
