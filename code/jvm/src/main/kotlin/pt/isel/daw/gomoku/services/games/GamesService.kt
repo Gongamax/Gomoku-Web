@@ -132,7 +132,9 @@ class GamesService(
                 else
                     failure(MatchmakingError.InvalidUser)
             } else {
-                gamesRepository.storeMatchmakingEntry(userId, MatchmakingStatus.PENDING, Clock.System.now())
+                // if the user is not in the queue, add him
+                if (!gamesRepository.isUserInMatchmakingQueue(userId))
+                    gamesRepository.storeMatchmakingEntry(userId, MatchmakingStatus.PENDING, Clock.System.now())
                 failure(MatchmakingError.NoMatchFound)
             }
         }

@@ -62,7 +62,7 @@ class JdbiGamesRepository(
             .execute()
     }
 
-    override fun createGame(game : GameCreationModel) : Int =
+    override fun createGame(game: GameCreationModel): Int =
         handle.createUpdate(
             """
                 insert into dbo.Games(state, board, created, updated, deadline, player_black, player_white)
@@ -81,7 +81,7 @@ class JdbiGamesRepository(
             .one()
 
 
-    override fun deleteGame(id:Int) {
+    override fun deleteGame(id: Int) {
         handle.createUpdate(
             """
             delete from dbo.Games
@@ -197,7 +197,7 @@ class JdbiGamesRepository(
         handle.createUpdate(
             """
                 insert into dbo.matchmaking(user_id, status, created)
-                values (:user_id, :status, :created)
+                values (:user_id, :status, :created);
             """.trimIndent()
         )
             .bind("user_id", userId)
@@ -205,7 +205,17 @@ class JdbiGamesRepository(
             .bind("created", created.epochSeconds)
             .execute()
 
-    override fun exitMatchmakingQueue(id : Int) =
+    override fun isUserInMatchmakingQueue(userId: Int): Boolean =
+        handle.createQuery(
+            """
+                select count(*) from dbo.matchmaking where user_id = :userId
+            """.trimIndent()
+        )
+            .bind("userId", userId)
+            .mapTo<Int>()
+            .single() == 1
+
+    override fun exitMatchmakingQueue(id: Int) =
         handle.createUpdate(
             """
                 delete from dbo.matchmaking where id = :id
@@ -256,7 +266,7 @@ class GameDbModel(
     @Nested("playerWhite")
     val playerWhite: User
 ) {
-    fun toGame() : Game = Game(Id(id), state, board, created, updated, deadline, playerBlack, playerWhite)
+    fun toGame(): Game = Game(Id(id), state, board, created, updated, deadline, playerBlack, playerWhite)
 }
 
 // Class that represents the matchmaking entry in the database
@@ -266,12 +276,13 @@ class MatchmakingEntryDbModel(
     val status: String,
     val created: Instant
 ) {
-    fun toMatchmakingEntry() : MatchmakingEntry = MatchmakingEntry(id, user_id, MatchmakingStatus.valueOf(status), created)
+    fun toMatchmakingEntry(): MatchmakingEntry =
+        MatchmakingEntry(id, user_id, MatchmakingStatus.valueOf(status), created)
 }
 
 // Class that represents the variant in the database
 class VariantsDbModel(
-   val variant_name: String
+    val variant_name: String
 ) {
-    fun toVariant() : Variants = Variants.valueOf(variant_name)
+    fun toVariant(): Variants = Variants.valueOf(variant_name)
 }
