@@ -62,6 +62,7 @@ create table dbo.Statistics
     user_id      int references dbo.Users (id),
     wins         int not null,
     losses       int not null,
+    draws        int not null,
     rank         int not null,
     games_played int not null,
     points       int not null
@@ -96,8 +97,8 @@ create or replace function dbo.add_user_to_statistics()
     returns trigger as
 $$
 begin
-    insert into dbo.Statistics (user_id, wins, losses, rank, games_played, points)
-    values (new.id, 0, 0, 0, 0, 0);
+    insert into dbo.Statistics (user_id, wins, losses, draws, rank, games_played, points)
+    values (new.id, 0, 0, 0, 0, 0, 0);
     return new;
 end;
 $$ language plpgsql;
@@ -149,6 +150,13 @@ begin
         update dbo.Statistics
         set losses = losses + 1, points = points + 3
         where user_id = new.player_black;
+    elsif new.state = 'DRAW' then
+        update dbo.Statistics
+        set draws = draws + 1, points = points + 6
+        where user_id = new.player_black;
+        update dbo.Statistics
+        set draws = draws + 1, points = points + 6
+        where user_id = new.player_white;
     end if;
     return new;
 end;
