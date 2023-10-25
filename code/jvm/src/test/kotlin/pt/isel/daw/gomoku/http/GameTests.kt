@@ -131,6 +131,8 @@ class GameTests {
             )
             .exchange()
 
+        println(player2.id)
+
         // and: get game location
         var playerInGame by Delegates.notNull<Int>()
 

@@ -2,10 +2,12 @@ create schema dbo;
 
 -- Table and Trigger Dropping
 
+drop trigger if exists check_points on dbo.statistics cascade;
 drop trigger if exists add_user_to_statistics on dbo.users cascade;
 drop trigger if exists update_rank on dbo.games cascade;
 drop trigger if exists increment_wins_losses on dbo.games cascade;
 drop trigger if exists increment_games_played on dbo.games cascade;
+drop function if exists dbo.check_points() cascade;
 drop function if exists dbo.add_user_to_statistics() cascade;
 drop function if exists dbo.update_rank() cascade;
 drop function if exists dbo.increment_wins_losses() cascade;
@@ -109,6 +111,24 @@ create trigger add_user_to_statistics
     for each row
 execute procedure dbo.add_user_to_statistics();
 
+-- Trigger to ensure points dont go below 0
+
+create or replace function dbo.check_points()
+    returns trigger as
+$$
+begin
+    if new.points < 0 then
+        new.points = 0;
+    end if;
+    return new;
+end;
+$$ language plpgsql;
+
+create trigger check_points
+    before update
+    on dbo.Statistics
+    for each row
+execute procedure dbo.check_points();
 
 -- Trigger for incrementing the games played by a user
 
@@ -135,27 +155,31 @@ execute procedure dbo.increment_games_played();
 create or replace function dbo.increment_wins_losses()
     returns trigger as
 $$
+declare
+    win_points int := 12;
+    draw_points int := 6;
+    loss_points int := 3;
 begin
     if new.state = 'PLAYER_BLACK_WON' then
         update dbo.Statistics
-        set wins = wins + 1, points = points + 12
+        set wins = wins + 1, points = points + win_points
         where user_id = new.player_black;
         update dbo.Statistics
-        set losses = losses + 1, points = points + 3
+        set losses = losses + 1, points = points - loss_points
         where user_id = new.player_white;
     elsif new.state = 'PLAYER_WHITE_WON' then
         update dbo.Statistics
-        set wins = wins + 1, points = points + 12
+        set wins = wins + 1, points = points + win_points
         where user_id = new.player_white;
         update dbo.Statistics
-        set losses = losses + 1, points = points + 3
+        set losses = losses + 1, points = points - loss_points
         where user_id = new.player_black;
     elsif new.state = 'DRAW' then
         update dbo.Statistics
-        set draws = draws + 1, points = points + 6
+        set draws = draws + 1, points = points + draw_points
         where user_id = new.player_black;
         update dbo.Statistics
-        set draws = draws + 1, points = points + 6
+        set draws = draws + 1, points = points + draw_points
         where user_id = new.player_white;
     end if;
     return new;

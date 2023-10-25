@@ -19,7 +19,7 @@ class UsersController(
     private val userService: UsersService
 ) {
     @PostMapping(Uris.Users.CREATE_USER)
-    fun create(@RequestBody input: UserCreateInputModel): ResponseEntity<*> {
+    fun create(@RequestBody @Valid input: UserCreateInputModel): ResponseEntity<*> {
         val res = userService.createUser(input.username, input.email, input.password)
         println(res)
         return when (res) {
