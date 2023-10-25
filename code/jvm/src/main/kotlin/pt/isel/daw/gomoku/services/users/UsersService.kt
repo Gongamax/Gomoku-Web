@@ -54,7 +54,6 @@ class UsersService(
                 ?: return@run failure(TokenCreationError.UserOrPasswordAreInvalid)
             if (!usersDomain.validatePassword(password, user.passwordValidation))
                 return@run failure(TokenCreationError.UserOrPasswordAreInvalid)
-
             val tokenValue = usersDomain.generateTokenValue()
             val now = clock.now()
             val newToken = Token(

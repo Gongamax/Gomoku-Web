@@ -119,6 +119,51 @@ class UserTests {
             .expectHeader().valueEquals("WWW-Authenticate", "bearer")
     }
 
+    @Test
+    fun `can create an user, obtain a token, and get a user by id`() {
+        // given: an HTTP client
+        val client = WebTestClient.bindToServer().baseUrl("http://localhost:$port/api").build()
+
+        // and: a random user
+        val email = newTestEmail()
+        val username = newTestUserName()
+        val password = newTestPassword()
+
+        // when: creating an user
+        // then: the response is a 201 with a proper Location header
+        client.post().uri("/users")
+            .bodyValue(
+                mapOf(
+                    "email" to email,
+                    "username" to username,
+                    "password" to password
+                )
+            )
+            .exchange()
+
+        // when: creating a token
+        val token = client.post().uri("/users/token")
+            .bodyValue(
+                mapOf(
+                    "email" to email,
+                    "username" to username,
+                    "password" to password
+                )
+            )
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(TokenResponse::class.java)
+            .returnResult()
+            .responseBody!!
+
+        // when: getting the user by id
+        client.get().uri("/users/1")
+            .header("Authorization", "Bearer ${token.token}")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+    }
+
     companion object {
         private fun newTestEmail() = "email-${abs(Random.nextLong())}@test.com"
 

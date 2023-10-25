@@ -129,7 +129,7 @@ create trigger increment_games_played
     for each row
 execute procedure dbo.increment_games_played();
 
--- Trigger for incrementing the wins and losses of a user
+-- Trigger for incrementing the wins, losses and points of a user
 
 create or replace function dbo.increment_wins_losses()
     returns trigger as
@@ -162,7 +162,7 @@ execute procedure dbo.increment_wins_losses();
 
 -- Trigger for updating the rank of a user
 -- Rank is calculated by the formula:
--- Rank = 1000 + 100 * (Wins - Losses) + 10 * (Games Played)
+-- Who has more points is ranked higher
 -- The rank is updated after every game
 create or replace function dbo.update_rank()
     returns trigger as

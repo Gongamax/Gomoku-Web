@@ -1,7 +1,7 @@
 INSERT INTO dbo.Users (username, password_validation, email)
-VALUES ('alice', 'Hash1', 'alicepereira@gmail.com'),
-       ('bob', 'Hash2', 'boboconstrutor@hotmail.com'),
-       ('charlie', 'Hash3', 'charliebrown@yahoo.com');
+VALUES ('alice', '$2a$10$rfB5mueMNJFZlFA1RTZbNOUy48WJn27gK8JInlEIwtjxAB2zaF81q', 'alicepereira@gmail.com'),
+       ('bob', '$2a$10$HiAG1gbNntnVCVJlXU.k7OMnkVaO22hIIQLrQBGxesoosntZ4TWW.', 'boboconstrutor@hotmail.com'),
+       ('charlie', '$2a$10$g46B9qqo3spqc4sMoGDFwuf/cwrjR99od.EDL9C6WD1xfE./.6YSu', 'charliebrown@yahoo.com');
 
 INSERT INTO dbo.Tokens (token_validation, user_id, created_at, last_used_at)
 VALUES ('token1', 1, 1634260800, 1634260810),

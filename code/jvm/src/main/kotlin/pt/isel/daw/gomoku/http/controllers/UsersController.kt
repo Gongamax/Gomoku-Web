@@ -1,5 +1,6 @@
 package pt.isel.daw.gomoku.http.controllers
 
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -38,7 +39,7 @@ class UsersController(
 
     @PostMapping(Uris.Users.TOKEN)
     fun login(
-        @RequestBody input: UserCreateTokenInputModel
+       @Valid @RequestBody input: UserCreateTokenInputModel
     ): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
             is Success ->

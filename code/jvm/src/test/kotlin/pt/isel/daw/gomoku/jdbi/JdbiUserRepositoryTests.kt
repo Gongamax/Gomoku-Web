@@ -99,6 +99,24 @@ class JdbiUserRepositoryTests {
         assertEquals(tokenCreationInstant, retrievedToken.createdAt)
     }
 
+    @Test
+    fun `can get ranking and user's statistics`(){
+        // given: a UsersRepository
+        val repo = JdbiUsersRepository(jdbi.open())
+
+        // when: getting ranking
+        val ranking = repo.getRanking()
+
+        // then: ranking is not null
+        assertNotNull(ranking)
+
+        // when: getting user's statistics
+        val statistics = repo.getUserStatsById(1)
+
+        // then: statistics is not null
+        assertNotNull(statistics)
+    }
+
     companion object {
 
         private fun runWithHandle(block: (Handle) -> Unit) = jdbi.useTransaction<Exception>(block)

@@ -47,7 +47,7 @@ class JdbiUsersRepository(
     override fun getUserStatsById(id: Int): UserStatistics? =
         handle.createQuery(
             """
-                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, rank. points
+                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, rank, points
                 from dbo.Users as users
                 inner join dbo.Statistics as statistics
                 on users.id = statistics.user_id
@@ -157,11 +157,11 @@ class JdbiUsersRepository(
     override fun getRanking(): List<UserStatistics> =
         handle.createQuery(
             """
-                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, rank. points
+                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, rank, points
                 from dbo.Users as users
                 inner join dbo.Statistics as statistics
-                on users.id = statistics.user_id
-                order by rank desc
+                on users.id = statistics.user_id and statistics.rank > 0
+                order by rank asc
             """.trimIndent()
         )
             .mapTo<UserStatsDBModel>()
