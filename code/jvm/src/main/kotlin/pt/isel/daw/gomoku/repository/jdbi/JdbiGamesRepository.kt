@@ -168,6 +168,24 @@ class JdbiGamesRepository(
                 select m.id, m.user_id, m.status, m.created
                 from dbo.matchmaking m
                          inner join dbo.Users users on m.user_id = users.id
+                where users.id = :userId
+                limit 1
+                for update skip locked
+            """.trimIndent()
+        )
+            .bind("userId", userId)
+            .mapTo<MatchmakingEntryDbModel>()
+            .singleOrNull()
+            ?.run {
+                toMatchmakingEntry()
+            }
+
+    override fun getAMatch(userId: Int): MatchmakingEntry? =
+        handle.createQuery(
+            """
+                select m.id, m.user_id, m.status, m.created
+                from dbo.matchmaking m
+                         inner join dbo.Users users on m.user_id = users.id
                 where users.id != :userId and m.status = 'PENDING'
                   order by m.created    
                 limit 1

@@ -25,9 +25,15 @@ class GameController(
         return when (val game = gameService.getGameById(id)) {
             is Success -> ResponseEntity.ok(
                 GameGetByIdOutputModel(
-                    GameOutputModel(game.value.id.value, game.value.board, game.value.playerBLACK, game.value.playerWHITE)
+                    GameOutputModel(
+                        game.value.id.value,
+                        game.value.board,
+                        game.value.playerBLACK,
+                        game.value.playerWHITE
+                    )
                 )
             )
+
             is Failure -> when (game.value) {
                 GameGetError.GameDoesNotExist -> Problem.response(404, Problem.gameDoesNotExists)
             }
@@ -81,7 +87,10 @@ class GameController(
     }
 
     @PostMapping(Uris.Games.MATCHMAKING)
-    fun matchmaking(@Valid @RequestBody inputModel: GameMatchmakingInputModel, user: AuthenticatedUser): ResponseEntity<*> {
+    fun matchmaking(
+        @Valid @RequestBody inputModel: GameMatchmakingInputModel,
+        user: AuthenticatedUser
+    ): ResponseEntity<*> {
         return when (val res = gameService.tryMatchmaking(inputModel.userId, inputModel.variant)) {
             is Success -> ResponseEntity.status(201)
                 .header(
@@ -93,6 +102,18 @@ class GameController(
                 MatchmakingError.InvalidUser -> Problem.response(422, Problem.invalidUser)
                 MatchmakingError.VariantDoesNotExist -> Problem.response(400, Problem.variantDoesNotExists)
                 MatchmakingError.NoMatchFound -> Problem.response(404, Problem.matchNotFound)
+            }
+        }
+    }
+
+    @GetMapping(Uris.Games.MATCHMAKING)
+    fun getMatchmakingStatus(authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
+        return when (val res = gameService.getMatchmakingStatus(authenticatedUser.user.id.value)) {
+            is Success -> ResponseEntity.ok(GameMatchmakingStatusOutputModel(res.value))
+
+            is Failure -> when (res.value) {
+                MatchmakingStatusError.InvalidUser -> Problem.response(401, Problem.invalidUser)
+                MatchmakingStatusError.MatchDoesNotExist -> Problem.response(404, Problem.matchNotFound)
             }
         }
     }
@@ -110,27 +131,26 @@ class GameController(
     }
 
     @GetMapping(Uris.Games.GET_ALL_GAMES)
-    fun getAllGames(): ResponseEntity<List<GameGetByIdOutputModel>> {
+    fun getAllGames(): ResponseEntity<GameGetAllOutputModel> {
         val games = gameService.getAll()
         return games.let {
-            ResponseEntity.ok(it.map { game ->
-                GameGetByIdOutputModel(
-                    GameOutputModel(
-                        game.id.value,
-                        game.board,
-                        game.playerBLACK,
-                        game.playerWHITE
-                    )
+            ResponseEntity.ok(GameGetAllOutputModel(it.map { game ->
+                GameOutputModel(
+                    game.id.value,
+                    game.board,
+                    game.playerBLACK,
+                    game.playerWHITE
                 )
-            })
+            }))
         }
     }
 
+
     @PutMapping(Uris.Games.LEAVE)
     fun leave(@PathVariable id: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
-        return when(val res = gameService.leaveGame(id, authenticatedUser.user.id.value)) {
+        return when (val res = gameService.leaveGame(id, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok().build<Unit>()
-            is Failure -> when(res.value) {
+            is Failure -> when (res.value) {
                 LeaveGameError.GameAlreadyEnded -> Problem.response(422, Problem.gameAlreadyEnded)
                 LeaveGameError.GameDoesNotExist -> Problem.response(404, Problem.gameDoesNotExists)
                 LeaveGameError.InvalidUser -> Problem.response(401, Problem.invalidUser)
@@ -141,16 +161,17 @@ class GameController(
     @GetMapping(Uris.Games.GET_ALL_GAMES_BY_USER)
     fun getAllGamesByUser(authenticatedUser: AuthenticatedUser, @PathVariable id: String): ResponseEntity<*> {
         return when (val games = gameService.getGamesOfUser(authenticatedUser.user.id.value)) {
-            is Success -> ResponseEntity.ok(games.value.map { game ->
-                GameGetByIdOutputModel(
+            is Success -> ResponseEntity.ok(
+                GameGetAllByUserOutputModel(games.value.map { game ->
                     GameOutputModel(
                         game.id.value,
                         game.board,
                         game.playerBLACK,
                         game.playerWHITE
                     )
-                )
-            })
+                })
+            )
+
             is Failure -> when (games.value) {
                 GameListError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)
             }

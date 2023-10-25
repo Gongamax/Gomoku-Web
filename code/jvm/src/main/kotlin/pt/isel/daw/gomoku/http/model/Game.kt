@@ -2,7 +2,7 @@ package pt.isel.daw.gomoku.http.model
 
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
-import java.util.*
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
 
 data class GamePlayInputModel(val userId : Int, val row : Int, val column : Int)
 
@@ -16,7 +16,7 @@ data class GameGetByIdOutputModel(val game: GameOutputModel)
 
 data class GameMatchmakingInputModel(val userId : Int, val variant : String)
 
-data class GameMatchmakingOutputModel(val gameId : Int)
+data class GameMatchmakingStatusOutputModel(val status : MatchmakingStatus)
 
 data class GameGetAllOutputModel(val games : List<GameOutputModel>)
 

@@ -5,13 +5,10 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
-import pt.isel.daw.gomoku.domain.users.Email
-import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
-import pt.isel.daw.gomoku.domain.users.User
-import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.http.model.TokenResponse
 import pt.isel.daw.gomoku.http.model.UserGetByIdOutputModel
 import kotlin.math.abs
+import kotlin.properties.Delegates
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
@@ -20,48 +17,6 @@ class GameTests {
 
     @LocalServerPort
     var port: Int = 0
-
-    @Test
-    fun `can create a game`() {
-        // given: an HTTP client
-        val client = WebTestClient.bindToServer().baseUrl("http://localhost:$port/api").build()
-
-        // and: alice and bob
-
-        val alice = User(Id(1), "alice", Email("alicepereira@gmail.com"), PasswordValidationInfo("Hash1"))
-        val bob = User(Id(2), "bob", Email("boboconstrutor@hotmail.com"), PasswordValidationInfo("Hash2"))
-
-        val token1 = client.post().uri("/users/token")
-            .bodyValue(
-                mapOf(
-                    "email" to alice.email.value,
-                    "username" to alice.username,
-                    "password" to alice.passwordValidation.validationInfo
-                )
-            )
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(TokenResponse::class.java)
-            .returnResult()
-            .responseBody!!
-
-        // when: creating an game
-        // then: the response is a 201 with a proper Location header
-        client.post().uri("/games")
-            .header("Authorization", "Bearer ${token1.token}")
-            .bodyValue(
-                mapOf(
-                    "userBlack" to alice.id.value,
-                    "userWhite" to bob.id.value,
-                    "variant" to "STANDARD"
-                )
-            )
-            .exchange()
-            .expectStatus().isCreated
-            .expectHeader().value("location") {
-                assertTrue(it.startsWith("/api/games/"))
-            }
-    }
 
     @Test
     fun `can play a game`() {
@@ -74,7 +29,7 @@ class GameTests {
         val password1 = newTestPassword()
         var id1: Int? = null
 
-         client.post().uri("/users")
+        client.post().uri("/users")
             .bodyValue(
                 mapOf(
                     "email" to email1,
@@ -156,25 +111,38 @@ class GameTests {
             .returnResult()
             .responseBody!!
 
-        // and: a game
-        val gameLocation = client.post().uri("/games")
+        // when: matching a game
+        val firstTryOnMatch = client.post().uri("/games/matchmaking")
             .header("Authorization", "Bearer ${token1.token}")
             .bodyValue(
                 mapOf(
-                    "userBlack" to player1.id,
-                    "userWhite" to player2.id,
+                    "userId" to player1.id,
                     "variant" to "STANDARD"
                 )
             )
             .exchange()
-            .expectStatus().isCreated
-            .expectHeader().value("location") {
-                assertTrue(it.startsWith("/api/games/"))
-            }
-            .returnResult<String>()
-            .responseHeaders
-            .location!!
-            .toASCIIString()
+
+        // and: other users try to match
+        val secondTryOnMatch = client.post().uri("/games/matchmaking")
+            .header("Authorization", "Bearer ${token2.token}")
+            .bodyValue(
+                mapOf(
+                    "userId" to player2.id,
+                    "variant" to "STANDARD"
+                )
+            )
+            .exchange()
+
+        // and: get game location
+        var playerInGame by Delegates.notNull<Int>()
+
+        val gameLocation = if (firstTryOnMatch.returnResult<String>().responseHeaders.location != null) {
+            firstTryOnMatch.returnResult<String>().responseHeaders.location!!.toASCIIString()
+                .also { playerInGame = player1.id }
+        } else {
+            secondTryOnMatch.returnResult<String>().responseHeaders.location!!.toASCIIString()
+                .also { playerInGame = player2.id }
+        }
 
         val playUri = gameLocation.split("/").drop(2).joinToString("/") + "/play"
         // when: playing a game
@@ -183,7 +151,7 @@ class GameTests {
             .header("Authorization", "Bearer ${token1.token}")
             .bodyValue(
                 mapOf(
-                    "userId" to player1.id,
+                    "userId" to playerInGame,
                     "row" to 1,
                     "column" to 1
                 )

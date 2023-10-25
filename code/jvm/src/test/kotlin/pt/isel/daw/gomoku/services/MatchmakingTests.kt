@@ -2,6 +2,7 @@ package pt.isel.daw.gomoku.services
 
 import org.jdbi.v3.core.Jdbi
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -14,10 +15,13 @@ import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
 import pt.isel.daw.gomoku.repository.jdbi.JdbiTransactionManager
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.games.GamesService
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
+import pt.isel.daw.gomoku.utils.Failure
+import pt.isel.daw.gomoku.utils.Success
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.fail
@@ -27,7 +31,7 @@ import kotlin.time.Duration.Companion.minutes
 
 class MatchmakingTests {
 
-    @Test
+    @RepeatedTest(10)
     fun `can create a matchmaking entry`() {
         //given: a game service and a user service to create users
         val testClock = TestClock()
@@ -35,9 +39,11 @@ class MatchmakingTests {
         val usersService = createUsersService(testClock)
         val variant: Variants = Variants.STANDARD
 
-        //when: creating a game
+        //given: a variable to store the game id
+        var res: Int? = null
+
+        //when: creating a user
         val createAliceResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
-        val createBobResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
 
         //when: creating alice and bob
         val aliceId = when (createAliceResult) {
@@ -45,53 +51,65 @@ class MatchmakingTests {
             is Either.Right -> createAliceResult.value
         }
 
-        val bobId = when (createBobResult) {
-            is Either.Left -> fail("User creation failed for $createBobResult")
-            is Either.Right -> createBobResult.value
-        }
-
         //when: creating a matchmaking entry
-        //then: the matchmaking entry is valid
-        val matchmakingEntryId = when (val matchmakingEntry = gamesService.tryMatchmaking(aliceId, variant.name)) {
-            is Either.Left -> null
-            is Either.Right -> matchmakingEntry.value
-        }
+        val matchmakingEntry = gamesService.tryMatchmaking(aliceId, variant.name)
 
-        //then: no match was found
-        println(matchmakingEntryId)
+        //then: if there was no match, alice is in the matchmaking queue
+        when (matchmakingEntry) {
+            is Failure -> {
+                println("Failed to create matchmaking entry for $matchmakingEntry")
+                val status = when (val s = gamesService.getMatchmakingStatus(aliceId)) {
+                    is Either.Left -> fail("Failed to get matchmaking status for $s")
+                    is Either.Right -> s.value
+                }
 
-        //when: creating a matchmaking entry
-        val newMatchmakingEntry = gamesService.tryMatchmaking(bobId, variant.name)
+                //then: while the matchmaking entry is valid, the game is not found
+                while (status != MatchmakingStatus.MATCHED) {
+                    val createBobResult = usersService.createUser(newTestUserName(), newTestEmail(), newTestPassword())
 
-        println(newMatchmakingEntry)
+                    val bobId = when (createBobResult) {
+                        is Either.Left -> fail("User creation failed for $createBobResult")
+                        is Either.Right -> createBobResult.value
+                    }
 
-        //then: the matchmaking entry is valid
-        while (true) {
-            when (newMatchmakingEntry) {
-                is Either.Left -> Unit
-                is Either.Right -> {
-                    when (val game = gamesService.getGameById(newMatchmakingEntry.value)) {
-                        is Either.Left -> fail("Failed to get game by id for $game")
-                        is Either.Right -> break
+                    //when: creating a matchmaking entry
+                    when (val newMatchmakingEntry = gamesService.tryMatchmaking(bobId, variant.name)) {
+                        is Either.Left -> Unit
+                        is Either.Right -> {
+                            when (val game = gamesService.getGameById(newMatchmakingEntry.value)) {
+                                is Either.Left -> fail("Failed to get game by id for $game")
+                                is Either.Right -> {
+                                    res = game.value.id.value
+                                    break
+                                }
+                            }
+                        }
                     }
                 }
+
+                val gameByIdValidated = when (val gameById = gamesService.getGameById(res!!)) {
+                    is Either.Left -> null
+                    is Either.Right -> gameById.value
+                }
+
+                //then: the game is found
+                assertNotNull(gameByIdValidated)
+            }
+
+            is Success -> {
+
+                res = matchmakingEntry.value
+
+                //when: getting the game by id
+                val gameByIdValidated = when (val gameById = gamesService.getGameById(res)) {
+                    is Either.Left -> null
+                    is Either.Right -> gameById.value
+                }
+
+                //then: the game is found
+                assertNotNull(gameByIdValidated)
             }
         }
-
-        //when: getting the result of the matchmaking entry
-        val res = when (newMatchmakingEntry) {
-            is Either.Left -> fail("Failed to create matchmaking entry for $newMatchmakingEntry")
-            is Either.Right -> newMatchmakingEntry.value
-        }
-
-        //when: getting the game by id
-        val gameByIdValidated = when (val gameById = gamesService.getGameById(res)) {
-            is Either.Left -> fail("Failed to get game by id for $gameById")
-            is Either.Right -> gameById.value
-        }
-
-        //then: the game is found
-        assertNotNull(gameByIdValidated)
     }
 
     companion object {

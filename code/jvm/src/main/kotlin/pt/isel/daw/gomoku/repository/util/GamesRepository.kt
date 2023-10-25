@@ -23,6 +23,8 @@ interface GamesRepository {
 
     fun isGameStoredById(id: Int): Boolean
 
+    fun getAMatch(userId: Int) : MatchmakingEntry?
+
     fun getMatchmakingEntry(userId: Int) : MatchmakingEntry?
 
     fun updateMatchmakingEntry(id: Int, status: MatchmakingStatus) : Int

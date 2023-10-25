@@ -74,7 +74,7 @@ class GamesService(
         }
     }
 
-    fun leaveGame(id: Int, userId: Int) : LeaveGameResult {
+    fun leaveGame(id: Int, userId: Int): LeaveGameResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             val game = gamesRepository.getGame(id) ?: return@run failure(LeaveGameError.GameDoesNotExist)
@@ -116,7 +116,7 @@ class GamesService(
             if (it.gamesRepository.getVariant(variant) == null)
                 return@run failure(MatchmakingError.VariantDoesNotExist)
 
-            val match = gamesRepository.getMatchmakingEntry(userId)
+            val match = gamesRepository.getAMatch(userId)
 
             if (match != null && match.status == MatchmakingStatus.PENDING) {
                 // Match found
@@ -124,12 +124,12 @@ class GamesService(
 
                 val opponent = it.usersRepository.getUserById(match.userId)
                 if (opponent != null) {
-                    val user = it.usersRepository.getUserById(userId)!!
+                    val user =
+                        it.usersRepository.getUserById(userId) ?: return@run failure(MatchmakingError.InvalidUser)
                     val gameModel = gamesDomain.createGameModel(user, opponent, Variants.valueOf(variant))
                     val id = gamesRepository.createGame(gameModel)
                     success(id)
-                }
-                else
+                } else
                     failure(MatchmakingError.InvalidUser)
             } else {
                 // if the user is not in the queue, add him
@@ -137,6 +137,20 @@ class GamesService(
                     gamesRepository.storeMatchmakingEntry(userId, MatchmakingStatus.PENDING, Clock.System.now())
                 failure(MatchmakingError.NoMatchFound)
             }
+        }
+    }
+
+    @Transactional
+    fun getMatchmakingStatus(userId: Int): MatchmakingStatusResult {
+        return transactionManager.run {
+            val gamesRepository = it.gamesRepository
+            if (it.usersRepository.getUserById(userId) == null)
+                return@run failure(MatchmakingStatusError.InvalidUser)
+            val match = gamesRepository.getMatchmakingEntry(userId)
+            if (match != null)
+                success(match.status)
+            else
+                failure(MatchmakingStatusError.MatchDoesNotExist)
         }
     }
 

@@ -2,6 +2,8 @@ package pt.isel.daw.gomoku.services.games
 
 import pt.isel.daw.gomoku.domain.games.Game
 import pt.isel.daw.gomoku.domain.games.RoundResult
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingEntry
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
 import pt.isel.daw.gomoku.utils.Either
 
 sealed class GameCreationError {
@@ -57,3 +59,11 @@ sealed class LeaveMatchmakingError {
 }
 
 typealias LeaveMatchmakingResult = Either<LeaveMatchmakingError, Unit>
+
+sealed class MatchmakingStatusError {
+    object MatchDoesNotExist : MatchmakingStatusError()
+
+    object InvalidUser : MatchmakingStatusError()
+}
+
+typealias MatchmakingStatusResult = Either<MatchmakingStatusError, MatchmakingStatus>
