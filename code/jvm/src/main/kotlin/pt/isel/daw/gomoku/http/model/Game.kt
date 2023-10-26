@@ -21,7 +21,7 @@ data class GameOutputModel(val id: Int, val board: Board, val userBlack: User, v
 
 data class GameGetByIdOutputModel(val game: GameOutputModel)
 
-data class GameMatchmakingInputModel(val userId: Int, @field:NotBlank val variant: String)
+data class GameMatchmakingInputModel(@field:NotBlank val variant: String)
 
 data class GameMatchmakingStatusOutputModel(val status: MatchmakingStatus)
 

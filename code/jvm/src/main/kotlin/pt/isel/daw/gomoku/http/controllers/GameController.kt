@@ -89,9 +89,9 @@ class GameController(
     @PostMapping(Uris.Games.MATCHMAKING)
     fun matchmaking(
         @Valid @RequestBody inputModel: GameMatchmakingInputModel,
-        user: AuthenticatedUser
+        authenticatedUser: AuthenticatedUser
     ): ResponseEntity<*> {
-        return when (val res = gameService.tryMatchmaking(inputModel.userId, inputModel.variant)) {
+        return when (val res = gameService.tryMatchmaking(authenticatedUser.user.id.value, inputModel.variant)) {
             is Success -> ResponseEntity.status(201)
                 .header(
                     "Location",
