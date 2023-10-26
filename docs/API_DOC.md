@@ -13,7 +13,6 @@
 Retrieve information about the Gomoku game system.
 
 **Endpoint:** `/api/system`
-
  **Method:** GET
 
 **Response Example:**
@@ -34,7 +33,6 @@ Retrieve information about the Gomoku game system.
 Retrieve the home page for unauthenticated users.
 
 **Endpoint:** `/api` 
-
 **Method:** GET
 
 **Response Example:**
@@ -53,7 +51,6 @@ Retrieve the home page for unauthenticated users.
 Create a new user to be able to play Gomoku.
 
 **Endpoint:** `/api/users`
-
  **Method:** POST
 
 - **Success**	
@@ -97,9 +94,7 @@ Create a new user to be able to play Gomoku.
 Create an authentication token for a user.
 
 **Endpoint:** `/api/users/token`
-
  **Method:** POST
-
 - **Success**
 	- **First Example**:
 		**Request Example:**
@@ -149,7 +144,6 @@ Create an authentication token for a user.
 Log out a user and invalidate their token.
 
 **Endpoint:** `/api/users/logout` 
-
 **Method:** POST
 
 **Authorization Bearer token Example:**
@@ -160,7 +154,6 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 Retrieve user information by their ID.
 
 **Endpoint:** `/api/users/{userId}` 
-
 **Method:** GET
 
 **Parameters:**
@@ -191,7 +184,6 @@ e.g: {userId} = 4.
 Retrieve the home page with user login for authenticated users.
 
 **Endpoint:** `/api/me` 
-
 **Method:** GET
 
 **Authorization Bearer token Example:**
@@ -213,9 +205,7 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 Retrieve the stats page of a user by his Id.
 
 **Endpoint:** `/api/stats/{userId}` 
-
 **Method:** GET
-
 **Parameter** 
 -   `userId` (integer, path) - The ID of the user 
 e.g: {userId} = 7.
@@ -249,7 +239,6 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 Retrieve the ranking page of all users.
 
 **Endpoint:** `/api/ranking` 
-
 **Method:** GET
 
 **Response Example:**
@@ -318,7 +307,6 @@ Retrieve the ranking page of all users.
 Create a gomoku game between two users.
 
 **Endpoint:** `/api/games` 
-
 **Method:** POST
 
 **Authorization Bearer token Example:**
@@ -350,7 +338,6 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 Retrieve information about a specific Gomoku game by its ID.
 
 **Endpoint:** `/api/games/{gameId}` 
-
 **Method:** GET
 
 **Parameters:**
@@ -439,7 +426,6 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 Make a move in the Gomoku game.
 
 **Endpoint:** `/api/games/{gameId}/play` 
-
 **Method:** PUT
 
 **Parameters:**
@@ -648,7 +634,6 @@ e.g: {gameId}: 2
 Get all games by a user Id.
 
 **Endpoint:** `/api/games/user` 
-
 **Method:** GET
 
 - **Success**
@@ -743,7 +728,6 @@ Get all games by a user Id.
 Get all gomoku games.
 
 **Endpoint:** `/api/games` 
-
 **Method:** GET
 
 - **Success**
@@ -828,36 +812,90 @@ Get all gomoku games.
 Leave the game by it's Id .
 
 **Endpoint:** `/api/games/{gameId}/leave` 
-
 **Method:** PUT
 
 **Authorization Bearer token Example:**
 		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
+**Failures**
+- Game already ended
+- Game does not exists
+- Invalid user
+
 
 
 ### Matchmaking
-Enter on a matchmaking to enter a game.
+Enter or create a lobby of a game.
 
 **Endpoint:** `/api/games/matchmaking` 
-
 **Method:** POST
 
 **Authorization Bearer token Example:**
 		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
-		
-**Request Example**
-	```json
-	{
-	}
-	```
+**First Example**	
+- **Request Example**
+```json
+{
+	"userId": 6, 
+	"variant": "STANDARD"
+}
+```
+- **Response Example**
+	Status code: 404 -> No lobby have been found
+
+**Second Example**	
+- **Request Example**
+```json
+{
+	"userId": 7, 
+	"variant": "STANDARD"
+}
+```
+- **Header location Example**: 
+	/api/games/1
+
+**Failures**
+- Invalid User
+- Variant does not exists
+- Match not found
 
 ### Exit Matchmaking
 Exit a matchmaking.
 
 **Endpoint:** `/api/games/matchmaking/exit` 
-
 **Method:** DEL
 
 **Authorization Bearer token Example:**
 		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+
+**Failures**
+- Invalid User
+- Match not found
+
+### Matchmaking
+Enter on a matchmaking to enter a game.
+
+**Endpoint:** `/api/games/matchmaking` 
+**Method:** POST
+
+**Authorization Bearer token Example:**
+		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+**Response Example**
+```json 
+	{
+	
+		"status": "MATCHED"
+	
+	}
+```
+
+**Failures**
+- Invalid User
+- Match not found
+
+
+
+
+	
+
+
