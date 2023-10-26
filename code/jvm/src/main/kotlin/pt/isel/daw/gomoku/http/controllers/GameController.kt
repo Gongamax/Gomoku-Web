@@ -159,7 +159,7 @@ class GameController(
     }
 
     @GetMapping(Uris.Games.GET_ALL_GAMES_BY_USER)
-    fun getAllGamesByUser(authenticatedUser: AuthenticatedUser, @PathVariable id: String): ResponseEntity<*> {
+    fun getAllGamesByUser(authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
         return when (val games = gameService.getGamesOfUser(authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok(
                 GameGetAllByUserOutputModel(games.value.map { game ->

@@ -34,7 +34,7 @@ object Uris {
         const val MATCHMAKING = "$PREFIX/games/matchmaking"
         const val LEAVE = "$PREFIX/games/{id}/leave"
         const val GET_ALL_GAMES = "$PREFIX/games"
-        const val GET_ALL_GAMES_BY_USER = "$PREFIX/games/user/{id}"
+        const val GET_ALL_GAMES_BY_USER = "$PREFIX/games/user"
         const val EXIT_MATCHMAKING_QUEUE = "$PREFIX/games/matchmaking/exit"
 
         fun byId(id: Int) = UriTemplate(GET_GAME_BY_ID).expand(id)

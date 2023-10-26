@@ -88,7 +88,7 @@ class UsersController(
     fun getRankingInfo(): ResponseEntity<*> =
         when (val res = userService.getRanking()) {
             is Success -> ResponseEntity.ok(RankingInfoOutputModel(res.value))
-            is Failure -> Problem.response(404, Problem.rankingNotFound)
+            is Failure ->  Problem.response(404, Problem.rankingNotFound)
         }
 
 
