@@ -85,8 +85,16 @@ class GamesService(
             if (game.state.isEnded)
                 failure(LeaveGameError.GameAlreadyEnded)
             else {
-                val newGame = if (game.playerBLACK.id.value == userId) game.copy(state = Game.State.PLAYER_WHITE_WON)
-                else game.copy(state = Game.State.PLAYER_BLACK_WON)
+                val newGame = if (game.playerBLACK.id.value == userId) game.copy(
+                    board = BoardWin(
+                        game.board.moves,
+                        winner = Piece.WHITE
+                    ), state = Game.State.PLAYER_WHITE_WON
+                )
+                else game.copy(
+                    board = BoardWin(game.board.moves, winner = Piece.BLACK),
+                    state = Game.State.PLAYER_BLACK_WON
+                )
                 success(gamesRepository.updateGame(newGame))
             }
         }
