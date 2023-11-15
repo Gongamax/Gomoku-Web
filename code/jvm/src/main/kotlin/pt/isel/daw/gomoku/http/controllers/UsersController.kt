@@ -1,22 +1,26 @@
 package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.hateoas.Link
+import org.springframework.hateoas.RepresentationModel
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
+import pt.isel.daw.gomoku.domain.users.User
+import pt.isel.daw.gomoku.http.assemblers.*
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.http.util.Uris
 import pt.isel.daw.gomoku.services.users.*
 import pt.isel.daw.gomoku.utils.Failure
 import pt.isel.daw.gomoku.utils.Success
 
+
 @RestController
 class UsersController(
-    private val userService: UsersService
+    private val userService: UsersService,
+    private val getUserModelAssembler: GetUserModelAssembler
 ) {
     @PostMapping(Uris.Users.CREATE_USER)
     fun create(@RequestBody @Valid input: UserCreateInputModel): ResponseEntity<*> {
@@ -63,13 +67,15 @@ class UsersController(
     @GetMapping(Uris.Users.GET_USER_BY_ID)
     fun getById(@PathVariable id: String): ResponseEntity<*> {
         return when (val user = userService.getUserById(id.toInt())) {
-            is Success -> ResponseEntity.ok(
-                UserGetByIdOutputModel(
-                    user.value.id.value,
-                    user.value.username,
-                    user.value.email.value
-                )
-            )
+            is Success -> {
+                ResponseEntity.ok(getUserModelAssembler.toModel(
+                    UserGetByIdOutputModel(
+                        user.value.id.value,
+                        user.value.username,
+                        user.value.email.value
+                    )
+                ))
+            }
 
             is Failure -> when (user.value) {
                 UserGetError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)

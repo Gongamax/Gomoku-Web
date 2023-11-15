@@ -11,10 +11,11 @@ object Uris {
     fun home(): URI = URI(HOME)
     fun systemInfo(): URI = URI(SYSTEM_INFO)
     object Users {
-        const val CREATE_USER = "$PREFIX/users"
-        const val TOKEN = "$PREFIX/users/token"
+        private const val USERS = "/users"
+        const val CREATE_USER = "$PREFIX$USERS"
+        const val TOKEN = "$PREFIX$USERS/token"
         const val LOGOUT = "$PREFIX/logout"
-        const val GET_USER_BY_ID = "$PREFIX/users/{id}"
+        const val GET_USER_BY_ID = "$PREFIX$USERS/{id}"
         const val AUTH_HOME = "$PREFIX/me"
         const val RANKING_INFO = "$PREFIX/ranking"
         const val GET_STATS_BY_ID = "$PREFIX/stats/{id}"
@@ -28,14 +29,15 @@ object Uris {
     }
 
     object Games {
-        const val CREATE_GAME = "$PREFIX/games"
-        const val GET_GAME_BY_ID = "$PREFIX/games/{id}"
-        const val PLAY = "$PREFIX/games/{id}/play"
-        const val MATCHMAKING = "$PREFIX/games/matchmaking"
-        const val LEAVE = "$PREFIX/games/{id}/leave"
-        const val GET_ALL_GAMES = "$PREFIX/games"
-        const val GET_ALL_GAMES_BY_USER = "$PREFIX/games/user"
-        const val EXIT_MATCHMAKING_QUEUE = "$PREFIX/games/matchmaking/exit"
+        private const val GAMES = "/games"
+        const val CREATE_GAME = "$PREFIX$GAMES"
+        const val GET_GAME_BY_ID = "$PREFIX$GAMES/{id}"
+        const val PLAY = "$PREFIX$GAMES/{id}/play"
+        const val MATCHMAKING = "$PREFIX$GAMES/matchmaking"
+        const val LEAVE = "$PREFIX$GAMES/{id}/leave"
+        const val GET_ALL_GAMES = "$PREFIX$GAMES"
+        const val GET_ALL_GAMES_BY_USER = "$PREFIX$GAMES/user"
+        const val EXIT_MATCHMAKING_QUEUE = "$PREFIX$GAMES/matchmaking/exit"
 
         fun byId(id: Int) = UriTemplate(GET_GAME_BY_ID).expand(id)
         fun play(id : Int): URI = UriTemplate(PLAY).expand(id)
