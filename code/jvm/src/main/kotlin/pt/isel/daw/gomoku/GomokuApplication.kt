@@ -15,7 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import pt.isel.daw.gomoku.domain.games.GamesDomainConfig
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
-import pt.isel.daw.gomoku.http.assemblers.GetUserModelAssembler
+import pt.isel.daw.gomoku.http.assemblers.UserModelAssembler
 import pt.isel.daw.gomoku.http.pipeline.AuthenticatedUserArgumentResolver
 import pt.isel.daw.gomoku.http.pipeline.AuthenticationInterceptor
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
@@ -38,8 +38,8 @@ import kotlin.time.Duration.Companion.minutes
 @EnableHypermediaSupport(type = [])
 internal class HypermediaConfiguration {
     @Bean
-    fun getUserModelAssembler(): GetUserModelAssembler {
-        return GetUserModelAssembler()
+    fun userModelAssembler(): UserModelAssembler {
+        return UserModelAssembler()
     }
 }
 

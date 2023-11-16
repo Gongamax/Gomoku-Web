@@ -20,7 +20,7 @@ import pt.isel.daw.gomoku.utils.Success
 @RestController
 class UsersController(
     private val userService: UsersService,
-    private val getUserModelAssembler: GetUserModelAssembler
+    private val userModelAssembler: UserModelAssembler
 ) {
     @PostMapping(Uris.Users.CREATE_USER)
     fun create(@RequestBody @Valid input: UserCreateInputModel): ResponseEntity<*> {
@@ -68,7 +68,7 @@ class UsersController(
     fun getById(@PathVariable id: String): ResponseEntity<*> {
         return when (val user = userService.getUserById(id.toInt())) {
             is Success -> {
-                ResponseEntity.ok(getUserModelAssembler.toModel(
+                ResponseEntity.ok(userModelAssembler.getUserModelAssembler.toModel(
                     UserGetByIdOutputModel(
                         user.value.id.value,
                         user.value.username,
