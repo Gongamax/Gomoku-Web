@@ -93,7 +93,7 @@ class UsersController(
     @GetMapping(Uris.Users.RANKING_INFO)
     fun getRankingInfo(): ResponseEntity<*> =
         when (val res = userService.getRanking()) {
-            is Success -> ResponseEntity.ok(RankingInfoOutputModel(res.value))
+            is Success -> ResponseEntity.ok(userModelAssembler.getRankingInfoModelAssembler.toModel(RankingInfoOutputModel(res.value)))
             is Failure ->  Problem.response(404, Problem.rankingNotFound)
         }
 

@@ -29,5 +29,24 @@ class UserModelAssembler {
         }
     }
 
+    class GetRankingInfoModelAssembler : RepresentationModelAssembler<RankingInfoOutputModel, RepresentationModel<*>> {
+        /**
+         * HINT Here we are creating a respective representation-model (based on the given source) with the [SirenModelBuilder].
+         * This allows great flexibility in how to create the representation-model.
+         */
+        override fun toModel(source: RankingInfoOutputModel): RepresentationModel<*> {
+            val selfLink: Link =
+                linkTo(methodOn(UsersController::class.java).getRankingInfo()).withSelfRel()
+            return sirenModel()
+                .classes("getRankingInfo")
+                .title("Get ranking info")
+                .properties(source)
+                .linksAndActions(selfLink)
+                .build()
+        }
+    }
+
     val getUserModelAssembler = GetUserModelAssembler()
+
+    val getRankingInfoModelAssembler = GetRankingInfoModelAssembler()
 }
