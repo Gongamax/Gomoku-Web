@@ -3,10 +3,12 @@ package pt.isel.daw.gomoku
 import kotlinx.datetime.Clock
 import org.jdbi.v3.core.Jdbi
 import org.postgresql.ds.PGSimpleDataSource
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.config.EnableHypermediaSupport
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
@@ -15,7 +17,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import pt.isel.daw.gomoku.domain.games.GamesDomainConfig
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
-import pt.isel.daw.gomoku.http.assemblers.UserModelAssembler
+import pt.isel.daw.gomoku.http.assemblers.GetAllStatsModelAssembler
+import pt.isel.daw.gomoku.http.assemblers.GetUserModelAssembler
+import pt.isel.daw.gomoku.http.model.StatsOutputModel
 import pt.isel.daw.gomoku.http.pipeline.AuthenticatedUserArgumentResolver
 import pt.isel.daw.gomoku.http.pipeline.AuthenticationInterceptor
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
@@ -37,10 +41,26 @@ import kotlin.time.Duration.Companion.minutes
 @Configuration
 @EnableHypermediaSupport(type = [])
 internal class HypermediaConfiguration {
+    /*@Bean
+    fun userModelAssembler(pagedResourcesAssembler: PagedResourcesAssembler<StatsOutputModel>): UserModelAssembler {
+        return UserModelAssembler(pagedResourcesAssembler = pagedResourcesAssembler)
+    }*/
     @Bean
-    fun userModelAssembler(): UserModelAssembler {
-        return UserModelAssembler()
+    fun getUserModelAssembler(): GetUserModelAssembler {
+        return GetUserModelAssembler()
     }
+
+    @Bean
+    fun getAllStatsModelAssembler(pagedResourcesAssembler: PagedResourcesAssembler<StatsOutputModel>) : GetAllStatsModelAssembler {
+        return GetAllStatsModelAssembler(pagedResourcesAssembler)
+    }
+    /*@Bean
+    fun countryModelAssembler(
+        stateModelAssembler: StateModelAssembler?,
+        pagedResourcesAssembler: PagedResourcesAssembler<Country?>?
+    ): CountryModelAssembler {
+        return CountryModelAssembler(stateModelAssembler, pagedResourcesAssembler)
+    }*/
 }
 
 @SpringBootApplication

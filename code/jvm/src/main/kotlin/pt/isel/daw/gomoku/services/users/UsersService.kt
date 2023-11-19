@@ -1,12 +1,14 @@
 package pt.isel.daw.gomoku.services.users
 
 import kotlinx.datetime.Clock
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import pt.isel.daw.gomoku.domain.users.Email
-import pt.isel.daw.gomoku.domain.utils.Token
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UsersDomain
-import pt.isel.daw.gomoku.domain.utils.RankingEntry
+import pt.isel.daw.gomoku.domain.utils.Token
+import pt.isel.daw.gomoku.http.util.PageUtils.toPage
 import pt.isel.daw.gomoku.repository.util.TransactionManager
 import pt.isel.daw.gomoku.services.others.RankingError
 import pt.isel.daw.gomoku.services.others.RankingResult
@@ -110,14 +112,14 @@ class UsersService(
         }
     }
 
-    fun getAllStats(): RankingResult =
+    fun getAllStats(pageable: Pageable): RankingResult =
         transactionManager.run {
             val usersRepository = it.usersRepository
             val ranking = usersRepository.getAllStats().filterIndexed { index, _ ->
                 index < 10
             }
             if (ranking.isEmpty()) failure(RankingError.RankingDoesNotExist)
-            else success(ranking)
+            else success(toPage(ranking, pageable))
         }
 
     fun getUserStatsById(id: Int): UserStatsResult =

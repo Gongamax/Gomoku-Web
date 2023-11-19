@@ -49,7 +49,7 @@ class UserGetByIdOutputModel(
     val email: String
 )
 
-class StatsGetByIdOutputModel(
+class StatsOutputModel(
     val id: Int,
     val username: String,
     val gamesPlayed: Int,
@@ -67,10 +67,10 @@ class UserHomeOutputModel(
 data class UserTokenCreateOutputModel(
     val token: String
 )
-data class StatsOfAllUsersOutputModel(
-    val statsTable: List<StatsGetByIdOutputModel>,
+/*data class StatsOfAllUsersOutputModel(
+    val statsTable: List<StatsOutputModel>,
     val size: Int = statsTable.size
-)
+)*/
 
 data class UserTokenRemoveOutputModel(
     val message: String

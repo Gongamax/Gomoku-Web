@@ -1,14 +1,13 @@
 package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.hateoas.Link
+import org.springframework.data.domain.Pageable
+import org.springframework.hateoas.PagedModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
-import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.http.assemblers.*
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.http.util.Uris
@@ -20,7 +19,8 @@ import pt.isel.daw.gomoku.utils.Success
 @RestController
 class UsersController(
     private val userService: UsersService,
-    private val userModelAssembler: UserModelAssembler
+    private val getUserModelAssembler: GetUserModelAssembler,
+    private val getAllStatsModelAssembler: GetAllStatsModelAssembler
 ) {
     @PostMapping(Uris.Users.CREATE_USER)
     fun create(@RequestBody @Valid input: UserCreateInputModel): ResponseEntity<*> {
@@ -68,7 +68,7 @@ class UsersController(
     fun getById(@PathVariable id: String): ResponseEntity<*> {
         return when (val user = userService.getUserById(id.toInt())) {
             is Success -> {
-                ResponseEntity.ok(userModelAssembler.getUserModelAssembler.toModel(
+                ResponseEntity.ok(/*userModelAssembler.*/getUserModelAssembler.toModel(
                     UserGetByIdOutputModel(
                         user.value.id.value,
                         user.value.username,
@@ -90,22 +90,37 @@ class UsersController(
     fun getAuthHome(userAuthenticatedUser: AuthenticatedUser): ResponseEntity<*> =
         ResponseEntity.ok(UserHomeOutputModel(userAuthenticatedUser.user.id.value, userAuthenticatedUser.user.username))
 
+    /*@GetMapping
+    fun findAll(pageable: Pageable?): ResponseEntity<PagedModel<RepresentationModel<*>>> {
+        return ok(countryModelAssembler.toPagedModel(countryService.findAll(pageable)))
+    }*/
     @GetMapping(Uris.Users.STATS_INFO)
-    fun getAllStats(): ResponseEntity<*> =
-        when (val res = userService.getAllStats()) {
-            is Success -> ResponseEntity.ok(userModelAssembler.getRankingInfoModelAssembler.toModel(StatsOfAllUsersOutputModel(
-                res.value.map { userStats ->
-                    StatsGetByIdOutputModel(
-                        userStats.user.id.value,
-                        userStats.user.username,
-                        userStats.gamesPlayed,
-                        userStats.wins,
-                        userStats.losses,
-                        userStats.rank,
-                        userStats.points
-                    )
-                }
-            )))
+    fun getAllStats(pageable: Pageable): ResponseEntity<*> =
+        when (val res = userService.getAllStats(pageable)) {
+            is Success -> ResponseEntity.ok(/*userModelAssembler.*/getAllStatsModelAssembler.toPagedModel(res.value.map { userStats ->
+                StatsOutputModel(
+                    userStats.user.id.value,
+                    userStats.user.username,
+                    userStats.gamesPlayed,
+                    userStats.wins,
+                    userStats.losses,
+                    userStats.rank,
+                    userStats.points
+                )
+            })/*.
+                toModel(StatsOfAllUsersOutputModel(
+                    res.value.map { userStats ->
+                        StatsGetByIdOutputModel(
+                            userStats.user.id.value,
+                            userStats.user.username,
+                            userStats.gamesPlayed,
+                            userStats.wins,
+                            userStats.losses,
+                            userStats.rank,
+                            userStats.points
+                        )
+                    }
+            ))*/)
             is Failure ->  Problem.response(404, Problem.rankingNotFound)
         }
 
@@ -114,7 +129,7 @@ class UsersController(
     fun getStatsById(@PathVariable id: String): ResponseEntity<*> =
         when (val stats = userService.getUserStatsById(id.toInt())) {
             is Success -> ResponseEntity.ok(
-                StatsGetByIdOutputModel(
+                StatsOutputModel(
                     stats.value.user.id.value,
                     stats.value.user.username,
                     stats.value.gamesPlayed,
