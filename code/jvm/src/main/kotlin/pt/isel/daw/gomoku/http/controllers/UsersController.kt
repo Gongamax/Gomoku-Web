@@ -90,16 +90,28 @@ class UsersController(
     fun getAuthHome(userAuthenticatedUser: AuthenticatedUser): ResponseEntity<*> =
         ResponseEntity.ok(UserHomeOutputModel(userAuthenticatedUser.user.id.value, userAuthenticatedUser.user.username))
 
-    @GetMapping(Uris.Users.RANKING_INFO)
-    fun getRankingInfo(): ResponseEntity<*> =
-        when (val res = userService.getRanking()) {
-            is Success -> ResponseEntity.ok(userModelAssembler.getRankingInfoModelAssembler.toModel(RankingInfoOutputModel(res.value)))
+    @GetMapping(Uris.Users.STATS_INFO)
+    fun getAllStats(): ResponseEntity<*> =
+        when (val res = userService.getAllStats()) {
+            is Success -> ResponseEntity.ok(userModelAssembler.getRankingInfoModelAssembler.toModel(StatsOfAllUsersOutputModel(
+                res.value.map { userStats ->
+                    StatsGetByIdOutputModel(
+                        userStats.user.id.value,
+                        userStats.user.username,
+                        userStats.gamesPlayed,
+                        userStats.wins,
+                        userStats.losses,
+                        userStats.rank,
+                        userStats.points
+                    )
+                }
+            )))
             is Failure ->  Problem.response(404, Problem.rankingNotFound)
         }
 
 
     @GetMapping(Uris.Users.GET_STATS_BY_ID)
-    fun getStatsById(@PathVariable id: String, user: AuthenticatedUser): ResponseEntity<*> =
+    fun getStatsById(@PathVariable id: String): ResponseEntity<*> =
         when (val stats = userService.getUserStatsById(id.toInt())) {
             is Success -> ResponseEntity.ok(
                 StatsGetByIdOutputModel(

@@ -37,5 +37,5 @@ interface UsersRepository {
 
     fun getAllUsers(): List<User>
 
-    fun getRanking(): List<UserStatistics>
+    fun getAllStats(): List<UserStatistics>
 }

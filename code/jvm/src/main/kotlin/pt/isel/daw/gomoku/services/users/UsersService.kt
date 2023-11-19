@@ -110,17 +110,12 @@ class UsersService(
         }
     }
 
-    fun getRanking(): RankingResult =
+    fun getAllStats(): RankingResult =
         transactionManager.run {
             val usersRepository = it.usersRepository
-            val ranking = usersRepository.getRanking().filterIndexed { index, _ ->
+            val ranking = usersRepository.getAllStats().filterIndexed { index, _ ->
                 index < 10
-            }.map { userStats ->
-                RankingEntry(
-                    userStats.rank,
-                    userStats.user.username,
-                    userStats.points
-                ) }
+            }
             if (ranking.isEmpty()) failure(RankingError.RankingDoesNotExist)
             else success(ranking)
         }

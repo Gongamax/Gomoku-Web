@@ -154,7 +154,7 @@ class JdbiUsersRepository(
             .mapTo<User>()
             .list()
 
-    override fun getRanking(): List<UserStatistics> =
+    override fun getAllStats(): List<UserStatistics> =
         handle.createQuery(
             """
                 select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, draws, rank, points

@@ -17,15 +17,15 @@ object Uris {
         const val LOGOUT = "$PREFIX/logout"
         const val GET_USER_BY_ID = "$PREFIX$USERS/{id}"
         const val AUTH_HOME = "$PREFIX/me"
-        const val RANKING_INFO = "$PREFIX/ranking"
-        const val GET_STATS_BY_ID = "$PREFIX/stats/{id}"
+        const val STATS_INFO = "$PREFIX/stats"
+        const val GET_STATS_BY_ID = "$PREFIX$STATS_INFO/{id}"
 
         fun getUsersById(id: Int) = UriTemplate(GET_USER_BY_ID).expand(id)
         fun getStatsById(id: Int) = UriTemplate(GET_STATS_BY_ID).expand(id)
         fun authHome(): URI = URI(HOME)
         fun login(): URI = URI(TOKEN)
         fun register(): URI = URI(CREATE_USER)
-        fun rankingInfo(): URI = URI(RANKING_INFO)
+        fun statsOfAllUsers(): URI = URI(STATS_INFO)
     }
 
     object Games {

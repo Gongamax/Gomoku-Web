@@ -13,10 +13,6 @@ import pt.isel.daw.gomoku.http.model.*
 
 class UserModelAssembler {
     class GetUserModelAssembler : RepresentationModelAssembler<UserGetByIdOutputModel, RepresentationModel<*>> {
-        /**
-         * HINT Here we are creating a respective representation-model (based on the given source) with the [SirenModelBuilder].
-         * This allows great flexibility in how to create the representation-model.
-         */
         override fun toModel(source: UserGetByIdOutputModel): RepresentationModel<*> {
             val selfLink: Link =
                 linkTo(methodOn(UsersController::class.java).getById(source.id.toString())).withSelfRel()
@@ -29,14 +25,11 @@ class UserModelAssembler {
         }
     }
 
-    class GetRankingInfoModelAssembler : RepresentationModelAssembler<RankingInfoOutputModel, RepresentationModel<*>> {
-        /**
-         * HINT Here we are creating a respective representation-model (based on the given source) with the [SirenModelBuilder].
-         * This allows great flexibility in how to create the representation-model.
-         */
-        override fun toModel(source: RankingInfoOutputModel): RepresentationModel<*> {
+    /** getRankingInfo retorna um conjunto de dados, por isso deve-se usar uma collection */
+    class GetRankingInfoModelAssembler : RepresentationModelAssembler<StatsOfAllUsersOutputModel, RepresentationModel<*>> {
+        override fun toModel(source: StatsOfAllUsersOutputModel): RepresentationModel<*> {
             val selfLink: Link =
-                linkTo(methodOn(UsersController::class.java).getRankingInfo()).withSelfRel()
+                linkTo(methodOn(UsersController::class.java).getAllStats()).withSelfRel()
             return sirenModel()
                 .classes("getRankingInfo")
                 .title("Get ranking info")

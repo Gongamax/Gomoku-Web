@@ -2,6 +2,7 @@ package pt.isel.daw.gomoku.http.model
 
 import jakarta.validation.constraints.Size
 import jakarta.validation.constraints.Email
+import pt.isel.daw.gomoku.domain.users.UserStatistics
 import pt.isel.daw.gomoku.domain.utils.RankingEntry
 
 const val MIN_USERNAME_LENGTH = 3
@@ -66,8 +67,9 @@ class UserHomeOutputModel(
 data class UserTokenCreateOutputModel(
     val token: String
 )
-data class RankingInfoOutputModel(
-    val rankingTable: List<RankingEntry>
+data class StatsOfAllUsersOutputModel(
+    val statsTable: List<StatsGetByIdOutputModel>,
+    val size: Int = statsTable.size
 )
 
 data class UserTokenRemoveOutputModel(
