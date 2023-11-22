@@ -7,11 +7,7 @@ import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
 
 
-data class GamePlayInputModel(
-    val userId: Int,
-    val row: Int,
-    val column: Int
-)
+data class GamePlayInputModel(val row: Int, val column: Int)
 
 data class GameStartInputModel(val userBlack: Int,val userWhite: Int,@field:NotBlank val variant: String)
 

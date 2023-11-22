@@ -2,11 +2,7 @@ package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.http.util.Uris
@@ -30,16 +26,36 @@ class UsersController(
                 ).build<Unit>()
 
             is Failure -> when (res.value) {
-                UserCreationError.InsecurePassword -> Problem.response(400, Problem.insecurePassword)
-                UserCreationError.UserAlreadyExists -> Problem.response(400, Problem.userAlreadyExists)
-                UserCreationError.InsecureEmail -> Problem.response(400, Problem.insecureEmail)
+                UserCreationError.InsecurePassword -> Problem(
+                    typeUri = Problem.insecurePassword,
+                    title = "Problem.insecurePassword",
+                    status = 400,
+                    detail = "Password is insecure",
+                    instance = Uris.Users.register()
+                ).toResponse()
+
+                UserCreationError.UserAlreadyExists -> Problem(
+                    typeUri = Problem.userAlreadyExists,
+                    title = "Problem.userAlreadyExists",
+                    status = 409,
+                    detail = "User with username ${input.username} already exists",
+                    instance = Uris.Users.register()
+                ).toResponse()
+
+                UserCreationError.InsecureEmail -> Problem(
+                    typeUri = Problem.insecureEmail,
+                    title = "Problem.insecureEmail",
+                    status = 400,
+                    detail = "Email is insecure",
+                    instance = Uris.Users.register()
+                ).toResponse()
             }
         }
     }
 
     @PostMapping(Uris.Users.TOKEN)
     fun login(
-       @Valid @RequestBody input: UserCreateTokenInputModel
+        @Valid @RequestBody input: UserCreateTokenInputModel
     ): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
             is Success ->
@@ -48,7 +64,13 @@ class UsersController(
 
             is Failure -> when (res.value) {
                 TokenCreationError.UserOrPasswordAreInvalid ->
-                    Problem.response(400, Problem.userOrPasswordAreInvalid)
+                    Problem(
+                        typeUri = Problem.userOrPasswordAreInvalid,
+                        title = "Problem.userOrPasswordAreInvalid",
+                        status = 401,
+                        detail = "User or password are invalid",
+                        instance = Uris.Users.login()
+                    ).toResponse()
             }
         }
     }
@@ -57,7 +79,13 @@ class UsersController(
     fun logout(user: AuthenticatedUser): ResponseEntity<*> =
         when (userService.revokeToken(user.token)) {
             is Success -> ResponseEntity.ok(UserTokenRemoveOutputModel("Token ${user.token} revoked. Logout succeeded"))
-            is Failure -> Problem.response(400, Problem.tokenNotRevoked)
+            is Failure -> Problem(
+                typeUri = Problem.tokenNotRevoked,
+                title = "Problem.tokenNotRevoked",
+                status = 400,
+                detail = "Token ${user.token} not revoked",
+                instance = Uris.Users.logout()
+            ).toResponse()
         }
 
     @GetMapping(Uris.Users.GET_USER_BY_ID)
@@ -72,10 +100,13 @@ class UsersController(
             )
 
             is Failure -> when (user.value) {
-                UserGetError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)
-                UserGetError.InvalidToken -> Problem.response(400, Problem.invalidToken)
-                UserGetError.TokenExpired -> Problem.response(400, Problem.tokenExpired)
-                UserGetError.UserIsNotAuthenticated -> Problem.response(400, Problem.userIsNotAuthenticated)
+                UserGetByIdError.UserDoesNotExist -> Problem(
+                    typeUri = Problem.userDoesNotExists,
+                    title = "Problem.userDoesNotExists",
+                    status = 404,
+                    detail = "User with id $id does not exist",
+                    instance = Uris.Users.getUsersById(id.toInt())
+                ).toResponse()
             }
         }
     }
@@ -88,7 +119,13 @@ class UsersController(
     fun getRankingInfo(): ResponseEntity<*> =
         when (val res = userService.getRanking()) {
             is Success -> ResponseEntity.ok(RankingInfoOutputModel(res.value))
-            is Failure ->  Problem.response(404, Problem.rankingNotFound)
+            is Failure -> Problem(
+                typeUri = Problem.rankingNotFound,
+                title = "Problem.rankingNotFound",
+                status = 404,
+                detail = "Ranking not found",
+                instance = Uris.Users.rankingInfo()
+            ).toResponse()
         }
 
 
@@ -96,7 +133,7 @@ class UsersController(
     fun getStatsById(@PathVariable id: String, user: AuthenticatedUser): ResponseEntity<*> =
         when (val stats = userService.getUserStatsById(id.toInt())) {
             is Success -> ResponseEntity.ok(
-                StatsGetByIdOutputModel(
+                UserStatsOutputModel(
                     stats.value.user.id.value,
                     stats.value.user.username,
                     stats.value.gamesPlayed,
@@ -109,10 +146,64 @@ class UsersController(
 
             is Failure ->
                 when (stats.value) {
-                    UserStatsError.UserDoesNotExist -> Problem.response(400, Problem.userDoesNotExists)
-                    UserStatsError.UserStatsDoesNotExist -> Problem.response(404, Problem.statsNotFound)
+                    UserStatsError.UserDoesNotExist -> Problem(
+                        typeUri = Problem.userDoesNotExists,
+                        title = "Problem.userDoesNotExists",
+                        status = 404,
+                        detail = "User with id $id does not exist",
+                        instance = Uris.Users.getUsersById(id.toInt())
+                    ).toResponse()
+
+                    UserStatsError.UserStatsDoesNotExist -> Problem(
+                        typeUri = Problem.statsNotFound,
+                        title = "Problem.statsNotFound",
+                        status = 404,
+                        detail = "Stats for user with id $id does not exist",
+                        instance = Uris.Users.getStatsById(id.toInt())
+                    ).toResponse()
                 }
         }
 
+    @PutMapping(Uris.Users.UPDATE_USER)
+    fun updateUser(
+        authenticatedUser: AuthenticatedUser,
+        @RequestBody @Valid input: UserUpdateInputModel
+    ): ResponseEntity<*> {
+        return when (val res =
+            userService.updateUser(authenticatedUser.user.id.value, input.username, input.email, input.password)) {
+            is Success -> ResponseEntity.ok().header(
+                "Location",
+                Uris.Users.getUsersById(authenticatedUser.user.id.value).toASCIIString()
+            ).body(
+                UserUpdateOutputModel("User with id ${authenticatedUser.user.id.value} updated successfully")
+            )
+
+            is Failure -> when (res.value) {
+                UserUpdateError.UserDoesNotExist -> Problem(
+                    typeUri = Problem.userDoesNotExists,
+                    title = "Problem.userDoesNotExists",
+                    status = 404,
+                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Users.getUsersById(authenticatedUser.user.id.value)
+                ).toResponse()
+
+                UserUpdateError.InsecurePassword -> Problem(
+                    typeUri = Problem.insecurePassword,
+                    title = "Problem.insecurePassword",
+                    status = 400,
+                    detail = "Password is insecure",
+                    instance = Uris.Users.updateUser(authenticatedUser.user.id.value)
+                ).toResponse()
+
+                UserUpdateError.InsecureEmail -> Problem(
+                    typeUri = Problem.insecureEmail,
+                    title = "Problem.insecureEmail",
+                    status = 400,
+                    detail = "Email is insecure",
+                    instance = Uris.Users.updateUser(authenticatedUser.user.id.value)
+                ).toResponse()
+            }
+        }
+    }
 }
 

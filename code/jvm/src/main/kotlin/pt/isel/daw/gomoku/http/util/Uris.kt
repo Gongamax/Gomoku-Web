@@ -18,13 +18,16 @@ object Uris {
         const val AUTH_HOME = "$PREFIX/me"
         const val RANKING_INFO = "$PREFIX/ranking"
         const val GET_STATS_BY_ID = "$PREFIX/stats/{id}"
+        const val UPDATE_USER = "$PREFIX/users/update"    //TODO: THINK ABOUT THIS
 
         fun getUsersById(id: Int) = UriTemplate(GET_USER_BY_ID).expand(id)
         fun getStatsById(id: Int) = UriTemplate(GET_STATS_BY_ID).expand(id)
         fun authHome(): URI = URI(HOME)
         fun login(): URI = URI(TOKEN)
+        fun logout(): URI = URI(LOGOUT)
         fun register(): URI = URI(CREATE_USER)
         fun rankingInfo(): URI = URI(RANKING_INFO)
+        fun updateUser(id: Int): URI = UriTemplate(UPDATE_USER).expand(id)
     }
 
     object Games {
@@ -32,6 +35,7 @@ object Uris {
         const val GET_GAME_BY_ID = "$PREFIX/games/{id}"
         const val PLAY = "$PREFIX/games/{id}/play"
         const val MATCHMAKING = "$PREFIX/games/matchmaking"
+        const val GET_MATCHMAKING_STATUS = "$PREFIX/games/matchmaking/status"
         const val LEAVE = "$PREFIX/games/{id}/leave"
         const val GET_ALL_GAMES = "$PREFIX/games"
         const val GET_ALL_GAMES_BY_USER = "$PREFIX/games/user"
@@ -42,6 +46,8 @@ object Uris {
         fun create(): URI = URI(CREATE_GAME)
 
         fun matchmaking(): URI = URI(MATCHMAKING)
+
+        fun getMatchmakingStatus(): URI = URI(GET_MATCHMAKING_STATUS)
 
         fun exitMatchmakingQueue(): URI = URI(EXIT_MATCHMAKING_QUEUE)
 

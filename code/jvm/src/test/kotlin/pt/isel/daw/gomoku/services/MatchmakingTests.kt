@@ -72,17 +72,17 @@ class MatchmakingTests {
                         is Either.Right -> createBobResult.value
                     }
 
+                    val newMatchmakingEntry = when (val r = gamesService.tryMatchmaking(bobId, variant.name)) {
+                        is Either.Left -> fail("Failed to create matchmaking entry for $matchmakingEntry")
+                        is Either.Right -> r.value
+                    }
+
                     //when: creating a matchmaking entry
-                    when (val newMatchmakingEntry = gamesService.tryMatchmaking(bobId, variant.name)) {
-                        is Either.Left -> Unit
+                    when (val game = gamesService.getGameById(newMatchmakingEntry.id)) {
+                        is Either.Left -> fail("Failed to get game by id for $game")
                         is Either.Right -> {
-                            when (val game = gamesService.getGameById(newMatchmakingEntry.value)) {
-                                is Either.Left -> fail("Failed to get game by id for $game")
-                                is Either.Right -> {
-                                    res = game.value.id.value
-                                    break
-                                }
-                            }
+                            res = game.value.id.value
+                            break
                         }
                     }
                 }
@@ -97,8 +97,7 @@ class MatchmakingTests {
             }
 
             is Success -> {
-
-                res = matchmakingEntry.value
+                res = matchmakingEntry.value.id
 
                 //when: getting the game by id
                 val gameByIdValidated = when (val gameById = gamesService.getGameById(res)) {
@@ -106,8 +105,16 @@ class MatchmakingTests {
                     is Either.Right -> gameById.value
                 }
 
-                //then: the game is found
-                assertNotNull(gameByIdValidated)
+                val getMatchmakingStatus = when (val status = gamesService.getMatchmakingStatus(aliceId)) {
+                    is Either.Left -> null
+                    is Either.Right -> status.value
+                }
+
+                //then: the game is found or the matchmaking entry is valid
+                if (gameByIdValidated == null)
+                    assertNotNull(getMatchmakingStatus)
+                else
+                    assertNotNull(gameByIdValidated)
             }
         }
     }

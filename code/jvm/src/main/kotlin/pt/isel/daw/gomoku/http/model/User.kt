@@ -48,7 +48,7 @@ class UserGetByIdOutputModel(
     val email: String
 )
 
-class StatsGetByIdOutputModel(
+class UserStatsOutputModel(
     val id: Int,
     val username: String,
     val gamesPlayed: Int,
@@ -71,5 +71,26 @@ data class RankingInfoOutputModel(
 )
 
 data class UserTokenRemoveOutputModel(
+    val message: String
+)
+
+data class UserUpdateInputModel(
+    @field:Size(
+        min = MIN_USERNAME_LENGTH,
+        max = MAX_USERNAME_LENGTH,
+        message = "Username must be between $MIN_USERNAME_LENGTH and $MAX_USERNAME_LENGTH characters long."
+    )
+    val username: String,
+    @field:Email(message = "Email must be valid.")
+    val email: String,
+    @field:Size(
+        min = MIN_PASSWORD_LENGTH,
+        max = MAX_PASSWORD_LENGTH,
+        message = "Password must be between $MIN_PASSWORD_LENGTH and $MAX_PASSWORD_LENGTH characters long."
+    )
+    val password: String
+)
+
+data class UserUpdateOutputModel(
     val message: String
 )

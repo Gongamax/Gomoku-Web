@@ -46,12 +46,17 @@ sealed class LeaveGameError {
 typealias LeaveGameResult = Either<LeaveGameError, Unit>
 
 sealed class MatchmakingError {
-    object NoMatchFound : MatchmakingError()
     object InvalidUser : MatchmakingError()
     object VariantDoesNotExist : MatchmakingError()
 }
 
-typealias MatchmakingResult = Either<MatchmakingError, Int>
+sealed class MatchmakingSuccess(val id : Int) {
+    class MatchFound(gameId : Int) : MatchmakingSuccess(gameId)
+
+    class OnWaitingQueue(matchEntry : Int) : MatchmakingSuccess(matchEntry)
+}
+
+typealias MatchmakingResult = Either<MatchmakingError, MatchmakingSuccess>
 
 sealed class LeaveMatchmakingError {
     object InvalidUser : LeaveMatchmakingError()

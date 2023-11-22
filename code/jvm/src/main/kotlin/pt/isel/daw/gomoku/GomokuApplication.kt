@@ -14,8 +14,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import pt.isel.daw.gomoku.domain.games.GamesDomainConfig
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
-import pt.isel.daw.gomoku.http.pipeline.AuthenticatedUserArgumentResolver
-import pt.isel.daw.gomoku.http.pipeline.AuthenticationInterceptor
+import pt.isel.daw.gomoku.http.pipeline.authentication.AuthenticatedUserArgumentResolver
+import pt.isel.daw.gomoku.http.pipeline.authentication.AuthenticationInterceptor
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.utils.Environment
 import kotlin.time.Duration.Companion.hours

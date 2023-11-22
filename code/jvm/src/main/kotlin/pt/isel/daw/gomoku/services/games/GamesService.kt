@@ -117,10 +117,10 @@ class GamesService(
         }
     }
 
-    @Transactional
     fun tryMatchmaking(userId: Int, variant: String): MatchmakingResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
+            val usersRepository = it.usersRepository
             if (it.gamesRepository.getVariant(variant) == null)
                 return@run failure(MatchmakingError.VariantDoesNotExist)
 
@@ -130,25 +130,24 @@ class GamesService(
                 // Match found
                 gamesRepository.updateMatchmakingEntry(match.id, MatchmakingStatus.MATCHED)
 
-                val opponent = it.usersRepository.getUserById(match.userId)
-                if (opponent != null) {
-                    val user =
-                        it.usersRepository.getUserById(userId) ?: return@run failure(MatchmakingError.InvalidUser)
-                    val gameModel = gamesDomain.createGameModel(user, opponent, Variants.valueOf(variant))
-                    val id = gamesRepository.createGame(gameModel)
-                    success(id)
-                } else
-                    failure(MatchmakingError.InvalidUser)
+                val opponent =
+                    usersRepository.getUserById(match.userId) ?: return@run failure(MatchmakingError.InvalidUser)
+                val user =
+                    usersRepository.getUserById(userId) ?: return@run failure(MatchmakingError.InvalidUser)
+                val gameModel = gamesDomain.createGameModel(user, opponent, Variants.valueOf(variant))
+                val id = gamesRepository.createGame(gameModel)
+                success(MatchmakingSuccess.MatchFound(id))
             } else {
                 // if the user is not in the queue, add him
                 if (!gamesRepository.isUserInMatchmakingQueue(userId))
                     gamesRepository.storeMatchmakingEntry(userId, MatchmakingStatus.PENDING, Clock.System.now())
-                failure(MatchmakingError.NoMatchFound)
+                // No match found, but the user is in the queue waiting for a match
+                success(MatchmakingSuccess.OnWaitingQueue(userId))
             }
         }
     }
 
-    @Transactional
+
     fun getMatchmakingStatus(userId: Int): MatchmakingStatusResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
@@ -162,7 +161,6 @@ class GamesService(
         }
     }
 
-    @Transactional
     fun exitMatchmakingQueue(userId: Int): LeaveMatchmakingResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository

@@ -117,4 +117,6 @@ dist
 **/out
 **/bin
 **/build
-*.yml
+
+### DB application properties ###
+./code/jvm/src/main/resources/

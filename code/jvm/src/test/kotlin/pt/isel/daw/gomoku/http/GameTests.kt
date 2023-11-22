@@ -1,5 +1,6 @@
 package pt.isel.daw.gomoku.http
 
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -18,7 +19,7 @@ class GameTests {
     @LocalServerPort
     var port: Int = 0
 
-    @Test
+    @RepeatedTest(10)
     fun `can play a game`() {
         // given: an HTTP client
         val client = WebTestClient.bindToServer().baseUrl("http://localhost:$port/api").build()
@@ -147,11 +148,10 @@ class GameTests {
         val playUri = gameLocation.split("/").drop(2).joinToString("/") + "/play"
         // when: playing a game
         // then: the response is a 200
-        client.put().uri("/$playUri")
-            .header("Authorization", "Bearer ${token1.token}")
+        client.post().uri("/$playUri")
+            .header("Authorization", "Bearer ${token2.token}")
             .bodyValue(
                 mapOf(
-                    "userId" to playerInGame,
                     "row" to 1,
                     "column" to 1
                 )

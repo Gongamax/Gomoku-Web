@@ -23,7 +23,12 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         request: WebRequest
     ): ResponseEntity<Any>? {
         log.info("Handling MethodArgumentNotValidException: {}", ex.message)
-        return Problem.response(400, Problem.invalidRequestContent)
+        return Problem(
+            typeUri = Problem.invalidRequestContent,
+            title = "Problem.invalidRequestContent",
+            status = 400,
+            detail = "Invalid request content",
+        ).toResponse()
     }
 
     override fun handleHttpMessageNotReadable(
@@ -33,7 +38,12 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         request: WebRequest
     ): ResponseEntity<Any> {
         log.info("Handling HttpMessageNotReadableException: {}", ex.httpInputMessage)
-        return Problem.response(400, Problem.invalidRequestContent)
+        return Problem(
+            typeUri = Problem.invalidRequestContent,
+            title = "Problem.invalidRequestContent",
+            status = 400,
+            detail = "Invalid request content",
+        ).toResponse()
     }
 
     override fun handleExceptionInternal(
@@ -44,7 +54,12 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         request: WebRequest
     ): ResponseEntity<Any> {
         log.info("Handling ExceptionInternal: {}", ex.message)
-        return Problem.response(500, Problem.internalServerError)
+        return Problem(
+            typeUri = Problem.internalServerError,
+            title = "Problem.internalServerError",
+            status = 500,
+            detail = "Internal server error",
+        ).toResponse()
     }
 
     override fun handleMissingPathVariable(
@@ -54,7 +69,12 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         request: WebRequest
     ): ResponseEntity<Any>? {
         log.info("Handling MissingPathVariableException: {}", ex.message)
-        return Problem.response(400, Problem.invalidRequestContent)
+        return Problem(
+            typeUri = Problem.invalidRequestContent,
+            title = "Problem.invalidRequestContent",
+            status = 400,
+            detail = "Invalid request content",
+        ).toResponse()
     }
 
     @ExceptionHandler(

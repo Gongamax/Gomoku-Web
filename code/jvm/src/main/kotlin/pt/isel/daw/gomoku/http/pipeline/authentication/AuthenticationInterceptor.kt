@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.http.pipeline
+package pt.isel.daw.gomoku.http.pipeline.authentication
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
+import pt.isel.daw.gomoku.http.pipeline.RequestTokenProcessor
 
 @Component
 class AuthenticationInterceptor(

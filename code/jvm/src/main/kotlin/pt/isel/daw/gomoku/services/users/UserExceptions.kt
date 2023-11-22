@@ -12,18 +12,23 @@ sealed class UserCreationError {
 
 typealias UserCreationResult = Either<UserCreationError, Int>
 
-sealed class UserGetError {
-    object UserDoesNotExist : UserGetError()
-
-    object UserIsNotAuthenticated : UserGetError()
-
-    object InvalidToken : UserGetError()
-
-    object TokenExpired : UserGetError()
+sealed class UserGetByIdError {
+    object UserDoesNotExist : UserGetByIdError()
 }
 
-typealias UserGetByIdResult = Either<UserGetError, User>
+typealias UserGetByIdResult = Either<UserGetByIdError, User>
 
+sealed class UserGetByTokenError {
+    object UserDoesNotExist : UserGetByTokenError()
+
+    object UserIsNotAuthenticated : UserGetByTokenError()
+
+    object InvalidToken : UserGetByTokenError()
+
+    object TokenExpired : UserGetByTokenError()
+}
+
+typealias UserGetByTokenResult = Either<UserGetByTokenError, User>
 
 sealed class UserStatsError {
     object UserStatsDoesNotExist : UserStatsError()
@@ -31,3 +36,11 @@ sealed class UserStatsError {
 }
 
 typealias UserStatsResult = Either<UserStatsError, UserStatistics>
+
+sealed class UserUpdateError {
+    object UserDoesNotExist : UserUpdateError()
+    object InsecurePassword : UserUpdateError()
+    object InsecureEmail : UserUpdateError()
+}
+
+typealias UserUpdateResult = Either<UserUpdateError, Int>

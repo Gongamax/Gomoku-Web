@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.http.pipeline
+package pt.isel.daw.gomoku.http.pipeline.authentication
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.MethodParameter

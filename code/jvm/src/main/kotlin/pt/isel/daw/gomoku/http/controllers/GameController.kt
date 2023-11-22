@@ -35,35 +35,25 @@ class GameController(
             )
 
             is Failure -> when (game.value) {
-                GameGetError.GameDoesNotExist -> Problem.response(404, Problem.gameDoesNotExists)
+                GameGetError.GameDoesNotExist -> Problem(
+                    typeUri = Problem.gameDoesNotExists,
+                    title = "Game does not exist",
+                    status = 404,
+                    detail = "Game with id $id does not exist",
+                    instance = Uris.Games.byId(id)
+                ).toResponse()
             }
         }
     }
 
-    @PostMapping(Uris.Games.CREATE_GAME)
-    fun create(@Valid @RequestBody inputModel: GameStartInputModel, user: AuthenticatedUser): ResponseEntity<*> {
-        return when (val res = gameService.createGame(inputModel.userBlack, inputModel.userWhite, inputModel.variant)) {
-            is Success -> ResponseEntity.status(201)
-                .header(
-                    "Location",
-                    Uris.Games.byId(res.value).toASCIIString()
-                ).build<Unit>()
-
-            is Failure -> when (res.value) {
-                GameCreationError.GameAlreadyExists -> Problem.response(422, Problem.gameAlreadyExists)
-                GameCreationError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)
-                GameCreationError.VariantDoesNotExist -> Problem.response(400, Problem.variantDoesNotExists)
-            }
-        }
-    }
-
-    @PutMapping(Uris.Games.PLAY)
+    @PostMapping(Uris.Games.PLAY)
     fun play(
         @PathVariable id: Int,
         @Valid @RequestBody inputModel: GamePlayInputModel,
-        user: AuthenticatedUser
+        authenticatedUser: AuthenticatedUser
     ): ResponseEntity<*> {
-        return when (val res = gameService.play(id, inputModel.userId, inputModel.row, inputModel.column)) {
+        return when (val res =
+            gameService.play(id, authenticatedUser.user.id.value, inputModel.row, inputModel.column)) {
             is Success -> ResponseEntity.ok(
                 GameRoundOutputModel(
                     GameOutputModel(
@@ -76,12 +66,48 @@ class GameController(
             )
 
             is Failure -> when (res.value) {
-                GamePlayError.GameDoesNotExist -> Problem.response(404, Problem.gameDoesNotExists)
-                GamePlayError.InvalidUser -> Problem.response(401, Problem.invalidUser)
-                GamePlayError.InvalidState -> Problem.response(422, Problem.invalidState)
-                GamePlayError.InvalidTime -> Problem.response(422, Problem.invalidTime)
-                GamePlayError.InvalidTurn -> Problem.response(422, Problem.invalidTurn)
-                GamePlayError.InvalidPosition -> Problem.response(422, Problem.invalidPosition)
+                GamePlayError.GameDoesNotExist -> Problem(
+                    typeUri = Problem.gameDoesNotExists,
+                    title = "Game does not exist",
+                    status = 404,
+                    detail = "Game with id $id does not exist",
+                    instance = Uris.Games.byId(id)
+                ).toResponse()
+                GamePlayError.InvalidUser -> Problem(
+                    typeUri = Problem.invalidUser,
+                    title = "Invalid user",
+                    status = 401,
+                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Games.play(id)
+                ).toResponse()
+                GamePlayError.InvalidState -> Problem(
+                    typeUri = Problem.invalidState,
+                    title = "Invalid state",
+                    status = 422,
+                    detail = "Game with id $id is not in the correct state to play",
+                    instance = Uris.Games.play(id)
+                ).toResponse()
+                GamePlayError.InvalidTime -> Problem(
+                    typeUri = Problem.invalidTime,
+                    title = "Invalid time",
+                    status = 422,
+                    detail = "Game with id $id is not in the correct time to play",
+                    instance = Uris.Games.play(id)
+                ).toResponse()
+                GamePlayError.InvalidTurn -> Problem(
+                    typeUri = Problem.invalidTurn,
+                    title = "Invalid turn",
+                    status = 422,
+                    detail = "Game with id $id is not in the correct turn to play",
+                    instance = Uris.Games.play(id)
+                ).toResponse()
+                GamePlayError.InvalidPosition -> Problem(
+                    typeUri = Problem.invalidPosition,
+                    title = "Invalid position",
+                    status = 422,
+                    detail = "Game with id $id is not in the correct position to play",
+                    instance = Uris.Games.play(id)
+                ).toResponse()
             }
         }
     }
@@ -92,28 +118,57 @@ class GameController(
         authenticatedUser: AuthenticatedUser
     ): ResponseEntity<*> {
         return when (val res = gameService.tryMatchmaking(authenticatedUser.user.id.value, inputModel.variant)) {
-            is Success -> ResponseEntity.status(201)
-                .header(
-                    "Location",
-                    Uris.Games.byId(res.value).toASCIIString()
-                ).build<Unit>()
+            is Success -> when (res.value) {
+                is MatchmakingSuccess.MatchFound -> ResponseEntity.status(201)
+                    .header(
+                        "Location",
+                        Uris.Games.byId(res.value.id).toASCIIString()
+                    ).build<Unit>()
+
+                is MatchmakingSuccess.OnWaitingQueue -> ResponseEntity.ok().body("On waiting queue")
+            }
 
             is Failure -> when (res.value) {
-                MatchmakingError.InvalidUser -> Problem.response(422, Problem.invalidUser)
-                MatchmakingError.VariantDoesNotExist -> Problem.response(400, Problem.variantDoesNotExists)
-                MatchmakingError.NoMatchFound -> Problem.response(404, Problem.matchNotFound)
+                MatchmakingError.InvalidUser -> Problem(
+                    typeUri = Problem.invalidUser,
+                    title = "Invalid user",
+                    status = 401,
+                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Games.matchmaking()
+                ).toResponse()
+                MatchmakingError.VariantDoesNotExist -> Problem(
+                    typeUri = Problem.variantDoesNotExists,
+                    title = "Variant does not exist",
+                    status = 400,
+                    detail = "Variant ${inputModel.variant} does not exist",
+                    instance = Uris.Games.matchmaking()
+                ).toResponse()
             }
         }
     }
 
+    //TODO: PASSAR A ENVIAR UM MATCHMAKING ENTRY, ADICIOANR O GAMEID À TABELA TAMBÉM
+    //TODO: ADICIONAR ROTA GETVARIANTS
     @GetMapping(Uris.Games.MATCHMAKING)
     fun getMatchmakingStatus(authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
         return when (val res = gameService.getMatchmakingStatus(authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok(GameMatchmakingStatusOutputModel(res.value))
 
             is Failure -> when (res.value) {
-                MatchmakingStatusError.InvalidUser -> Problem.response(401, Problem.invalidUser)
-                MatchmakingStatusError.MatchDoesNotExist -> Problem.response(404, Problem.matchNotFound)
+                MatchmakingStatusError.InvalidUser -> Problem(
+                    typeUri = Problem.invalidUser,
+                    title = "Invalid user",
+                    status = 401,
+                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Games.getMatchmakingStatus()
+                ).toResponse()
+                MatchmakingStatusError.MatchDoesNotExist -> Problem(
+                    typeUri = Problem.matchNotFound,
+                    title = "Match not found",
+                    status = 404,
+                    detail = "Match for user with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Games.getMatchmakingStatus()
+                ).toResponse()
             }
         }
     }
@@ -124,8 +179,20 @@ class GameController(
             is Success -> ResponseEntity.ok().build<Unit>()
 
             is Failure -> when (res.value) {
-                LeaveMatchmakingError.MatchDoesNotExist -> Problem.response(404, Problem.matchNotFound)
-                LeaveMatchmakingError.InvalidUser -> Problem.response(401, Problem.invalidUser)
+                LeaveMatchmakingError.MatchDoesNotExist -> Problem(
+                    typeUri = Problem.matchNotFound,
+                    title = "Match not found",
+                    status = 404,
+                    detail = "Match for user with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Games.exitMatchmakingQueue()
+                ).toResponse()
+                LeaveMatchmakingError.InvalidUser -> Problem(
+                    typeUri = Problem.invalidUser,
+                    title = "Invalid user",
+                    status = 401,
+                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Games.exitMatchmakingQueue()
+                ).toResponse()
             }
         }
     }
@@ -151,9 +218,27 @@ class GameController(
         return when (val res = gameService.leaveGame(id, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok().build<Unit>()
             is Failure -> when (res.value) {
-                LeaveGameError.GameAlreadyEnded -> Problem.response(422, Problem.gameAlreadyEnded)
-                LeaveGameError.GameDoesNotExist -> Problem.response(404, Problem.gameDoesNotExists)
-                LeaveGameError.InvalidUser -> Problem.response(401, Problem.invalidUser)
+                LeaveGameError.GameAlreadyEnded -> Problem(
+                    typeUri = Problem.gameAlreadyEnded,
+                    title = "Game already ended",
+                    status = 422,
+                    detail = "Game with id $id already ended",
+                    instance = Uris.Games.leave(id)
+                ).toResponse()
+                LeaveGameError.GameDoesNotExist -> Problem(
+                    typeUri = Problem.gameDoesNotExists,
+                    title = "Game does not exist",
+                    status = 404,
+                    detail = "Game with id $id does not exist",
+                    instance = Uris.Games.leave(id)
+                ).toResponse()
+                LeaveGameError.InvalidUser -> Problem(
+                    typeUri = Problem.invalidUser,
+                    title = "Invalid user",
+                    status = 401,
+                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Games.leave(id)
+                ).toResponse()
             }
         }
     }
@@ -173,7 +258,13 @@ class GameController(
             )
 
             is Failure -> when (games.value) {
-                GameListError.UserDoesNotExist -> Problem.response(404, Problem.userDoesNotExists)
+                GameListError.UserDoesNotExist -> Problem(
+                    typeUri = Problem.userDoesNotExists,
+                    title = "Problem.userDoesNotExists",
+                    status = 404,
+                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
+                    instance = Uris.Users.getUsersById(authenticatedUser.user.id.value)
+                ).toResponse()
             }
         }
     }

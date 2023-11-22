@@ -78,13 +78,13 @@ class UsersService(
             if (userAndId != null)
                 success(userAndId)
             else
-                failure(UserGetError.UserDoesNotExist)
+                failure(UserGetByIdError.UserDoesNotExist)
         }
     }
 
-    fun getUserByToken(token: String): UserGetByIdResult {
+    fun getUserByToken(token: String): UserGetByTokenResult {
         if (!usersDomain.canBeToken(token)) {
-            return failure(UserGetError.InvalidToken)
+            return failure(UserGetByTokenError.InvalidToken)
         }
         return transactionManager.run {
             val usersRepository = it.usersRepository
@@ -92,12 +92,35 @@ class UsersService(
             val userAndToken = usersRepository.getTokenByTokenValidationInfo(tokenValidationInfo)
             if (userAndToken != null ) {
                 if (!usersDomain.isTokenTimeValid(clock, userAndToken.second))
-                    return@run failure(UserGetError.TokenExpired)
+                    return@run failure(UserGetByTokenError.TokenExpired)
                 usersRepository.updateTokenLastUsed(userAndToken.second, clock.now())
                 success(userAndToken.first)
             } else {
-                failure(UserGetError.InvalidToken)
+                failure(UserGetByTokenError.InvalidToken)
             }
+        }
+    }
+
+    fun updateUser(id : Int, username: String, email: String, password: String): UserUpdateResult {
+        if (!usersDomain.isSafePassword(password)) {
+            return failure(UserUpdateError.InsecurePassword)
+        }
+
+        val passwordValidationInfo = usersDomain.createPasswordValidationInformation(password)
+
+        val emailValidation = Email(email)
+        if (!usersDomain.isSafeEmail(emailValidation)) {
+            return failure(UserUpdateError.InsecureEmail)
+        }
+
+        return transactionManager.run {
+            val usersRepository = it.usersRepository
+            val user = usersRepository.getUserById(id)
+                ?: return@run failure(UserUpdateError.UserDoesNotExist)
+            val updatedUser = user.copy(email = emailValidation, passwordValidation = passwordValidationInfo)
+            val res = usersRepository.updateUser(updatedUser)
+            if (res == 0) failure(UserUpdateError.UserDoesNotExist)
+            else success(res)
         }
     }
 
