@@ -105,7 +105,7 @@ class JdbiUserRepositoryTests {
         val repo = JdbiUsersRepository(jdbi.open())
 
         // when: getting ranking
-        val ranking = repo.getRanking()
+        val ranking = repo.getAllStats()
 
         // then: ranking is not null
         assertNotNull(ranking)

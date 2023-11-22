@@ -21,9 +21,14 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:3.1.0")
-
+    implementation("org.springframework.boot:spring-boot-starter-hateoas")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
+
+    // For Siren Hypermedia
+    /** NEVER USE THIS DEPENDENCY **/ // implementation("org.springframework.hateoas:spring-hateoas")
+    implementation("de.ingogriebsch.hateoas:spring-hateoas-siren:1.3.0") // Siren Hypermedia dependency
+    implementation("org.atteo:evo-inflector:1.2")
 
     // For transactions
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc:3.1.4")
