@@ -38,3 +38,4 @@ enum class Variants(val boardDim: BoardDim, val openingRule: OpeningRule, val pl
         playingRule = PlayingRule.THREE_AND_THREE
     );
 }
+fun String.toVariant(): Variants = Variants.valueOf(this)

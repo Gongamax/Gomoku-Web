@@ -12,28 +12,28 @@ interface Variant {
             Pair(Direction.LEFT, Direction.RIGHT)
         )
 
-    fun play(board: Board, cell: Cell, nextPiece: Piece): Board {
+    fun play(board: Board, cell: Cell, nextPiece: Piece, variant: Variants): Board {
         return when (board) {
-            is BoardOpen -> playOpening(board, cell, nextPiece)
+            is BoardOpen -> playOpening(board, cell, nextPiece, variant)
             is BoardRun -> {
                 require(board.moves[cell] == null) { "Position $cell used" }
                 val moves = board.moves + (cell to board.turn)
                 when {
-                    board.isWin(cell) -> return BoardWin(moves, winner = board.turn)
-                    board.isDraw() ->  return BoardDraw(moves)
-                    else -> return BoardRun(moves, nextPiece, board.variant)
+                    board.isWin(cell, variant) -> return BoardWin(moves, winner = board.turn)
+                    board.isDraw(variant) ->  return BoardDraw(moves)
+                    else -> return BoardRun(moves, nextPiece)
                 }
             }
             is BoardWin, is BoardDraw -> error("Game over")
         }
     }
-    fun playOpening(board: BoardOpen, cell: Cell, nextPiece: Piece): Board =
-        when (board.variant.openingRule) {
-            OpeningRule.STANDARD -> BoardRun(board.moves + (cell to board.turn), nextPiece, board.variant)
-            OpeningRule.SWAP -> BoardOpen(board.moves + (cell to board.turn), nextPiece, board.variant)
+    fun playOpening(board: BoardOpen, cell: Cell, nextPiece: Piece, variant: Variants): Board =
+        when (variant.openingRule) {
+            OpeningRule.STANDARD -> BoardRun(board.moves + (cell to board.turn), nextPiece)
+            OpeningRule.SWAP -> BoardOpen(board.moves + (cell to board.turn), nextPiece)
         }
-    fun validPlay(board: Board, cell: Cell): Boolean =
-        when (board.variant.playingRule) {
+    fun validPlay(board: Board, cell: Cell, variant: Variants): Boolean =
+        when (variant.playingRule) {
             PlayingRule.STANDARD -> cell !in board.moves
             PlayingRule.THREE_AND_THREE -> isValidOnThreeAndThreeRule(board, cell)
         }
@@ -77,4 +77,7 @@ interface Variant {
                 }
             }
         }
+
+    fun isDraw(board: BoardRun, variant: Variants): Boolean =
+        board.moves.size == variant.boardDim.toInt() * variant.boardDim.toInt()
 }

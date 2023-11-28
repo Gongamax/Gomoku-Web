@@ -25,7 +25,7 @@ class BoardTests {
     @Test
     fun `serialize and deserialize a board`() {
 
-        val board = BoardRun(emptyMap(), Piece.BLACK, Variants.STANDARD)
+        val board = BoardRun(emptyMap(), Piece.BLACK)
         val boardString = board.toString()
         assertEquals(boardString, "Run:BLACK")
 

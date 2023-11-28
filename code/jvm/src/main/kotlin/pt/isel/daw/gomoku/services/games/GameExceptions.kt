@@ -1,8 +1,7 @@
 package pt.isel.daw.gomoku.services.games
 
 import pt.isel.daw.gomoku.domain.games.Game
-import pt.isel.daw.gomoku.domain.games.RoundResult
-import pt.isel.daw.gomoku.repository.jdbi.MatchmakingEntry
+import pt.isel.daw.gomoku.http.util.PageResult
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
 import pt.isel.daw.gomoku.utils.Either
 
@@ -33,9 +32,10 @@ typealias GameGetResult = Either<GameGetError, Game>
 
 sealed class GameListError {
     object UserDoesNotExist : GameListError()
+    object GamesNotFound: GameListError()
 }
 
-typealias GameListResult = Either<GameListError, List<Game>>
+typealias GameListResult = Either<GameListError, PageResult<Game>>
 
 sealed class LeaveGameError {
     object GameDoesNotExist : LeaveGameError()

@@ -47,7 +47,7 @@ class JdbiGamesRepositoryTests {
         val game = gameRepo.getGame(g) ?: fail("game must exist")
 
         // when: updating the game
-        val newGame = game.copy(board = game.board.playRound(Cell(1,1), Piece.BLACK))
+        val newGame = game.copy(board = game.board.playRound(Cell(1,1), Piece.BLACK, game.variant))
 
         // and: storing the game
         gameRepo.updateGame(newGame)

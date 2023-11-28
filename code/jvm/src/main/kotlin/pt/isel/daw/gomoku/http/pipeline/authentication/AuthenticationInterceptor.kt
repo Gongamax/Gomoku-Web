@@ -27,7 +27,10 @@ class AuthenticationInterceptor(
                 response.addHeader(NAME_WWW_AUTHENTICATE_HEADER, RequestTokenProcessor.SCHEME)
                 false
             } else {
-                AuthenticatedUserArgumentResolver.addUserTo(user, request)
+                if (request.requestURI.contains("logout"))
+                    AuthenticatedUserArgumentResolver.removeUserFrom(request)
+                else
+                    AuthenticatedUserArgumentResolver.addUserTo(user, request)
                 true
             }
         }

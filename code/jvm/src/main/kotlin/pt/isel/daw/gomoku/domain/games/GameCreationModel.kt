@@ -11,4 +11,5 @@ data class GameCreationModel(
     val deadline: Instant?,
     val playerBLACK : User,
     val playerWHITE : User,
+    val variant: Variants,
 )

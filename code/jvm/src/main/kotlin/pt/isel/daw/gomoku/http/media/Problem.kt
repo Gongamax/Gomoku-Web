@@ -1,10 +1,11 @@
-package pt.isel.daw.gomoku.http.model
+package pt.isel.daw.gomoku.http.media
 
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import java.net.URI
 
 class Problem(
-    typeUri: URI,
+    val typeUri: URI,
     val title: String = "",
     val status: Int = 500,
     val detail: String = "",
@@ -15,6 +16,9 @@ class Problem(
         .status(status)
         .header("Content-Type", MEDIA_TYPE)
         .body<Any>(this)
+
+    @Suppress("unused")
+    val problemMediaType = MediaType(MEDIA_TYPE)
 
     companion object {
         private const val MEDIA_TYPE = "application/problem+json"
@@ -52,6 +56,7 @@ class Problem(
         val matchNotFound = URI(BASE_URL + "match-not-found")
         val rankingNotFound = URI(BASE_URL + "ranking-not-found")
         val statsNotFound = URI(BASE_URL + "stats-not-found")
+        val gamesNotFound: URI = URI(BASE_URL + "games-not-found")
     }
 
     fun insecurePassword() = Problem(

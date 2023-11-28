@@ -79,18 +79,6 @@ create table dbo.Matchmaking
     created int         not null
 );
 
--- Inserting default values for the variant table
-
-insert into dbo.Variant (variant_name, board_dim, play_rule, opening_rule)
-values ('STANDARD', 15, 'STANDARD', 'STANDARD'),
-       ('SWAP', 15, 'STANDARD', 'SWAP'),
-       ('RENJU', 15, 'THREE_AND_THREE', 'STANDARD'),
-       ('CARO', 15, 'STANDARD', 'STANDARD'),
-       ('PENTE', 19, 'STANDARD', 'STANDARD'),
-       ('OMOK', 19, 'THREE_AND_THREE', 'STANDARD'),
-       ('NINUKI_RENJU', 15, 'THREE_AND_THREE', 'STANDARD');
-
-
 -- Triggers
 
 -- Trigger to add a new user to the statistics table

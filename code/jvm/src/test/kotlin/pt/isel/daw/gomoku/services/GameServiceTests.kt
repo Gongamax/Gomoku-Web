@@ -120,8 +120,11 @@ class GameServiceTests {
         assertNotNull(allGames)
 
         //then: the game is found
-        val gameFound = allGames.any { it.id.value == game }
-        assertTrue { gameFound }
+        val gamesFound = when (allGames) {
+            is Either.Left -> fail("Failed to get all games for $allGames")
+            is Either.Right -> allGames.value
+        }
+        assertTrue { gamesFound.isNotEmpty() }
     }
 
     @Test

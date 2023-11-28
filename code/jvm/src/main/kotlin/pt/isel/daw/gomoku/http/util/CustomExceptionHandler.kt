@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
-import pt.isel.daw.gomoku.http.model.Problem
+import pt.isel.daw.gomoku.http.media.Problem
 
 @ControllerAdvice
 class CustomExceptionHandler : ResponseEntityExceptionHandler() {

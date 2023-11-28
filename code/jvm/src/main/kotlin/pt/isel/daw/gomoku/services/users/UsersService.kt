@@ -1,17 +1,16 @@
 package pt.isel.daw.gomoku.services.users
 
 import kotlinx.datetime.Clock
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.utils.Token
-import pt.isel.daw.gomoku.http.util.PageUtils.toPage
+import pt.isel.daw.gomoku.http.util.PageResult.Companion.toPage
 import pt.isel.daw.gomoku.repository.util.TransactionManager
 import pt.isel.daw.gomoku.services.others.RankingError
 import pt.isel.daw.gomoku.services.others.RankingResult
+import pt.isel.daw.gomoku.utils.PositiveValue
 import pt.isel.daw.gomoku.utils.Success
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
@@ -135,14 +134,12 @@ class UsersService(
         }
     }
 
-    fun getAllStats(pageable: Pageable): RankingResult =
+    fun getRanking(pageNr: PositiveValue): RankingResult =
         transactionManager.run {
             val usersRepository = it.usersRepository
-            val ranking = usersRepository.getAllStats().filterIndexed { index, _ ->
-                index < 10
-            }
+            val ranking = usersRepository.getAllStats()
             if (ranking.isEmpty()) failure(RankingError.RankingDoesNotExist)
-            else success(toPage(ranking, pageable))
+            else success(toPage(ranking, pageNr.value))
         }
 
     fun getUserStatsById(id: Int): UserStatsResult =
@@ -156,4 +153,6 @@ class UsersService(
                 else failure(UserStatsError.UserStatsDoesNotExist)
             }
         }
+
+    //TODO: MAKE FUNCTION TO GET USER STATS BY NAME
 }

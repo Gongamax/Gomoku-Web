@@ -2,7 +2,7 @@ package pt.isel.daw.gomoku.http.model
 
 import jakarta.validation.constraints.Size
 import jakarta.validation.constraints.Email
-import pt.isel.daw.gomoku.domain.utils.RankingEntry
+import pt.isel.daw.gomoku.domain.users.UserStatistics
 
 const val MIN_USERNAME_LENGTH = 3
 const val MAX_USERNAME_LENGTH = 40
@@ -42,6 +42,10 @@ data class UserCreateTokenInputModel(
     val password: String
 )
 
+class UserCreateOutputModel(
+    val uid: Int
+)
+
 class UserGetByIdOutputModel(
     val id: Int,
     val username: String,
@@ -60,14 +64,15 @@ class UserStatsOutputModel(
 
 class UserHomeOutputModel(
     val id: Int,
-    val username: String
+    val username: String,
+    val message: String = "Welcome Player! Lets play."
 )
 
 data class UserTokenCreateOutputModel(
     val token: String
 )
 data class RankingInfoOutputModel(
-    val rankingTable: List<RankingEntry>
+    val rankingTable: List<UserStatistics>
 )
 
 data class UserTokenRemoveOutputModel(

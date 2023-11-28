@@ -44,8 +44,8 @@ object BoardSerializer {
     fun serialize(data: Board): String {
         var boardData = BoardData()
         boardData = when (data) {
-            is BoardOpen -> boardData.copy(kind = "Open:${data.variant.name}", piece = data.turn.name)
-            is BoardRun -> boardData.copy(kind = "Run:${data.variant.name}", piece = data.turn.name)
+            is BoardOpen -> boardData.copy(kind = "Open", piece = data.turn.name)
+            is BoardRun -> boardData.copy(kind = "Run", piece = data.turn.name)
             is BoardWin -> boardData.copy(kind = "Win", piece = data.winner.name)
             is BoardDraw -> boardData.copy(kind = "Draw")
         }
@@ -57,16 +57,8 @@ object BoardSerializer {
         val boardData = objectMapper.readValue(stream, BoardData::class.java)
         val info = boardData.kind.split(":")
         return when (info[0]) {
-            "Open" -> {
-                val variantPart = info[1]
-                val variant = if (variantPart.isNotEmpty()) Variants.valueOf(variantPart) else Variants.STANDARD
-                BoardOpen(boardData.moves, Piece.valueOf(boardData.piece), variant)
-            }
-            "Run" -> {
-                val variantPart = info[1]
-                val variant = if (variantPart.isNotEmpty()) Variants.valueOf(variantPart) else Variants.STANDARD
-                BoardRun(boardData.moves, Piece.valueOf(boardData.piece), variant)
-            }
+            "Open" -> BoardOpen(boardData.moves, Piece.valueOf(boardData.piece))
+            "Run" -> BoardRun(boardData.moves, Piece.valueOf(boardData.piece))
             "Win" -> BoardWin(boardData.moves, Piece.valueOf(boardData.piece))
             "Draw" -> BoardDraw(boardData.moves)
             else -> error("Invalid board kind: ${boardData.kind}")

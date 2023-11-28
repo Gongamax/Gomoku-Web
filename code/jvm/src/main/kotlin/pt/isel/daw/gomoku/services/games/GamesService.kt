@@ -2,10 +2,12 @@ package pt.isel.daw.gomoku.services.games
 
 import kotlinx.datetime.Clock
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.http.util.PageResult
+import pt.isel.daw.gomoku.http.util.PageResult.Companion.toPage
 import pt.isel.daw.gomoku.repository.util.TransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
+import pt.isel.daw.gomoku.utils.PositiveValue
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
 
@@ -100,20 +102,24 @@ class GamesService(
         }
     }
 
-    fun getGamesOfUser(userId: Int): GameListResult {
+    fun getGamesOfUser(userId: Int, pageNr: PositiveValue): GameListResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             val usersRepository = it.usersRepository
             usersRepository.getUserById(userId) ?: return@run failure(GameListError.UserDoesNotExist)
             val games = gamesRepository.getGamesByUser(userId)
-            success(games)
+            success(toPage( games, pageNr.value))
         }
     }
 
-    fun getAll(): List<Game> {
+    fun getAll(pageNr: PositiveValue): GameListResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
-            gamesRepository.getAll()
+            val games = gamesRepository.getAll()
+            if (games.isEmpty())
+                failure(GameListError.GamesNotFound)
+            else
+                success(toPage(games, pageNr.value))
         }
     }
 

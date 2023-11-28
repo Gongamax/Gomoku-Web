@@ -25,6 +25,7 @@ data class Game(
     val deadline: Instant?,
     val playerBLACK : User,
     val playerWHITE : User,
+    val variant: Variants,
 ){
     enum class State {
         SWAPPING_PIECES,

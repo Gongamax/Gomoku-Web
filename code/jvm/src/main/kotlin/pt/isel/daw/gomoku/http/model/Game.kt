@@ -1,7 +1,6 @@
 package pt.isel.daw.gomoku.http.model
 
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotEmpty
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
@@ -13,7 +12,15 @@ data class GameStartInputModel(val userBlack: Int,val userWhite: Int,@field:NotB
 
 data class GameRoundOutputModel(val game: GameOutputModel, val state: String)
 
-data class GameOutputModel(val id: Int, val board: Board, val userBlack: User, val userWhite: User)
+data class GameOutputModel(
+    val id: Int,
+    val board: Board,
+    val userBlack: User,
+    val userWhite: User,
+    val state: String,
+    val variant: String,
+    val created: String
+)
 
 data class GameGetByIdOutputModel(val game: GameOutputModel)
 

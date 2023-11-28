@@ -5,7 +5,6 @@ import kotlinx.datetime.Instant
 import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.utils.Id
-import java.util.*
 
 /**
  * This class is responsible for the game domain logic.
@@ -25,17 +24,18 @@ class GameDomain(
     fun createGameModel(
         playerBlack: User,
         playerWhite: User,
-        variants: Variants,
+        variant: Variants,
     ): GameCreationModel {
         val now = clock.now()
         return GameCreationModel(
             state = Game.State.NEXT_PLAYER_BLACK,
-            board = Board.createBoard(piece = Piece.BLACK, variant = variants),
+            board = Board.createBoard(piece = Piece.BLACK),
             created = now,
             updated = now,
             deadline = now + config.timeout,
             playerBLACK = playerBlack,
             playerWHITE = playerWhite,
+            variant = variant
         )
     }
 
@@ -90,10 +90,10 @@ class GameDomain(
             val newGame = game.copy(state = aux.otherWon, deadline = null)
             RoundResult.TooLate(newGame)
         } else {
-            if (game.board.canPlayOn(round.cell)) {
-                when (val newBoard = game.board.playRound(round.cell, nextPiece(game, round.player))) {
+            if (game.board.canPlayOn(round.cell, game.variant)) {
+                when (val newBoard = game.board.playRound(round.cell, nextPiece(game, round.player), game.variant)) {
                     is BoardOpen -> {
-                        val newGame = when(game.board.variant.openingRule) {
+                        val newGame = when(game.variant.openingRule) {
                             OpeningRule.STANDARD -> game.copy(
                                 board = newBoard,
                                 state = aux.nextPlayer,

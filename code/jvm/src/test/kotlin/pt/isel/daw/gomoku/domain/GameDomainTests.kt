@@ -178,12 +178,13 @@ class GameDomainTests {
             Game(
                 id = Id(1),
                 state = Game.State.NEXT_PLAYER_BLACK,
-                board = Board.createBoard(Piece.BLACK, Variants.STANDARD),
+                board = Board.createBoard(Piece.BLACK),
                 created = Clock.System.now(),
                 updated = Clock.System.now(),
                 deadline = null,
                 playerBLACK = alice,
-                playerWHITE = bob
+                playerWHITE = bob,
+                variant = Variants.STANDARD
             )
     }
 }

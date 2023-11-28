@@ -38,5 +38,9 @@ class AuthenticatedUserArgumentResolver : HandlerMethodArgumentResolver {
                 it as? AuthenticatedUser
             }
         }
+
+        fun removeUserFrom(request: HttpServletRequest) {
+            request.removeAttribute(KEY)
+        }
     }
 }

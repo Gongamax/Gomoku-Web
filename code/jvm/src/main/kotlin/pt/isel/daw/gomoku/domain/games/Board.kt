@@ -10,9 +10,7 @@ typealias Moves = Map<Cell, Piece>
  * There are four possible states of board: [BoardRun], [BoardWin] and [BoardDraw]
  * These hierarchies are to be used by pattern matching.
  */
-sealed class Board(val moves: Moves, val variant: Variants = Variants.STANDARD) {
-    private val boardSize = variant.boardDim.toInt()
-    val maxMoves = boardSize * boardSize
+sealed class Board(val moves: Moves) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -40,12 +38,12 @@ sealed class Board(val moves: Moves, val variant: Variants = Variants.STANDARD) 
     override fun hashCode(): Int = moves.hashCode()
 
     companion object {
-        fun createBoard(piece: Piece, variant: Variants) = BoardOpen(emptyMap(), piece, variant)
+        fun createBoard(piece: Piece) = BoardOpen(emptyMap(), piece)
     }
 }
 
-class BoardOpen(moves: Moves, val turn: Piece, variant: Variants) : Board(moves, variant)
-class BoardRun(moves: Moves, val turn: Piece, variant: Variants) : Board(moves, variant )
+class BoardOpen(moves: Moves, val turn: Piece) : Board(moves)
+class BoardRun(moves: Moves, val turn: Piece) : Board(moves)
 class BoardWin(moves: Moves, val winner: Piece) : Board(moves)
 class BoardDraw(moves: Moves) : Board(moves)
 
@@ -54,19 +52,20 @@ class BoardDraw(moves: Moves) : Board(moves)
  * @throws IllegalArgumentException if the [cell] is already used.
  * @throws IllegalStateException if the game is over (Draw or Win).
  */
-fun Board.playRound(cell: Cell, nextPiece: Piece): Board = variant.play(this, cell, nextPiece)
+fun Board.playRound(cell: Cell, nextPiece: Piece, variant: Variants): Board =
+    variant.play(this, cell, nextPiece, variant)
 
 /**
  * Checks if the move in [cell] position is a winning move.
  */
-fun BoardRun.isWin(cell: Cell) = variant.isWin(this, cell)
+fun BoardRun.isWin(cell: Cell, variant: Variants) = variant.isWin(this, cell)
 
 /**
  * Checks if the move in [cell] position is a valid move according to the play rule.
  */
-fun Board.canPlayOn(cell: Cell) = variant.validPlay(this, cell)
+fun Board.canPlayOn(cell: Cell, variant: Variants) = variant.validPlay(this, cell, variant)
 
 /**
  * Checks if the state of the board will end the game as a Draw.
  */
-fun BoardRun.isDraw() = moves.size == maxMoves
+fun BoardRun.isDraw(variant: Variants) = variant.isDraw(this, variant)

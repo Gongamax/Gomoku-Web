@@ -24,6 +24,7 @@ class JdbiGamesRepository(
                games.created,
                games.updated,
                games.deadline,
+               games.variant,
                users_black.id                  as playerBlack_id,
                users_black.username            as playerBlack_username,
                users_black.email               as playerBlack_email,
@@ -65,8 +66,8 @@ class JdbiGamesRepository(
     override fun createGame(game: GameCreationModel): Int =
         handle.createUpdate(
             """
-                insert into dbo.Games(state, board, created, updated, deadline, player_black, player_white)
-                values (:state, :board, :created, :updated, :deadline, :player_black , :player_white)
+                insert into dbo.Games(state, board, created, updated, deadline, player_black, player_white, variant)
+                values (:state, :board, :created, :updated, :deadline, :player_black , :player_white, :variant)
             """.trimIndent()
         )
             .bind("state", game.state)
@@ -76,6 +77,7 @@ class JdbiGamesRepository(
             .bind("deadline", game.deadline?.epochSeconds)
             .bind("player_black", game.playerBLACK.id.value)
             .bind("player_white", game.playerWHITE.id.value)
+            .bind("variant", game.variant.name)
             .executeAndReturnGeneratedKeys()
             .mapTo<Int>()
             .one()
@@ -132,6 +134,7 @@ class JdbiGamesRepository(
                        games.created,
                        games.updated,
                        games.deadline,
+                       games.variant,
                        users_black.id                  as playerBlack_id,
                        users_black.username            as playerBlack_username,
                        users_black.email               as playerBlack_email,
@@ -279,12 +282,14 @@ class GameDbModel(
     val created: Instant,
     val updated: Instant,
     val deadline: Instant?,
+    val variant: String,
     @Nested("playerBlack")
     val playerBlack: User,
     @Nested("playerWhite")
     val playerWhite: User
 ) {
-    fun toGame(): Game = Game(Id(id), state, board, created, updated, deadline, playerBlack, playerWhite)
+    fun toGame(): Game =
+        Game(Id(id), state, board, created, updated, deadline, playerBlack, playerWhite, variant.toVariant())
 }
 
 // Class that represents the matchmaking entry in the database
