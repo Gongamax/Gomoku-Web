@@ -17,6 +17,7 @@ import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.games.GamesService
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
+import pt.isel.daw.gomoku.utils.PositiveValue
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertNotNull
@@ -114,7 +115,7 @@ class GameServiceTests {
         }
 
         // when: getting all games
-        val allGames = gamesService.getAll()
+        val allGames = gamesService.getAll(PositiveValue(0))
 
         //then: the game is found
         assertNotNull(allGames)
@@ -124,7 +125,7 @@ class GameServiceTests {
             is Either.Left -> fail("Failed to get all games for $allGames")
             is Either.Right -> allGames.value
         }
-        assertTrue { gamesFound.isNotEmpty() }
+        assertTrue { gamesFound.content.isNotEmpty() }
     }
 
     @Test
