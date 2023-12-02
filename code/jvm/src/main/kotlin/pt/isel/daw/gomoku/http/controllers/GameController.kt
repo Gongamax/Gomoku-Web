@@ -171,13 +171,6 @@ class GameController(
                             clazz("matchmaking")
                             link(Uris.Games.byId(res.value.id), Rels.SELF)
                             link(Uris.Games.byId(res.value.id), Rels.GAME)
-                            entity(
-                                "{ status: MATCHED }",
-                                Rels.MATCHMAKING_STATUS
-                            ){
-                                clazz("matchmaking-status")
-                                requireAuth(true)
-                            }
                             requireAuth(true)
                         }
                     )
@@ -188,13 +181,6 @@ class GameController(
                     ) {
                         clazz("matchmaking")
                         link(Uris.Games.matchmaking(), Rels.SELF)
-                        entity(
-                            "{ status: PENDING }",
-                            Rels.MATCHMAKING_STATUS
-                        ){
-                            clazz("matchmaking-status")
-                            requireAuth(true)
-                        }
                         action("leave-matchmaking",
                             Uris.Games.exitMatchmakingQueue(),
                             HttpMethod.DELETE,
@@ -226,8 +212,6 @@ class GameController(
         }
     }
 
-    //TODO: PASSAR A ENVIAR UM MATCHMAKING ENTRY, ADICIOANR O GAMEID À TABELA TAMBÉM
-    //TODO: ADICIONAR ROTA GETVARIANTS
     @GetMapping(Uris.Games.GET_MATCHMAKING_STATUS)
     fun getMatchmakingStatus(authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
         return when (val res = gameService.getMatchmakingStatus(authenticatedUser.user.id.value)) {
