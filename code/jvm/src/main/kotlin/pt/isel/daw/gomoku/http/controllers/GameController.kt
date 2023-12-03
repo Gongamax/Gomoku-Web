@@ -144,13 +144,6 @@ class GameController(
                             clazz("matchmaking")
                             link(Uris.Games.byId(res.value.id), Rels.SELF)
                             link(Uris.Games.byId(res.value.id), Rels.GAME)
-                            entity(
-                                "{ status: MATCHED }",
-                                Rels.MATCHMAKING_STATUS
-                            ) {
-                                clazz("matchmaking-status")
-                                requireAuth(true)
-                            }
                             requireAuth(true)
                         }
                     )
@@ -165,16 +158,8 @@ class GameController(
                     ) {
                         clazz("matchmaking")
                         link(Uris.Games.matchmaking(), Rels.SELF)
-                        entity(
-                            "{ status: PENDING }",
-                            Rels.MATCHMAKING_STATUS
-                        ) {
-                            clazz("matchmaking-status")
-                            requireAuth(true)
-                        }
-                        action(
-                            "leave-matchmaking",
-                            Uris.Games.exitMatchmakingQueue(res.value.id),
+                        action("leave-matchmaking",
+                            Uris.Games.exitMatchmakingQueue(),
                             HttpMethod.DELETE,
                             "application/json"
                         ) {
