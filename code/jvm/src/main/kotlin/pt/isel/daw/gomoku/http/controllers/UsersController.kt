@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.http.media.Problem
+import pt.isel.daw.gomoku.http.media.siren.SirenModel
 import pt.isel.daw.gomoku.http.media.siren.siren
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.http.util.Rels
@@ -30,7 +31,9 @@ class UsersController(
                 .header(
                     "Location",
                     Uris.Users.getUsersById(res.value).toASCIIString()
-                ).body(
+                )
+                .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
+                .body(
                     siren(UserCreateOutputModel(res.value)) {
                         clazz("register")
                         link(Uris.Users.register(), Rels.SELF)
@@ -52,7 +55,7 @@ class UsersController(
     ): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
             is Success ->
-                ResponseEntity.status(200)
+                ResponseEntity.status(200).header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                     .body(
                         siren(UserTokenCreateOutputModel(res.value.tokenValue)) {
                             clazz("login")
@@ -70,7 +73,7 @@ class UsersController(
     @PostMapping(Uris.Users.LOGOUT)
     fun logout(authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
         when (userService.revokeToken(authenticatedUser.token)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     UserTokenRemoveOutputModel("Token ${authenticatedUser.token} revoked. Logout succeeded")
                 ) {

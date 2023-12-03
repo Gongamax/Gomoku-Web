@@ -17,9 +17,6 @@ class Problem(
         .header("Content-Type", MEDIA_TYPE)
         .body<Any>(this)
 
-    @Suppress("unused")
-    val problemMediaType = MediaType(MEDIA_TYPE)
-
     companion object {
         private const val MEDIA_TYPE = "application/problem+json"
         private const val BASE_URL = "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/problems/"

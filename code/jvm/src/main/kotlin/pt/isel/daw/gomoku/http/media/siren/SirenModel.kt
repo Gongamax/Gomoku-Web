@@ -2,6 +2,7 @@ package pt.isel.daw.gomoku.http.media.siren
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import java.net.URI
 
 /**
@@ -23,7 +24,11 @@ data class SirenModel<T>(
     val entities: List<EntityModel<*>>,
     val actions: List<ActionModel>,
     val requireAuth: List<Boolean>
-)
+) {
+    companion object {
+        const val SIREN_MEDIA_TYPE = "application/vnd.siren+json"
+    }
+}
 
 /**
  * Link is a navigational link, distinct from entity relationships.
