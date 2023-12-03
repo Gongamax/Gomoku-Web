@@ -1,9 +1,8 @@
 package pt.isel.daw.gomoku.domain
 
 import kotlin.test.Test
-import pt.isel.daw.gomoku.domain.games.BoardRun
+import pt.isel.daw.gomoku.domain.games.board.BoardRun
 import pt.isel.daw.gomoku.domain.games.Piece
-import pt.isel.daw.gomoku.domain.games.Variants
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.users.User

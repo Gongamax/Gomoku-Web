@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
 import pt.isel.daw.gomoku.domain.games.*
 import com.fasterxml.jackson.databind.module.SimpleModule
+import pt.isel.daw.gomoku.domain.games.board.*
+import pt.isel.daw.gomoku.domain.games.variants.Variants
 
 object CellKeyDeserializer : KeyDeserializer() {
     override fun deserializeKey(parser: String, context: DeserializationContext): Any {

@@ -1,4 +1,7 @@
-package pt.isel.daw.gomoku.domain.games
+package pt.isel.daw.gomoku.domain.games.board
+
+import pt.isel.daw.gomoku.domain.games.Piece
+import pt.isel.daw.gomoku.domain.games.variants.Variants
 
 
 typealias Moves = Map<Cell, Piece>

@@ -3,6 +3,9 @@ package pt.isel.daw.gomoku.domain.games
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.springframework.stereotype.Component
+import pt.isel.daw.gomoku.domain.games.board.*
+import pt.isel.daw.gomoku.domain.games.variants.OpeningRule
+import pt.isel.daw.gomoku.domain.games.variants.Variants
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.utils.Id
 

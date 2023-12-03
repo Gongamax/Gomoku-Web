@@ -1,7 +1,9 @@
 package pt.isel.daw.gomoku.http.util
 
 import org.slf4j.LoggerFactory
+import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import pt.isel.daw.gomoku.http.media.Problem
+import java.net.URI
 
 @ControllerAdvice
 class CustomExceptionHandler : ResponseEntityExceptionHandler() {
@@ -74,6 +77,30 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
             title = "Problem.invalidRequestContent",
             status = 400,
             detail = "Invalid request content",
+        ).toResponse()
+    }
+
+    override fun handleTypeMismatch(
+        ex: TypeMismatchException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        log.info("Handling TypeMismatchException: {}", ex.message)
+        val type = ex.value?.let { it::class.java.simpleName } ?: "null"
+        val detail = "The value '${ex.value}' of type '$type' could not be converted to ${ex.requiredType?.name}"
+        val uri = URI(
+            request.toString()
+                .substringAfter("uri=")
+                .substringBefore("}")
+                .substringBefore(";")
+        )
+        return Problem(
+            typeUri = Problem.invalidRequestContent,
+            title = "Invalid Argument",
+            status = HttpStatus.UNPROCESSABLE_ENTITY.value(),
+            detail = detail,
+            instance = uri
         ).toResponse()
     }
 

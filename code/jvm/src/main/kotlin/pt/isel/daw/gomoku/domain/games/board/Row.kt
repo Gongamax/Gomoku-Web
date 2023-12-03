@@ -1,4 +1,4 @@
-package pt.isel.daw.gomoku.domain.games
+package pt.isel.daw.gomoku.domain.games.board
 
 /**
     * Class Row represents a row in the board.

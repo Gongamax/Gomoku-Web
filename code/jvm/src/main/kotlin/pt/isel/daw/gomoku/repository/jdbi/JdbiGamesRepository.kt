@@ -7,6 +7,9 @@ import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.statement.Update
 import org.postgresql.util.PGobject
 import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.games.board.Board
+import pt.isel.daw.gomoku.domain.games.board.BoardDim
+import pt.isel.daw.gomoku.domain.games.variants.*
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.repository.util.GamesRepository
@@ -165,18 +168,17 @@ class JdbiGamesRepository(
             .mapTo<Int>()
             .single() == 1
 
-    override fun getMatchmakingEntry(userId: Int): MatchmakingEntry? =
+    override fun getMatchmakingEntry(entryId: Int): MatchmakingEntry? =
         handle.createQuery(
             """
-                select m.id, m.user_id, m.status, m.created
+                select m.id, m.user_id, m.game_id, m.variant, m.status, m.created
                 from dbo.matchmaking m
                          inner join dbo.Users users on m.user_id = users.id
-                where users.id = :userId
-                limit 1
+                where m.id = :entryId
                 for update skip locked
             """.trimIndent()
         )
-            .bind("userId", userId)
+            .bind("entryId", entryId)
             .mapTo<MatchmakingEntryDbModel>()
             .singleOrNull()
             ?.run {
@@ -186,7 +188,7 @@ class JdbiGamesRepository(
     override fun getAMatch(userId: Int): MatchmakingEntry? =
         handle.createQuery(
             """
-                select m.id, m.user_id, m.status, m.created
+                select m.id, m.user_id, m.game_id, m.variant, m.status, m.created
                 from dbo.matchmaking m
                          inner join dbo.Users users on m.user_id = users.id
                 where users.id != :userId and m.status = 'PENDING'
@@ -202,34 +204,38 @@ class JdbiGamesRepository(
                 toMatchmakingEntry()
             }
 
-    override fun updateMatchmakingEntry(id: Int, status: MatchmakingStatus) =
+    override fun updateMatchmakingEntry(id: Int, status: MatchmakingStatus, gameId: Int) =
         handle.createUpdate(
             """
                 update dbo.matchmaking
-                set status = :status
+                set status = :status, game_id = :gameId
                 where id = :id
             """.trimIndent()
         )
             .bind("id", id)
+            .bind("gameId", gameId)
             .bind("status", status)
             .execute()
 
-    override fun storeMatchmakingEntry(userId: Int, status: MatchmakingStatus, created: Instant) =
+    override fun storeMatchmakingEntry(userId: Int, variant: String, status: MatchmakingStatus, created: Instant) =
         handle.createUpdate(
             """
-                insert into dbo.matchmaking(user_id, status, created)
-                values (:user_id, :status, :created);
+                insert into dbo.matchmaking(user_id, variant, status, created)
+                values (:user_id, :variant, :status, :created);
             """.trimIndent()
         )
             .bind("user_id", userId)
+            .bind("variant", variant)
             .bind("status", status)
             .bind("created", created.epochSeconds)
-            .execute()
+            .executeAndReturnGeneratedKeys()
+            .mapTo<Int>()
+            .one()
 
     override fun isUserInMatchmakingQueue(userId: Int): Boolean =
         handle.createQuery(
             """
-                select count(*) from dbo.matchmaking where user_id = :userId
+                select count(*) from dbo.matchmaking where user_id = :userId and status = 'PENDING'
             """.trimIndent()
         )
             .bind("userId", userId)
@@ -255,6 +261,19 @@ class JdbiGamesRepository(
             .mapTo<VariantsDbModel>()
             .singleOrNull()?.run {
                 toVariant()
+            }
+
+    override fun getAllVariants(): List<GameVariant> =
+        handle.createQuery(
+            """
+                select v.variant_name, v.board_dim, v.opening_rule, v.play_rule
+                from dbo.Variant v
+            """.trimIndent()
+        )
+            .mapTo<GameVariantDbModel>()
+            .list()
+            .map {
+                it.toGameVariant()
             }
 
     companion object {
@@ -296,11 +315,13 @@ class GameDbModel(
 class MatchmakingEntryDbModel(
     val id: Int,
     val user_id: Int,
+    val game_id: Int?,
+    val variant: String,
     val status: String,
     val created: Instant
 ) {
     fun toMatchmakingEntry(): MatchmakingEntry =
-        MatchmakingEntry(id, user_id, MatchmakingStatus.valueOf(status), created)
+        MatchmakingEntry(id, user_id, game_id, variant, MatchmakingStatus.valueOf(status), created)
 }
 
 // Class that represents the variant in the database
@@ -308,4 +329,20 @@ class VariantsDbModel(
     val variant_name: String
 ) {
     fun toVariant(): Variants = Variants.valueOf(variant_name)
+}
+
+// Class that represents the game variant in the database
+class GameVariantDbModel(
+    val variant_name: String,
+    val board_dim: Int,
+    val opening_rule: String,
+    val play_rule: String
+) {
+    fun toGameVariant(): GameVariant =
+        GameVariant(
+            variant_name,
+            BoardDim.fromInt(board_dim),
+            PlayingRule.valueOf(play_rule),
+            OpeningRule.valueOf(opening_rule)
+        )
 }

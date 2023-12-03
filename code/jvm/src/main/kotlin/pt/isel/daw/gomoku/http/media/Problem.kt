@@ -46,6 +46,7 @@ class Problem(
         val internalServerError = URI(BASE_URL + "internal-server-error")
         val gameDoesNotExists = URI(BASE_URL + "game-does-not-exists")
         val gameAlreadyEnded = URI(BASE_URL + "game-already-ended")
+        val userAlreadyInQueue = URI(BASE_URL + "user-already-in-queue")
 
         // Unauthorized
         val tokenExpired = URI(BASE_URL + "token-expired")
@@ -57,175 +58,231 @@ class Problem(
         val rankingNotFound = URI(BASE_URL + "ranking-not-found")
         val statsNotFound = URI(BASE_URL + "stats-not-found")
         val gamesNotFound: URI = URI(BASE_URL + "games-not-found")
+        val variantsNotFound = URI(BASE_URL + "variants-not-found")
+
+        fun insecurePassword(instance: URI?) = Problem(
+            typeUri = insecurePassword,
+            title = "Problem.insecurePassword",
+            status = 422,
+            detail = "Password is insecure",
+            instance = instance
+        ).toResponse()
+
+        fun insecureEmail(instance: URI?) = Problem(
+            typeUri = insecureEmail,
+            title = "Problem.insecureEmail",
+            status = 422,
+            detail = "Email is insecure",
+            instance = instance
+        ).toResponse()
+
+        fun userOrPasswordAreInvalid(instance: URI?) = Problem(
+            typeUri = userOrPasswordAreInvalid,
+            title = "Problem.userOrPasswordAreInvalid",
+            status = 401,
+            detail = "User or password are invalid",
+            instance = instance
+        ).toResponse()
+
+        fun invalidRequestContent(instance: URI?) = Problem(
+            typeUri = invalidRequestContent,
+            title = "Problem.invalidRequestContent",
+            status = 400,
+            detail = "Invalid request content",
+            instance = instance
+        ).toResponse()
+
+        fun invalidToken(instance: URI?) = Problem(
+            typeUri = invalidToken,
+            title = "Problem.invalidToken",
+            status = 400,
+            detail = "Invalid token",
+            instance = instance
+        ).toResponse()
+
+        fun tokenExpired(instance: URI?) = Problem(
+            typeUri = tokenExpired,
+            title = "Problem.tokenExpired",
+            status = 401,
+            detail = "Token expired",
+            instance = instance
+        ).toResponse()
+
+        fun tokenNotRevoked(instance: URI?, token : String) = Problem(
+            typeUri = tokenNotRevoked,
+            title = "Token not revoked",
+            status = 400,
+            detail = "Token $token not revoked",
+            instance = instance
+        ).toResponse()
+
+        fun matchNotFound(instance: URI?, matchEntryId: Int) = Problem(
+            typeUri = matchNotFound,
+            title = "Match not found",
+            status = 404,
+            detail = "Match entry with id $matchEntryId does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun rankingNotFound(instance: URI?) = Problem(
+            typeUri = rankingNotFound,
+            title = "Problem.rankingNotFound",
+            status = 404,
+            detail = "Ranking not found",
+            instance = instance
+        ).toResponse()
+
+        fun statsNotFound(instance: URI?, uid : Int) = Problem(
+            typeUri = statsNotFound,
+            title = "Stats not found",
+            status = 404,
+            detail = "Stats for user with id $uid does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun statsNotFound(instance: URI?, username : String) = Problem(
+            typeUri = statsNotFound,
+            title = "Stats not found",
+            status = 404,
+            detail = "Stats for user with username $username does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun internalServerError(instance: URI?) = Problem(
+            typeUri = internalServerError,
+            title = "Problem.internalServerError",
+            status = 500,
+            detail = "Internal server error",
+            instance = instance
+        ).toResponse()
+
+        fun gameAlreadyEnded(instance: URI?, gid : Int) = Problem(
+            typeUri = gameAlreadyEnded,
+            title = "Game Already Ended",
+            status = 409,
+            detail = "Game with id $gid already ended",
+            instance = instance
+        ).toResponse()
+
+        fun gameDoesNotExists(instance: URI?, gid : Int) = Problem(
+            typeUri = gameDoesNotExists,
+            title = "Game does not exist",
+            status = 404,
+            detail = "Game with id $gid does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun variantDoesNotExists(instance: URI?, variantName: String) = Problem(
+            typeUri = variantDoesNotExists,
+            title = "Variant does not exist",
+            status = 404,
+            detail = "Variant $variantName does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun userDoesNotExists(instance: URI?, uid : Int) = Problem(
+            typeUri = userDoesNotExists,
+            title = "User does not exist",
+            status = 404,
+            detail = "User with id $uid does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun userDoesNotExists(instance: URI?, username : String) = Problem(
+            typeUri = userDoesNotExists,
+            title = "User does not exist",
+            status = 404,
+            detail = "User with username $username does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun userIsNotAuthenticated(instance: URI?) = Problem(
+            typeUri = userIsNotAuthenticated,
+            title = "Problem.userIsNotAuthenticated",
+            status = 401,
+            detail = "User is not authenticated",
+            instance = instance
+        ).toResponse()
+
+        fun gameAlreadyExists(instance: URI?) = Problem(
+            typeUri = gameAlreadyExists,
+            title = "Problem.gameAlreadyExists",
+            status = 409,
+            detail = "Game already exists",
+            instance = instance
+        ).toResponse()
+
+        fun userAlreadyExists(instance: URI?, name : String) = Problem(
+            typeUri = userAlreadyExists,
+            title = "Problem.userAlreadyExists",
+            status = 409,
+            detail = "User with username $name already exists",
+            instance = instance
+        ).toResponse()
+
+        fun invalidPosition(instance: URI?, gid: Int) = Problem(
+            typeUri = invalidPosition,
+            title = "Problem.invalidPosition",
+            status = 400,
+            detail = "Unplayable position on game with id $gid",
+            instance = instance
+        ).toResponse()
+
+        fun invalidTurn(instance: URI?, gid : Int) = Problem(
+            typeUri = invalidTurn,
+            title = "Invalid Turn",
+            status = 400,
+            detail = "Game with id $gid is not in the correct turn to play",
+            instance = instance
+        ).toResponse()
+
+        fun invalidTime(instance: URI?, gid: Int) = Problem(
+            typeUri = invalidTime,
+            title = "Invalid Time",
+            status = 400,
+            detail = "Game with id $gid is not in the correct time to play",
+            instance = instance
+        ).toResponse()
+
+        fun invalidState(instance: URI?, gid : Int) = Problem(
+            typeUri = invalidState,
+            title = "Invalid State",
+            status = 409,
+            detail = "Game with id $gid is not in the correct state to play",
+            instance = instance
+        ).toResponse()
+
+        fun invalidUser(instance: URI?, userId : Int) = Problem(
+            typeUri = invalidUser,
+            title = "Invalid User",
+            status = 401,
+            detail = "User with id $userId does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun gamesNotFound(instance: URI?) = Problem(
+            typeUri = gamesNotFound,
+            title = "Games not found",
+            status = 404,
+            detail = "Games not found",
+            instance = instance
+        ).toResponse()
+
+        fun variantsNotFound(instance: URI?) = Problem(
+            typeUri = variantsNotFound,
+            title = "Variants not found",
+            status = 404,
+            detail = "Variants not found",
+            instance = instance
+        ).toResponse()
+
+        fun userAlreadyInQueue(instance: URI?, uid : Int) = Problem(
+            typeUri = userAlreadyInQueue,
+            title = "User already in queue",
+            status = 409,
+            detail = "User with id $uid is already in queue",
+            instance = instance
+        ).toResponse()
+
     }
-
-    fun insecurePassword() = Problem(
-        typeUri = insecurePassword,
-        title = "Problem.insecurePassword",
-        status = 400,
-        detail = "Password is insecure",
-        instance = null
-    ).toResponse()
-
-    fun insecureEmail() = Problem(
-        typeUri = insecureEmail,
-        title = "Problem.insecureEmail",
-        status = 400,
-        detail = "Email is insecure",
-        instance = null
-    ).toResponse()
-
-    fun userOrPasswordAreInvalid() = Problem(
-        typeUri = userOrPasswordAreInvalid,
-        title = "Problem.userOrPasswordAreInvalid",
-        status = 401,
-        detail = "User or password are invalid",
-        instance = null
-    ).toResponse()
-
-    fun invalidRequestContent() = Problem(
-        typeUri = invalidRequestContent,
-        title = "Problem.invalidRequestContent",
-        status = 400,
-        detail = "Invalid request content",
-        instance = null
-    ).toResponse()
-
-    fun invalidToken() = Problem(
-        typeUri = invalidToken,
-        title = "Problem.invalidToken",
-        status = 400,
-        detail = "Invalid token",
-        instance = null
-    ).toResponse()
-
-    fun tokenExpired() = Problem(
-        typeUri = tokenExpired,
-        title = "Problem.tokenExpired",
-        status = 401,
-        detail = "Token expired",
-        instance = null
-    ).toResponse()
-
-    fun tokenNotRevoked() = Problem(
-        typeUri = tokenNotRevoked,
-        title = "Problem.tokenNotRevoked",
-        status = 400,
-        detail = "Token not revoked",
-        instance = null
-    ).toResponse()
-
-    fun matchNotFound() = Problem(
-        typeUri = matchNotFound,
-        title = "Problem.matchNotFound",
-        status = 404,
-        detail = "Match not found",
-        instance = null
-    ).toResponse()
-
-    fun rankingNotFound() = Problem(
-        typeUri = rankingNotFound,
-        title = "Problem.rankingNotFound",
-        status = 404,
-        detail = "Ranking not found",
-        instance = null
-    ).toResponse()
-
-    fun statsNotFound() = Problem(
-        typeUri = statsNotFound,
-        title = "Problem.statsNotFound",
-        status = 404,
-        detail = "Stats not found",
-        instance = null
-    ).toResponse()
-
-    fun internalServerError() = Problem(
-        typeUri = internalServerError,
-        title = "Problem.internalServerError",
-        status = 500,
-        detail = "Internal server error",
-        instance = null
-    ).toResponse()
-
-    fun gameAlreadyEnded() = Problem(
-        typeUri = gameAlreadyEnded,
-        title = "Problem.gameAlreadyEnded",
-        status = 409,
-        detail = "Game already ended",
-        instance = null
-    ).toResponse()
-
-    fun gameDoesNotExists() = Problem(
-        typeUri = gameDoesNotExists,
-        title = "Problem.gameDoesNotExists",
-        status = 404,
-        detail = "Game does not exists",
-        instance = null
-    ).toResponse()
-
-    fun variantDoesNotExists() = Problem(
-        typeUri = variantDoesNotExists,
-        title = "Problem.variantDoesNotExists",
-        status = 404,
-        detail = "Variant does not exists",
-        instance = null
-    ).toResponse()
-
-    fun userDoesNotExists() = Problem(
-        typeUri = userDoesNotExists,
-        title = "Problem.userDoesNotExists",
-        status = 404,
-        detail = "User does not exists",
-        instance = null
-    ).toResponse()
-
-    fun gameAlreadyExists() = Problem(
-        typeUri = gameAlreadyExists,
-        title = "Problem.gameAlreadyExists",
-        status = 409,
-        detail = "Game already exists",
-        instance = null
-    ).toResponse()
-
-    fun userAlreadyExists() = Problem(
-        typeUri = userAlreadyExists,
-        title = "Problem.userAlreadyExists",
-        status = 409,
-        detail = "User already exists",
-        instance = null
-    ).toResponse()
-
-    fun invalidPosition() = Problem(
-        typeUri = invalidPosition,
-        title = "Problem.invalidPosition",
-        status = 400,
-        detail = "Invalid position",
-        instance = null
-    ).toResponse()
-
-    fun invalidTurn() = Problem(
-        typeUri = invalidTurn,
-        title = "Problem.invalidTurn",
-        status = 400,
-        detail = "Invalid turn",
-        instance = null
-    ).toResponse()
-
-    fun invalidTime() = Problem(
-        typeUri = invalidTime,
-        title = "Problem.invalidTime",
-        status = 400,
-        detail = "Invalid time",
-        instance = null
-    ).toResponse()
-
-    fun invalidState() = Problem(
-        typeUri = invalidState,
-        title = "Problem.invalidState",
-        status = 400,
-        detail = "Invalid state",
-        instance = null
-    ).toResponse()
-
-    //TODO: continue for all
 }

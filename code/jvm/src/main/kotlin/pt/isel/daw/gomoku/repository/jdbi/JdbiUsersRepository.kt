@@ -5,6 +5,7 @@ import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.reflect.ColumnName
 import org.slf4j.LoggerFactory
+import pt.isel.daw.gomoku.domain.games.EndGameResult
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.utils.Token
@@ -44,6 +45,39 @@ class JdbiUsersRepository(
             .bind("password_validation", user.passwordValidation.validationInfo)
             .execute()
 
+    override fun updateUserStats(id: Int, opponent: Int, result: EndGameResult) : Int =
+        when (result) {
+            EndGameResult.WIN ->
+                handle.createUpdate(
+                    """
+                            update dbo.Statistics
+                            set
+                                wins = case when user_id = :id then wins + 1 else wins end,
+                                losses = case when user_id = :opponent then losses + 1 else losses end,
+                                points = case 
+                                    when user_id = :id then points + 12 
+                                    when user_id = :opponent then points - 3 
+                                    else points end
+                            where user_id in (:id, :opponent)
+                        """
+                )
+                    .bind("id", id)
+                    .bind("opponent", opponent)
+                    .execute()
+
+            EndGameResult.DRAW ->
+                handle.createUpdate(
+                    """
+                            update dbo.Statistics
+                            set draws = draws + 1, points = points + 6
+                            where user_id in (:id, :opponent)
+                        """
+                )
+                    .bind("id", id)
+                    .bind("opponent", opponent)
+                    .execute()
+        }
+
     override fun getUserStatsById(id: Int): UserStatistics? =
         handle.createQuery(
             """
@@ -55,6 +89,22 @@ class JdbiUsersRepository(
             """.trimIndent()
         )
             .bind("id", id)
+            .mapTo<UserStatsDBModel>()
+            .singleOrNull()?.run {
+                toUserStatistics()
+            }
+
+    override fun getUserStatsByUsername(username: String): UserStatistics? =
+        handle.createQuery(
+            """
+                select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, draws, rank, points
+                from dbo.Users as users
+                inner join dbo.Statistics as statistics
+                on users.id = statistics.user_id
+                where users.username = :username
+            """.trimIndent()
+        )
+            .bind("username", username)
             .mapTo<UserStatsDBModel>()
             .singleOrNull()?.run {
                 toUserStatistics()

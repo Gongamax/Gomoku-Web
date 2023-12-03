@@ -1,8 +1,10 @@
 package pt.isel.daw.gomoku.services.games
 
 import pt.isel.daw.gomoku.domain.games.Game
+import pt.isel.daw.gomoku.domain.games.variants.GameVariant
+import pt.isel.daw.gomoku.domain.games.variants.Variants
 import pt.isel.daw.gomoku.http.util.PageResult
-import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
+import pt.isel.daw.gomoku.repository.jdbi.MatchmakingEntry
 import pt.isel.daw.gomoku.utils.Either
 
 sealed class GameCreationError {
@@ -48,6 +50,7 @@ typealias LeaveGameResult = Either<LeaveGameError, Unit>
 sealed class MatchmakingError {
     object InvalidUser : MatchmakingError()
     object VariantDoesNotExist : MatchmakingError()
+    object UserAlreadyInQueue : MatchmakingError()
 }
 
 sealed class MatchmakingSuccess(val id : Int) {
@@ -71,4 +74,10 @@ sealed class MatchmakingStatusError {
     object InvalidUser : MatchmakingStatusError()
 }
 
-typealias MatchmakingStatusResult = Either<MatchmakingStatusError, MatchmakingStatus>
+typealias MatchmakingStatusResult = Either<MatchmakingStatusError, MatchmakingEntry>
+
+sealed class VariantListError {
+    object VariantsNotFound : VariantListError()
+}
+
+typealias VariantListResult = Either<VariantListError, List<GameVariant>>

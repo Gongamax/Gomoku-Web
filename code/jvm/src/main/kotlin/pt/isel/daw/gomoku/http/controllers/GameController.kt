@@ -32,33 +32,36 @@ class GameController(
         return when (val game = gameService.getGameById(id)) {
             is Success -> ResponseEntity.ok(
                 siren(
-                GameGetByIdOutputModel(
-                    GameOutputModel(
-                        game.value.id.value,
-                        game.value.board,
-                        game.value.playerBLACK,
-                        game.value.playerWHITE,
-                        game.value.state.toString(),
-                        game.value.variant.toString(),
-                        game.value.created.toString()
+                    GameGetByIdOutputModel(
+                        GameOutputModel(
+                            game.value.id.value,
+                            game.value.board,
+                            game.value.playerBLACK,
+                            game.value.playerWHITE,
+                            game.value.state.toString(),
+                            game.value.variant.toString(),
+                            game.value.created.toString()
+                        )
                     )
-                ) ){
+                ) {
                     clazz("game")
                     link(Uris.Games.byId(id), Rels.SELF)
-                    action("play",
+                    action(
+                        "play",
                         Uris.Games.play(id),
                         HttpMethod.POST,
                         "application/x-www-form-urlencoded"
-                    ){
+                    ) {
                         numberField("row")
                         numberField("column")
                         requireAuth(true)
                     }
-                    action("leave-game",
+                    action(
+                        "leave-game",
                         Uris.Games.leave(id),
                         HttpMethod.PUT,
                         "application/json"
-                    ){
+                    ) {
                         requireAuth(true)
                     }
                     requireAuth(true)
@@ -66,13 +69,7 @@ class GameController(
             )
 
             is Failure -> when (game.value) {
-                GameGetError.GameDoesNotExist -> Problem(
-                    typeUri = Problem.gameDoesNotExists,
-                    title = "Game does not exist",
-                    status = 404,
-                    detail = "Game with id $id does not exist",
-                    instance = Uris.Games.byId(id)
-                ).toResponse()
+                GameGetError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.byId(id), gid = id)
             }
         }
     }
@@ -87,18 +84,19 @@ class GameController(
             gameService.play(id, authenticatedUser.user.id.value, inputModel.row, inputModel.column)) {
             is Success -> ResponseEntity.ok(
                 siren(
-                GameRoundOutputModel(
-                    GameOutputModel(
-                        res.value.id.value,
-                        res.value.board,
-                        res.value.playerBLACK,
-                        res.value.playerWHITE,
-                        res.value.state.toString(),
-                        res.value.variant.toString(),
-                        res.value.created.toString()
-                    ),
-                    res.value.state.toString()
-                ) ){
+                    GameRoundOutputModel(
+                        GameOutputModel(
+                            res.value.id.value,
+                            res.value.board,
+                            res.value.playerBLACK,
+                            res.value.playerWHITE,
+                            res.value.state.toString(),
+                            res.value.variant.toString(),
+                            res.value.created.toString()
+                        ),
+                        res.value.state.toString()
+                    )
+                ) {
                     clazz("play")
                     link(Uris.Games.play(id), Rels.SELF)
                     link(Uris.Games.byId(id), Rels.GAME)
@@ -107,48 +105,19 @@ class GameController(
             )
 
             is Failure -> when (res.value) {
-                GamePlayError.GameDoesNotExist -> Problem(
-                    typeUri = Problem.gameDoesNotExists,
-                    title = "Game does not exist",
-                    status = 404,
-                    detail = "Game with id $id does not exist",
-                    instance = Uris.Games.byId(id)
-                ).toResponse()
-                GamePlayError.InvalidUser -> Problem(
-                    typeUri = Problem.invalidUser,
-                    title = "Invalid user",
-                    status = 401,
-                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Games.play(id)
-                ).toResponse()
-                GamePlayError.InvalidState -> Problem(
-                    typeUri = Problem.invalidState,
-                    title = "Invalid state",
-                    status = 422,
-                    detail = "Game with id $id is not in the correct state to play",
-                    instance = Uris.Games.play(id)
-                ).toResponse()
-                GamePlayError.InvalidTime -> Problem(
-                    typeUri = Problem.invalidTime,
-                    title = "Invalid time",
-                    status = 422,
-                    detail = "Game with id $id is not in the correct time to play",
-                    instance = Uris.Games.play(id)
-                ).toResponse()
-                GamePlayError.InvalidTurn -> Problem(
-                    typeUri = Problem.invalidTurn,
-                    title = "Invalid turn",
-                    status = 422,
-                    detail = "Game with id $id is not in the correct turn to play",
-                    instance = Uris.Games.play(id)
-                ).toResponse()
-                GamePlayError.InvalidPosition -> Problem(
-                    typeUri = Problem.invalidPosition,
-                    title = "Invalid position",
-                    status = 422,
-                    detail = "Game with id $id is not in the correct position to play",
-                    instance = Uris.Games.play(id)
-                ).toResponse()
+                GamePlayError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.play(id), gid = id)
+
+                GamePlayError.InvalidUser -> Problem.invalidUser(
+                    instance = Uris.Games.play(id), userId = authenticatedUser.user.id.value
+                )
+
+                GamePlayError.InvalidState -> Problem.invalidState(instance = Uris.Games.play(id), gid = id)
+
+                GamePlayError.InvalidTime -> Problem.invalidTime(instance = Uris.Games.play(id), gid = id)
+
+                GamePlayError.InvalidTurn -> Problem.invalidTurn(instance = Uris.Games.play(id), gid = id)
+
+                GamePlayError.InvalidPosition -> Problem.invalidPosition(instance = Uris.Games.play(id), gid = id)
             }
         }
     }
@@ -166,7 +135,11 @@ class GameController(
                         Uris.Games.byId(res.value.id).toASCIIString()
                     ).body(
                         siren(
-                            "Game found"
+                            GameMatchmakingOutputModel(
+                                "Match found",
+                                "gid",
+                                res.value.id
+                            )
                         ) {
                             clazz("matchmaking")
                             link(Uris.Games.byId(res.value.id), Rels.SELF)
@@ -174,7 +147,7 @@ class GameController(
                             entity(
                                 "{ status: MATCHED }",
                                 Rels.MATCHMAKING_STATUS
-                            ){
+                            ) {
                                 clazz("matchmaking-status")
                                 requireAuth(true)
                             }
@@ -184,22 +157,27 @@ class GameController(
 
                 is MatchmakingSuccess.OnWaitingQueue -> ResponseEntity.ok().body(
                     siren(
-                        "User on matchmaking queue"
+                        GameMatchmakingOutputModel(
+                            "User on waiting queue",
+                            "mid",
+                            res.value.id
+                        )
                     ) {
                         clazz("matchmaking")
                         link(Uris.Games.matchmaking(), Rels.SELF)
                         entity(
                             "{ status: PENDING }",
                             Rels.MATCHMAKING_STATUS
-                        ){
+                        ) {
                             clazz("matchmaking-status")
                             requireAuth(true)
                         }
-                        action("leave-matchmaking",
-                            Uris.Games.exitMatchmakingQueue(),
+                        action(
+                            "leave-matchmaking",
+                            Uris.Games.exitMatchmakingQueue(res.value.id),
                             HttpMethod.DELETE,
                             "application/json"
-                        ){
+                        ) {
                             requireAuth(true)
                         }
                         requireAuth(true)
@@ -208,102 +186,98 @@ class GameController(
             }
 
             is Failure -> when (res.value) {
-                MatchmakingError.InvalidUser -> Problem(
-                    typeUri = Problem.invalidUser,
-                    title = "Invalid user",
-                    status = 401,
-                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Games.matchmaking()
-                ).toResponse()
-                MatchmakingError.VariantDoesNotExist -> Problem(
-                    typeUri = Problem.variantDoesNotExists,
-                    title = "Variant does not exist",
-                    status = 400,
-                    detail = "Variant ${inputModel.variant} does not exist",
-                    instance = Uris.Games.matchmaking()
-                ).toResponse()
+                MatchmakingError.InvalidUser -> Problem.invalidUser(
+                    instance = Uris.Games.matchmaking(),
+                    userId = authenticatedUser.user.id.value
+                )
+
+                MatchmakingError.VariantDoesNotExist -> Problem.variantDoesNotExists(
+                    instance = Uris.Games.matchmaking(),
+                    variantName = inputModel.variant
+                )
+
+                MatchmakingError.UserAlreadyInQueue -> Problem.userAlreadyInQueue(
+                    instance = Uris.Games.matchmaking(),
+                    uid = authenticatedUser.user.id.value
+                )
             }
         }
     }
 
-    //TODO: PASSAR A ENVIAR UM MATCHMAKING ENTRY, ADICIOANR O GAMEID À TABELA TAMBÉM
-    //TODO: ADICIONAR ROTA GETVARIANTS
     @GetMapping(Uris.Games.GET_MATCHMAKING_STATUS)
-    fun getMatchmakingStatus(authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
-        return when (val res = gameService.getMatchmakingStatus(authenticatedUser.user.id.value)) {
+    fun getMatchmakingStatus(authenticatedUser: AuthenticatedUser, @PathVariable id: Int): ResponseEntity<*> {
+        return when (val res = gameService.getMatchmakingStatus(id, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok(
                 siren(
-                    GameMatchmakingStatusOutputModel(res.value)
+                    GameMatchmakingStatusOutputModel(
+                        res.value.id,
+                        res.value.userId,
+                        res.value.gameId,
+                        res.value.status.toString(),
+                        res.value.variant,
+                        res.value.created.toString()
+                    )
                 ) {
                     clazz("matchmaking-status")
-                    link(Uris.Games.getMatchmakingStatus(), Rels.SELF)
+                    link(Uris.Games.getMatchmakingStatus(id), Rels.SELF)
                     requireAuth(true)
                 }
             )
 
             is Failure -> when (res.value) {
-                MatchmakingStatusError.InvalidUser -> Problem(
-                    typeUri = Problem.invalidUser,
-                    title = "Invalid user",
-                    status = 401,
-                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Games.getMatchmakingStatus()
-                ).toResponse()
-                MatchmakingStatusError.MatchDoesNotExist -> Problem(
-                    typeUri = Problem.matchNotFound,
-                    title = "Match not found",
-                    status = 404,
-                    detail = "Match for user with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Games.getMatchmakingStatus()
-                ).toResponse()
+                MatchmakingStatusError.InvalidUser -> Problem.invalidUser(
+                    instance = Uris.Games.getMatchmakingStatus(id),
+                    userId = authenticatedUser.user.id.value
+                )
+
+                MatchmakingStatusError.MatchDoesNotExist -> Problem.matchNotFound(
+                    instance = Uris.Games.getMatchmakingStatus(id),
+                    matchEntryId = id
+                )
             }
         }
     }
 
     @DeleteMapping(Uris.Games.EXIT_MATCHMAKING_QUEUE)
-    fun exitMatchmakingQueue(authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
-        return when (val res = gameService.exitMatchmakingQueue(authenticatedUser.user.id.value)) {
+    fun exitMatchmakingQueue(authenticatedUser: AuthenticatedUser, @PathVariable id: Int): ResponseEntity<*> {
+        return when (val res = gameService.exitMatchmakingQueue(id, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok(
                 siren(
                     "User left matchmaking queue"
                 ) {
                     clazz("leave-matchmaking")
-                    link(Uris.Games.exitMatchmakingQueue(), Rels.SELF)
+                    link(Uris.Games.exitMatchmakingQueue(id), Rels.SELF)
                     requireAuth(true)
                 }
             )
 
             is Failure -> when (res.value) {
-                LeaveMatchmakingError.MatchDoesNotExist -> Problem(
-                    typeUri = Problem.matchNotFound,
-                    title = "Match not found",
-                    status = 404,
-                    detail = "Match for user with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Games.exitMatchmakingQueue()
-                ).toResponse()
-                LeaveMatchmakingError.InvalidUser -> Problem(
-                    typeUri = Problem.invalidUser,
-                    title = "Invalid user",
-                    status = 401,
-                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Games.exitMatchmakingQueue()
-                ).toResponse()
+                LeaveMatchmakingError.MatchDoesNotExist -> Problem.matchNotFound(
+                    instance = Uris.Games.exitMatchmakingQueue(id),
+                    matchEntryId = id
+                )
+
+                LeaveMatchmakingError.InvalidUser -> Problem.invalidUser(
+                    instance = Uris.Games.exitMatchmakingQueue(id),
+                    userId = authenticatedUser.user.id.value
+                )
             }
         }
     }
 
     @GetMapping(Uris.Games.GET_ALL_GAMES)
     fun getAllGames(@RequestParam page: String): ResponseEntity<*> =
-       when(val games = gameService.getAll(PositiveValue(page.toInt()))) {
-           is Failure ->
-               Problem(
-                   typeUri = Problem.gamesNotFound,
-                   title = "No games",
-                   status = 404,
-                   detail = "There are no games",
-                   instance = Uris.Games.getAllGames()
-               ).toResponse()
-           is Success->
+        when (val games = gameService.getAll(PositiveValue(page.toInt()))) {
+            is Failure ->
+                Problem(
+                    typeUri = Problem.gamesNotFound,
+                    title = "No games",
+                    status = 404,
+                    detail = "There are no games",
+                    instance = Uris.Games.getAllGames()
+                ).toResponse()
+
+            is Success ->
                 ResponseEntity.ok(
                     siren(
                         GameGetAllOutputModel(
@@ -319,21 +293,21 @@ class GameController(
                                 )
                             }
                         )
-                ){
-                    clazz("game-list")
-                    link(Uris.Games.getAllGames(), Rels.SELF)
-                    entity(
-                        "{gid, board, playerBlack, playerWhite, state, variant, created}",
-                        Rels.GAME
-                    ){
-                        clazz("game")
-                        link(URI(Uris.Games.GET_GAME_BY_ID), Rels.GAME)
+                    ) {
+                        clazz("game-list")
+                        link(Uris.Games.getAllGames(), Rels.SELF)
+                        entity(
+                            "{gid, board, playerBlack, playerWhite, state, variant, created}",
+                            Rels.GAME
+                        ) {
+                            clazz("game")
+                            link(URI(Uris.Games.GET_GAME_BY_ID), Rels.GAME)
+                            requireAuth(true)
+                        }
                         requireAuth(true)
                     }
-                    requireAuth(true)
-                }
-            )
-       }
+                )
+        }
 
 
     @PutMapping(Uris.Games.LEAVE)
@@ -348,28 +322,14 @@ class GameController(
                     requireAuth(true)
                 }
             )
+
             is Failure -> when (res.value) {
-                LeaveGameError.GameAlreadyEnded -> Problem(
-                    typeUri = Problem.gameAlreadyEnded,
-                    title = "Game already ended",
-                    status = 422,
-                    detail = "Game with id $id already ended",
-                    instance = Uris.Games.leave(id)
-                ).toResponse()
-                LeaveGameError.GameDoesNotExist -> Problem(
-                    typeUri = Problem.gameDoesNotExists,
-                    title = "Game does not exist",
-                    status = 404,
-                    detail = "Game with id $id does not exist",
-                    instance = Uris.Games.leave(id)
-                ).toResponse()
-                LeaveGameError.InvalidUser -> Problem(
-                    typeUri = Problem.invalidUser,
-                    title = "Invalid user",
-                    status = 401,
-                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Games.leave(id)
-                ).toResponse()
+                LeaveGameError.GameAlreadyEnded -> Problem.gameAlreadyEnded(instance = Uris.Games.leave(id), gid = id)
+                LeaveGameError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.leave(id), gid = id)
+                LeaveGameError.InvalidUser -> Problem.invalidUser(
+                    instance = Uris.Games.leave(id),
+                    userId = authenticatedUser.user.id.value
+                )
             }
         }
     }
@@ -379,7 +339,7 @@ class GameController(
         authenticatedUser: AuthenticatedUser,
         @PathVariable uid: String?,
         @RequestParam page: String
-        ): ResponseEntity<*> {
+    ): ResponseEntity<*> {
         return when (
             val games = gameService.getGamesOfUser(
                 uid?.toInt() ?: authenticatedUser.user.id.value, PositiveValue(page.toInt())
@@ -400,13 +360,13 @@ class GameController(
                             )
                         }
                     )
-                ){
+                ) {
                     clazz("game-list-of-user")
                     link(Uris.Games.getAllGamesByUser(uid?.toInt() ?: authenticatedUser.user.id.value), Rels.SELF)
                     entity(
                         "{gid, board, playerBlack, playerWhite, state, variant, created}",
                         Rels.GAME
-                    ){
+                    ) {
                         clazz("game")
                         link(URI(Uris.Games.GET_GAME_BY_ID), Rels.GAME)
                         requireAuth(true)
@@ -416,20 +376,54 @@ class GameController(
             )
 
             is Failure -> when (games.value) {
-                GameListError.UserDoesNotExist -> Problem(
-                    typeUri = Problem.userDoesNotExists,
-                    title = "Problem.userDoesNotExists",
-                    status = 404,
-                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Users.getUsersById(authenticatedUser.user.id.value)
-                ).toResponse()
-                GameListError.GamesNotFound -> Problem(
-                    typeUri = Problem.gamesNotFound,
-                    title = "Problem.gamesNotFound",
-                    status = 404,
-                    detail = "There are no games",
-                    instance = Uris.Games.getAllGamesByUser(authenticatedUser.user.id.value)
-                ).toResponse()
+                GameListError.UserDoesNotExist -> Problem.userDoesNotExists(
+                    instance = Uris.Games.getAllGamesByUser(
+                        uid?.toInt() ?: authenticatedUser.user.id.value
+                    ),
+                    uid = uid?.toInt() ?: authenticatedUser.user.id.value
+                )
+
+                GameListError.GamesNotFound -> Problem.gamesNotFound(
+                    instance = Uris.Games.getAllGamesByUser(
+                        uid?.toInt() ?: authenticatedUser.user.id.value
+                    )
+                )
+            }
+        }
+    }
+
+    @GetMapping(Uris.Games.GET_ALL_VARIANTS)
+    fun getAllVariants(): ResponseEntity<*> {
+        return when (val res = gameService.getAllVariants()) {
+            is Success -> ResponseEntity.ok(
+                siren(
+                    GameGetAllVariantsOutputModel(
+                        res.value.map { variant ->
+                            VariantOutputModel(
+                                variant.name,
+                                variant.boardDim.toInt(),
+                                variant.playingRule.toString(),
+                                variant.openingRule.toString()
+                            )
+                        }
+                    )
+                ) {
+                    clazz("variant-list")
+                    link(Uris.Games.getAllVariants(), Rels.SELF)
+                    entity(
+                        "{vid, name, description}",
+                        Rels.VARIANT
+                    ) {
+                        clazz("variant")
+                        link(URI(Uris.Games.GET_VARIANT_BY_NAME), Rels.VARIANT)
+                        requireAuth(true)
+                    }
+                    requireAuth(true)
+                }
+            )
+
+            is Failure -> when (res.value) {
+                VariantListError.VariantsNotFound -> Problem.variantsNotFound(instance = Uris.Games.getAllVariants())
             }
         }
     }

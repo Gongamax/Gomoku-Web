@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.repository.util
 
 import kotlinx.datetime.Instant
+import pt.isel.daw.gomoku.domain.games.EndGameResult
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.utils.Token
@@ -23,7 +24,11 @@ interface UsersRepository {
 
     fun updateUser(user: User): Int
 
+    fun updateUserStats(id : Int, opponent : Int, result : EndGameResult) : Int
+
     fun getUserStatsById(id: Int): UserStatistics?
+
+    fun getUserStatsByUsername(username: String): UserStatistics?
 
     fun getTokenByTokenValidationInfo(tokenValidationInfo: TokenValidationInfo): Pair<User, Token>?
 

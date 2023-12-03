@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.games.board.Board
+import pt.isel.daw.gomoku.domain.games.board.Cell
+import pt.isel.daw.gomoku.domain.games.variants.Variants
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.users.User

@@ -39,29 +39,9 @@ class UsersController(
                 )
 
             is Failure -> when (res.value) {
-                UserCreationError.InsecurePassword -> Problem(
-                    typeUri = Problem.insecurePassword,
-                    title = "Problem.insecurePassword",
-                    status = 400,
-                    detail = "Password is insecure",
-                    instance = Uris.Users.register()
-                ).toResponse()
-
-                UserCreationError.UserAlreadyExists -> Problem(
-                    typeUri = Problem.userAlreadyExists,
-                    title = "Problem.userAlreadyExists",
-                    status = 409,
-                    detail = "User with username ${input.username} already exists",
-                    instance = Uris.Users.register()
-                ).toResponse()
-
-                UserCreationError.InsecureEmail -> Problem(
-                    typeUri = Problem.insecureEmail,
-                    title = "Problem.insecureEmail",
-                    status = 400,
-                    detail = "Email is insecure",
-                    instance = Uris.Users.register()
-                ).toResponse()
+                UserCreationError.InsecurePassword -> Problem.insecurePassword(Uris.Users.register())
+                UserCreationError.UserAlreadyExists -> Problem.userAlreadyExists(Uris.Users.register(), input.username)
+                UserCreationError.InsecureEmail -> Problem.insecureEmail(Uris.Users.register())
             }
         }
     }
@@ -74,7 +54,7 @@ class UsersController(
             is Success ->
                 ResponseEntity.status(200)
                     .body(
-                        siren(UserTokenCreateOutputModel(res.value.tokenValue)){
+                        siren(UserTokenCreateOutputModel(res.value.tokenValue)) {
                             clazz("login")
                             link(Uris.Users.login(), Rels.SELF)
                             requireAuth(false)
@@ -82,14 +62,7 @@ class UsersController(
                     )
 
             is Failure -> when (res.value) {
-                TokenCreationError.UserOrPasswordAreInvalid ->
-                    Problem(
-                        typeUri = Problem.userOrPasswordAreInvalid,
-                        title = "Problem.userOrPasswordAreInvalid",
-                        status = 401,
-                        detail = "User or password are invalid",
-                        instance = Uris.Users.login()
-                    ).toResponse()
+                TokenCreationError.UserOrPasswordAreInvalid -> Problem.userOrPasswordAreInvalid(Uris.Users.login())
             }
         }
     }
@@ -107,32 +80,28 @@ class UsersController(
                 }
             )
 
-            is Failure -> Problem(
-                typeUri = Problem.tokenNotRevoked,
-                title = "Problem.tokenNotRevoked",
-                status = 400,
-                detail = "Token ${authenticatedUser.token} not revoked",
-                instance = Uris.Users.logout()
-            ).toResponse()
+            is Failure -> Problem.tokenNotRevoked(Uris.Users.logout(), authenticatedUser.token)
         }
 
     @GetMapping(Uris.Users.GET_USER_BY_ID)
-    fun getById(@PathVariable id: String, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
-        when (val user = userService.getUserById(id.toInt())) {
+    fun getById(@PathVariable id: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
+        when (val user = userService.getUserById(id)) {
             is Success -> ResponseEntity.ok(
-                siren(UserGetByIdOutputModel(
-                    user.value.id.value,
-                    user.value.username,
-                    user.value.email.value
-                )){
+                siren(
+                    UserGetByIdOutputModel(
+                        user.value.id.value,
+                        user.value.username,
+                        user.value.email.value
+                    )
+                ) {
                     clazz("user")
-                    link(Uris.Users.getUsersById(id.toInt()), Rels.SELF)
+                    link(Uris.Users.getUsersById(id), Rels.SELF)
                     action(
                         "update-user",
-                        Uris.Users.updateUser(id.toInt()),
+                        Uris.Users.updateUser(),
                         HttpMethod.PUT,
                         "application/x-www-form-urlencoded"
-                    ){
+                    ) {
                         textField("username")
                         textField("email")
                         textField("password")
@@ -143,13 +112,7 @@ class UsersController(
             )
 
             is Failure -> when (user.value) {
-                UserGetByIdError.UserDoesNotExist -> Problem(
-                    typeUri = Problem.userDoesNotExists,
-                    title = "Problem.userDoesNotExists",
-                    status = 404,
-                    detail = "User with id $id does not exist",
-                    instance = Uris.Users.getUsersById(id.toInt())
-                ).toResponse()
+                UserGetByIdError.UserDoesNotExist -> Problem.userDoesNotExists(Uris.Users.getUsersById(id), id)
             }
         }
 
@@ -160,32 +123,36 @@ class UsersController(
                 clazz("user-home")
                 link(Uris.Users.authHome(), Rels.SELF)
                 link(Uris.systemInfo(), Rels.SYSTEM_INFO)
-                link(URI(Uris.Users.RANKING_INFO + "?page=0" ), Rels.RANKING_INFO)
+                link(URI(Uris.Users.RANKING_INFO + "?page=0"), Rels.RANKING_INFO)
                 action(
                     "matchmaking",
                     Uris.Games.matchmaking(),
                     HttpMethod.POST,
                     "application/x-www-form-urlencoded"
-                ){
-                        hiddenField("userId", authenticatedUser.user.id.value.toString())
-                        textField("variant")
-                        requireAuth(true)
+                ) {
+                    hiddenField("userId", authenticatedUser.user.id.value.toString())
+                    textField("variant")
+                    requireAuth(true)
                 }
-                action("logout",
+                action(
+                    "logout",
                     Uris.Users.logout(),
                     HttpMethod.POST,
-                    "application/json") {
-                        requireAuth(true)
-                    }
+                    "application/json"
+                ) {
+                    requireAuth(true)
+                }
                 requireAuth(true)
             }
         )
+
     @GetMapping(Uris.Users.RANKING_INFO)
     fun getRankingInfo(@RequestParam page: String): ResponseEntity<*> =
         when (val res = userService.getRanking(PositiveValue(page.toInt()))) {
             is Success -> ResponseEntity.ok(
-                siren(RankingInfoOutputModel(res.value.content)
-                ){
+                siren(
+                    RankingInfoOutputModel(res.value.content)
+                ) {
                     clazz("ranking-info")
                     link(URI(Uris.Users.RANKING_INFO + "?page=" + page), Rels.SELF)
                     entity(
@@ -195,13 +162,13 @@ class UsersController(
                         clazz("user-statistics")
                         requireAuth(false)
                     }
-                    if(res.value.firstPage != null)
+                    if (res.value.firstPage != null)
                         link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.firstPage), Rels.FIRST)
 
-                    if(res.value.previousPage != null)
+                    if (res.value.previousPage != null)
                         link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.previousPage), Rels.PREVIOUS)
 
-                    if(res.value.nextPage != null)
+                    if (res.value.nextPage != null)
                         link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.nextPage), Rels.NEXT)
 
                     link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.lastPage), Rels.LAST)
@@ -209,13 +176,51 @@ class UsersController(
                     requireAuth(false)
                 }
             )
-            is Failure -> Problem(
-                typeUri = Problem.rankingNotFound,
-                title = "Problem.rankingNotFound",
-                status = 404,
-                detail = "Ranking not found",
-                instance = URI(Uris.Users.RANKING_INFO + "?page=" + page)
-            ).toResponse()
+
+            is Failure -> Problem.rankingNotFound(Uris.Users.rankingInfo())
+        }
+
+    @GetMapping(Uris.Users.GET_STATS_BY_USERNAME)
+    fun getStatsByUsername(@PathVariable username: String): ResponseEntity<*> =
+        when (val stats = userService.getUserStatsByUsername(username)) {
+            is Success -> ResponseEntity.ok(
+                siren(
+                    UserStatsOutputModel(
+                        stats.value.user.id.value,
+                        stats.value.user.username,
+                        stats.value.gamesPlayed,
+                        stats.value.wins,
+                        stats.value.losses,
+                        stats.value.rank,
+                        stats.value.points
+                    )
+                ) {
+                    clazz("user-statistics")
+                    link(Uris.Users.getStatsByUsername(username), Rels.SELF)
+                    entity(
+                        "[ {gid, board, playerBlack, playerWhite, state, variant, created}, ... ]",
+                        Rels.GET_ALL_GAMES_BY_USER
+                    ) {
+                        clazz("game-list-of-user")
+                        link(Uris.Games.getAllGamesByUser(stats.value.user.id.value), Rels.SELF)
+                        requireAuth(true)
+                    }
+                    requireAuth(false)
+                }
+            )
+
+            is Failure ->
+                when (stats.value) {
+                    UserStatsError.UserDoesNotExist -> Problem.userDoesNotExists(
+                        Uris.Users.getStatsByUsername(username),
+                        username
+                    )
+
+                    UserStatsError.UserStatsDoesNotExist -> Problem.statsNotFound(
+                        Uris.Users.getStatsByUsername(username),
+                        username
+                    )
+                }
         }
 
 
@@ -223,21 +228,23 @@ class UsersController(
     fun getStatsById(@PathVariable id: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
         when (val stats = userService.getUserStatsById(id)) {
             is Success -> ResponseEntity.ok(
-                siren(UserStatsOutputModel(
-                    stats.value.user.id.value,
-                    stats.value.user.username,
-                    stats.value.gamesPlayed,
-                    stats.value.wins,
-                    stats.value.losses,
-                    stats.value.rank,
-                    stats.value.points
-                )){
+                siren(
+                    UserStatsOutputModel(
+                        stats.value.user.id.value,
+                        stats.value.user.username,
+                        stats.value.gamesPlayed,
+                        stats.value.wins,
+                        stats.value.losses,
+                        stats.value.rank,
+                        stats.value.points
+                    )
+                ) {
                     clazz("user-statistics")
                     link(Uris.Users.getStatsById(id), Rels.SELF)
                     entity(
                         "[ {gid, board, playerBlack, playerWhite, state, variant, created}, ... ]",
                         Rels.GET_ALL_GAMES_BY_USER
-                    ){
+                    ) {
                         clazz("game-list-of-user")
                         link(Uris.Games.getAllGamesByUser(id), Rels.SELF)
                         requireAuth(true)
@@ -248,21 +255,8 @@ class UsersController(
 
             is Failure ->
                 when (stats.value) {
-                    UserStatsError.UserDoesNotExist -> Problem(
-                        typeUri = Problem.userDoesNotExists,
-                        title = "Problem.userDoesNotExists",
-                        status = 404,
-                        detail = "User with id $id does not exist",
-                        instance = Uris.Users.getUsersById(id)
-                    ).toResponse()
-
-                    UserStatsError.UserStatsDoesNotExist -> Problem(
-                        typeUri = Problem.statsNotFound,
-                        title = "Problem.statsNotFound",
-                        status = 404,
-                        detail = "Stats for user with id $id does not exist",
-                        instance = Uris.Users.getStatsById(id)
-                    ).toResponse()
+                    UserStatsError.UserDoesNotExist -> Problem.userDoesNotExists(Uris.Users.getUsersById(id), id)
+                    UserStatsError.UserStatsDoesNotExist -> Problem.statsNotFound(Uris.Users.getStatsById(id), id)
                 }
         }
 
@@ -277,41 +271,28 @@ class UsersController(
                 "Location",
                 Uris.Users.getUsersById(authenticatedUser.user.id.value).toASCIIString()
             ).body(
-                siren( UserUpdateOutputModel("User with id ${authenticatedUser.user.id.value} updated successfully")){
+                siren(UserUpdateOutputModel("User with id ${authenticatedUser.user.id.value} updated successfully")) {
                     clazz("update-user")
-                    link(Uris.Users.updateUser(authenticatedUser.user.id.value), Rels.SELF)
+                    link(Uris.Users.updateUser(), Rels.SELF)
                     requireAuth(true)
                 }
             )
 
             is Failure -> when (res.value) {
-                UserUpdateError.UserDoesNotExist -> Problem(
-                    typeUri = Problem.userDoesNotExists,
-                    title = "Problem.userDoesNotExists",
-                    status = 404,
-                    detail = "User with id ${authenticatedUser.user.id.value} does not exist",
-                    instance = Uris.Users.getUsersById(authenticatedUser.user.id.value)
-                ).toResponse()
+                UserUpdateError.UserDoesNotExist -> Problem.userDoesNotExists(
+                    Uris.Users.updateUser(),
+                    authenticatedUser.user.id.value
+                )
 
-                UserUpdateError.InsecurePassword -> Problem(
-                    typeUri = Problem.insecurePassword,
-                    title = "Problem.insecurePassword",
-                    status = 400,
-                    detail = "Password is insecure",
-                    instance = Uris.Users.updateUser(authenticatedUser.user.id.value)
-                ).toResponse()
+                UserUpdateError.InsecurePassword -> Problem.insecurePassword(
+                    Uris.Users.updateUser()
+                )
 
-                UserUpdateError.InsecureEmail -> Problem(
-                    typeUri = Problem.insecureEmail,
-                    title = "Problem.insecureEmail",
-                    status = 400,
-                    detail = "Email is insecure",
-                    instance = Uris.Users.updateUser(authenticatedUser.user.id.value)
-                ).toResponse()
+                UserUpdateError.InsecureEmail -> Problem.insecureEmail(
+                    Uris.Users.updateUser()
+                )
             }
         }
     }
-
-    //TODO: MAKE FUNCTION TO GET USER STATS BY NAME
 }
 

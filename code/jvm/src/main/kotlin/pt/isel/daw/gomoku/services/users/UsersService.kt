@@ -138,7 +138,7 @@ class UsersService(
         transactionManager.run {
             val usersRepository = it.usersRepository
             val ranking = usersRepository.getAllStats()
-            if (ranking.isEmpty()) failure(RankingError.RankingDoesNotExist)
+            if (ranking.isEmpty()) return@run failure(RankingError.RankingDoesNotExist)
             else success(toPage(ranking, pageNr.value))
         }
 
@@ -146,7 +146,7 @@ class UsersService(
         transactionManager.run {
             val usersRepository = it.usersRepository
             val user = usersRepository.getUserById(id)
-            if (user == null) failure(UserStatsError.UserDoesNotExist)
+            if (user == null) return@run failure(UserStatsError.UserDoesNotExist)
             else {
                 val userStats = usersRepository.getUserStatsById(id)
                 if (userStats != null) success(userStats)
@@ -154,5 +154,15 @@ class UsersService(
             }
         }
 
-    //TODO: MAKE FUNCTION TO GET USER STATS BY NAME
+    fun getUserStatsByUsername(username: String): UserStatsResult =
+        transactionManager.run {
+            val usersRepository = it.usersRepository
+            val user = usersRepository.getUserByUsername(username)
+            if (user == null) return@run failure(UserStatsError.UserDoesNotExist)
+            else {
+                val userStats = usersRepository.getUserStatsByUsername(username)
+                if (userStats != null) success(userStats)
+                else failure(UserStatsError.UserStatsDoesNotExist)
+            }
+        }
 }

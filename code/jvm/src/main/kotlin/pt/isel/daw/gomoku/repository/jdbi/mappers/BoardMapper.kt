@@ -3,7 +3,7 @@ package pt.isel.daw.gomoku.repository.jdbi.mappers
 import org.jdbi.v3.core.mapper.ColumnMapper
 import org.jdbi.v3.core.statement.StatementContext
 import org.postgresql.util.PGobject
-import pt.isel.daw.gomoku.domain.games.Board
+import pt.isel.daw.gomoku.domain.games.board.Board
 import pt.isel.daw.gomoku.repository.jdbi.JdbiGamesRepository
 import java.sql.ResultSet
 import java.sql.SQLException

@@ -8,6 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import pt.isel.daw.gomoku.utils.Environment
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.games.board.Cell
+import pt.isel.daw.gomoku.domain.games.variants.Variants
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.domain.utils.Id
@@ -188,6 +190,13 @@ class GameServiceTests {
         }
         // then: check the winner
         assertTrue { gameByIdAfterLeave.state == Game.State.PLAYER_WHITE_WON }
+
+        //then: check if points were added
+        val whiteStats = when(val whiteStats = usersService.getUserStatsById(game.playerWHITE.id.value)) {
+            is Either.Left -> fail("Failed to get user stats for $whiteStats")
+            is Either.Right -> whiteStats.value
+        }
+        assertTrue { whiteStats.points > 0 }
     }
 
     companion object {
@@ -196,6 +205,7 @@ class GameServiceTests {
             testClock: TestClock,
         ) = GamesService(
             JdbiTransactionManager(jdbi),
+            clock = testClock,
             GameDomain(
                 clock = testClock,
                 config = GamesDomainConfig(

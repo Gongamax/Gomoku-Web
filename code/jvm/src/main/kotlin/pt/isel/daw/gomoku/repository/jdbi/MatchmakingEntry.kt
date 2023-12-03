@@ -5,6 +5,8 @@ import kotlinx.datetime.Instant
 data class MatchmakingEntry (
     val id: Int,
     val userId: Int,
+    val gameId: Int?,
+    val variant: String,
     val status : MatchmakingStatus,
     val created : Instant
 )

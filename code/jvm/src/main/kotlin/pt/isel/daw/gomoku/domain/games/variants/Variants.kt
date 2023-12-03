@@ -1,4 +1,6 @@
-package pt.isel.daw.gomoku.domain.games
+package pt.isel.daw.gomoku.domain.games.variants
+
+import pt.isel.daw.gomoku.domain.games.board.BoardDim
 
 
 enum class Variants(val boardDim: BoardDim, val openingRule: OpeningRule, val playingRule: PlayingRule) : Variant {

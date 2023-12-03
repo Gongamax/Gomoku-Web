@@ -2,8 +2,9 @@ package pt.isel.daw.gomoku.domain.games
 
 import pt.isel.daw.gomoku.domain.users.User
 import kotlinx.datetime.Instant
+import pt.isel.daw.gomoku.domain.games.board.Board
+import pt.isel.daw.gomoku.domain.games.variants.Variants
 import pt.isel.daw.gomoku.domain.utils.Id
-import java.util.UUID
 
 /**
  * Represents a game.

@@ -5,12 +5,10 @@ create schema dbo;
 drop trigger if exists check_points on dbo.statistics cascade;
 drop trigger if exists add_user_to_statistics on dbo.users cascade;
 drop trigger if exists update_rank on dbo.games cascade;
-drop trigger if exists increment_wins_losses on dbo.games cascade;
 drop trigger if exists increment_games_played on dbo.games cascade;
 drop function if exists dbo.check_points() cascade;
 drop function if exists dbo.add_user_to_statistics() cascade;
 drop function if exists dbo.update_rank() cascade;
-drop function if exists dbo.increment_wins_losses() cascade;
 drop function if exists dbo.increment_games_played() cascade;
 drop table if exists dbo.variant cascade;
 drop table if exists dbo.matchmaking cascade;
@@ -75,6 +73,8 @@ create table dbo.Matchmaking
 (
     id      serial primary key,
     user_id int references dbo.Users (id),
+    game_id int references dbo.Games (id), -- null if not in a game, otherwise the game id
+    variant VARCHAR(64) references dbo.Variant (variant_name),
     status  VARCHAR(64) not null,
     created int         not null
 );
@@ -137,48 +137,6 @@ create trigger increment_games_played
     on dbo.Games
     for each row
 execute procedure dbo.increment_games_played();
-
--- Trigger for incrementing the wins, losses and points of a user
-
-create or replace function dbo.increment_wins_losses()
-    returns trigger as
-$$
-declare
-    win_points int := 12;
-    draw_points int := 6;
-    loss_points int := 3;
-begin
-    if new.state = 'PLAYER_BLACK_WON' then
-        update dbo.Statistics
-        set wins = wins + 1, points = points + win_points
-        where user_id = new.player_black;
-        update dbo.Statistics
-        set losses = losses + 1, points = points - loss_points
-        where user_id = new.player_white;
-    elsif new.state = 'PLAYER_WHITE_WON' then
-        update dbo.Statistics
-        set wins = wins + 1, points = points + win_points
-        where user_id = new.player_white;
-        update dbo.Statistics
-        set losses = losses + 1, points = points - loss_points
-        where user_id = new.player_black;
-    elsif new.state = 'DRAW' then
-        update dbo.Statistics
-        set draws = draws + 1, points = points + draw_points
-        where user_id = new.player_black;
-        update dbo.Statistics
-        set draws = draws + 1, points = points + draw_points
-        where user_id = new.player_white;
-    end if;
-    return new;
-end;
-$$ language plpgsql;
-
-create trigger increment_wins_losses
-    after update
-    on dbo.Games
-    for each row
-execute procedure dbo.increment_wins_losses();
 
 -- Trigger for updating the rank of a user
 -- Rank is calculated by the formula:

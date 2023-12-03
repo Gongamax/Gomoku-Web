@@ -1,4 +1,7 @@
-package pt.isel.daw.gomoku.domain.games
+package pt.isel.daw.gomoku.domain.games.variants
+
+import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.games.board.*
 
 interface Variant {
     private val WIN_LENGTH: Int

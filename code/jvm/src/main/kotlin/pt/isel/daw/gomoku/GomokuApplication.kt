@@ -42,7 +42,7 @@ class GomokuApplication {
 
     @Bean
     fun gamesDomainConfig() = GamesDomainConfig(
-        timeout = 10.minutes
+        timeout = 10.minutes,
     )
 
     @Bean
