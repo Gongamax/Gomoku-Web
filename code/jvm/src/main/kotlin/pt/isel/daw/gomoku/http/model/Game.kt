@@ -37,9 +37,16 @@ data class GameMatchmakingStatusOutputModel(
     val created: String
 )
 
-data class GameGetAllOutputModel(val games: List<GameOutputModel>)
+data class GameGetAllOutputModel(
+    val page: Int,
+    val pageSize: Int
+)
 
-data class GameGetAllByUserOutputModel(val games: List<GameOutputModel>)
+data class GameGetAllByUserOutputModel(
+    val uid: Int,
+    val page: Int,
+    val pageSize: Int
+)
 
 data class GameGetAllVariantsOutputModel(val variants: List<VariantOutputModel>)
 

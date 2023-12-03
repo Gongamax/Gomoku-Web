@@ -4,7 +4,7 @@ import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.games.board.*
 
 interface Variant {
-    private val WIN_LENGTH: Int
+    private val winLength: Int
         get() = 5
 
     private val directions: List<Pair<Direction, Direction>>
@@ -44,7 +44,7 @@ interface Variant {
 
 
     fun isWin(board: BoardRun, cell: Cell): Boolean =
-        board.moves.size >= WIN_LENGTH * 2 - 2 &&
+        board.moves.size >= winLength * 2 - 2 &&
                 (board.moves.filter { it.value == board.turn }.keys + cell).run {
                     any { winningCell ->
                         directions.any { (forwardDir, backwardDir) ->
@@ -55,14 +55,14 @@ interface Variant {
 
                             val consecutiveCells = (backwardCells + listOf(winningCell) + forwardCells)
 
-                            consecutiveCells.size >= WIN_LENGTH
+                            consecutiveCells.size >= winLength
                         }
                     }
                 }
 
     /*
     * in this function is not possible to play if
-    * theres a move that simultaneously forms two open rows of three stones
+    * there's a move that simultaneously forms two open rows of three stones
     * (rows not blocked by an opponent's stone at either end
     * */
     fun isValidOnThreeAndThreeRule(board: Board, cell: Cell): Boolean =

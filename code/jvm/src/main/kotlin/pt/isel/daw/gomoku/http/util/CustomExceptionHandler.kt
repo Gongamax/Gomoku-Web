@@ -107,7 +107,8 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(
         Exception::class,
     )
-    fun handleAll(): ResponseEntity<Unit> {
+    fun handleAll(ex: Exception): ResponseEntity<Unit> {
+        log.info("Handling Exception: ${ex.message}")
         return ResponseEntity.status(500).build()
     }
 

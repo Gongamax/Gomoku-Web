@@ -72,7 +72,8 @@ data class UserTokenCreateOutputModel(
     val token: String
 )
 data class RankingInfoOutputModel(
-    val rankingTable: List<UserStatistics>
+    val page: Int,
+    val pageSize: Int
 )
 
 data class UserTokenRemoveOutputModel(

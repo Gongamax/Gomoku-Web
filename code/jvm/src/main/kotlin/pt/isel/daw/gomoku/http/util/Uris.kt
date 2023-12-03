@@ -14,16 +14,16 @@ object Uris {
         const val REGISTER = "$PREFIX/users"
         const val LOGIN = "$PREFIX/users/token"
         const val LOGOUT = "$PREFIX/logout"
-        const val GET_USER_BY_ID = "$PREFIX/users/{id}"
+        const val GET_USER_BY_ID = "$PREFIX/users/{uid}"
         const val AUTH_HOME = "$PREFIX/me"
         const val RANKING_INFO = "$PREFIX/ranking"
-        const val GET_STATS_BY_ID = "$PREFIX/stats/{id}"
-        const val GET_STATS_BY_USERNAME = "$PREFIX/stats/username/{username}"
+        const val GET_STATS_BY_ID = "$PREFIX/stats/{uid}"
+        const val GET_STATS_BY_USERNAME = "$PREFIX/stats/username"
         const val UPDATE_USER = "$PREFIX/users/update"
 
         fun getUsersById(id: Int) = UriTemplate(GET_USER_BY_ID).expand(id)
         fun getStatsById(id: Int) = UriTemplate(GET_STATS_BY_ID).expand(id)
-        fun getStatsByUsername(username: String) = UriTemplate(GET_STATS_BY_USERNAME).expand(username)
+        fun getStatsByUsername() = URI(GET_STATS_BY_USERNAME)
         fun authHome(): URI = URI(AUTH_HOME)
         fun login(): URI = URI(LOGIN)
         fun logout(): URI = URI(LOGOUT)
@@ -34,14 +34,14 @@ object Uris {
 
     object Games {
         const val CREATE_GAME = "$PREFIX/games"
-        const val GET_GAME_BY_ID = "$PREFIX/games/{id}"
-        const val PLAY = "$PREFIX/games/{id}/play"
+        const val GET_GAME_BY_ID = "$PREFIX/games/{gid}"
+        const val PLAY = "$PREFIX/games/{gid}/play"
         const val MATCHMAKING = "$PREFIX/games/matchmaking"
-        const val GET_MATCHMAKING_STATUS = "$PREFIX/games/matchmaking/{id}/status"
-        const val LEAVE = "$PREFIX/games/{id}/leave"
+        const val GET_MATCHMAKING_STATUS = "$PREFIX/games/matchmaking/{mid}/status"
+        const val LEAVE = "$PREFIX/games/{gid}/leave"
         const val GET_ALL_GAMES = "$PREFIX/games"
         const val GET_ALL_GAMES_BY_USER = "$PREFIX/games/user/{uid}"
-        const val EXIT_MATCHMAKING_QUEUE = "$PREFIX/games/matchmaking/{id}/exit"
+        const val EXIT_MATCHMAKING_QUEUE = "$PREFIX/games/matchmaking/{mid}/exit"
         const val GET_ALL_VARIANTS = "$PREFIX/games/variants"
         const val GET_VARIANT_BY_NAME = "$PREFIX/games/variants/{name}"
 

@@ -84,8 +84,8 @@ class UsersController(
         }
 
     @GetMapping(Uris.Users.GET_USER_BY_ID)
-    fun getById(@PathVariable id: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
-        when (val user = userService.getUserById(id)) {
+    fun getById(@PathVariable uid: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
+        when (val user = userService.getUserById(uid)) {
             is Success -> ResponseEntity.ok(
                 siren(
                     UserGetByIdOutputModel(
@@ -95,7 +95,7 @@ class UsersController(
                     )
                 ) {
                     clazz("user")
-                    link(Uris.Users.getUsersById(id), Rels.SELF)
+                    link(Uris.Users.getUsersById(uid), Rels.SELF)
                     action(
                         "update-user",
                         Uris.Users.updateUser(),
@@ -112,7 +112,7 @@ class UsersController(
             )
 
             is Failure -> when (user.value) {
-                UserGetByIdError.UserDoesNotExist -> Problem.userDoesNotExists(Uris.Users.getUsersById(id), id)
+                UserGetByIdError.UserDoesNotExist -> Problem.userDoesNotExists(Uris.Users.getUsersById(uid), uid)
             }
         }
 
@@ -151,16 +151,30 @@ class UsersController(
         when (val res = userService.getRanking(PositiveValue(page.toInt()))) {
             is Success -> ResponseEntity.ok(
                 siren(
-                    RankingInfoOutputModel(res.value.content)
+                    RankingInfoOutputModel(
+                        page.toInt(),
+                        res.value.pageSize
+                    )
                 ) {
                     clazz("ranking-info")
                     link(URI(Uris.Users.RANKING_INFO + "?page=" + page), Rels.SELF)
-                    entity(
-                        "{id, username, gamesPlayed, wins, losses, rank, points}",
-                        Rels.USER_STATS
-                    ) {
-                        clazz("user-statistics")
-                        requireAuth(false)
+                    res.value.content.forEach {
+                        entity(
+                            UserStatsOutputModel(
+                                it.user.id.value,
+                                it.user.username,
+                                it.gamesPlayed,
+                                it.wins,
+                                it.losses,
+                                it.rank,
+                                it.points
+                            ),
+                            Rels.USER_STATS
+                        ) {
+                            clazz("user-statistics")
+                            link(Uris.Users.getStatsById(it.user.id.value), Rels.SELF)
+                            requireAuth(false)
+                        }
                     }
                     if (res.value.firstPage != null)
                         link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.firstPage), Rels.FIRST)
@@ -181,7 +195,7 @@ class UsersController(
         }
 
     @GetMapping(Uris.Users.GET_STATS_BY_USERNAME)
-    fun getStatsByUsername(@PathVariable username: String): ResponseEntity<*> =
+    fun getStatsByUsername(@RequestParam username: String): ResponseEntity<*> =
         when (val stats = userService.getUserStatsByUsername(username)) {
             is Success -> ResponseEntity.ok(
                 siren(
@@ -196,15 +210,8 @@ class UsersController(
                     )
                 ) {
                     clazz("user-statistics")
-                    link(Uris.Users.getStatsByUsername(username), Rels.SELF)
-                    entity(
-                        "[ {gid, board, playerBlack, playerWhite, state, variant, created}, ... ]",
-                        Rels.GET_ALL_GAMES_BY_USER
-                    ) {
-                        clazz("game-list-of-user")
-                        link(Uris.Games.getAllGamesByUser(stats.value.user.id.value), Rels.SELF)
-                        requireAuth(true)
-                    }
+                    link(URI(Uris.Users.GET_STATS_BY_USERNAME + "?username=" + username), Rels.SELF)
+                    link(Uris.Games.getAllGamesByUser(stats.value.user.id.value), Rels.GET_ALL_GAMES_BY_USER)
                     requireAuth(false)
                 }
             )
@@ -212,12 +219,12 @@ class UsersController(
             is Failure ->
                 when (stats.value) {
                     UserStatsError.UserDoesNotExist -> Problem.userDoesNotExists(
-                        Uris.Users.getStatsByUsername(username),
+                        URI(Uris.Users.GET_STATS_BY_USERNAME + "?username=" + username),
                         username
                     )
 
                     UserStatsError.UserStatsDoesNotExist -> Problem.statsNotFound(
-                        Uris.Users.getStatsByUsername(username),
+                        URI(Uris.Users.GET_STATS_BY_USERNAME + "?username=" + username),
                         username
                     )
                 }
@@ -225,8 +232,8 @@ class UsersController(
 
 
     @GetMapping(Uris.Users.GET_STATS_BY_ID)
-    fun getStatsById(@PathVariable id: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
-        when (val stats = userService.getUserStatsById(id)) {
+    fun getStatsById(@PathVariable uid: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
+        when (val stats = userService.getUserStatsById(uid)) {
             is Success -> ResponseEntity.ok(
                 siren(
                     UserStatsOutputModel(
@@ -240,23 +247,16 @@ class UsersController(
                     )
                 ) {
                     clazz("user-statistics")
-                    link(Uris.Users.getStatsById(id), Rels.SELF)
-                    entity(
-                        "[ {gid, board, playerBlack, playerWhite, state, variant, created}, ... ]",
-                        Rels.GET_ALL_GAMES_BY_USER
-                    ) {
-                        clazz("game-list-of-user")
-                        link(Uris.Games.getAllGamesByUser(id), Rels.SELF)
-                        requireAuth(true)
-                    }
-                    requireAuth(true)
+                    link(Uris.Users.getStatsById(uid), Rels.SELF)
+                    link(Uris.Games.getAllGamesByUser(stats.value.user.id.value), Rels.GET_ALL_GAMES_BY_USER)
+                    requireAuth(false)
                 }
             )
 
             is Failure ->
                 when (stats.value) {
-                    UserStatsError.UserDoesNotExist -> Problem.userDoesNotExists(Uris.Users.getUsersById(id), id)
-                    UserStatsError.UserStatsDoesNotExist -> Problem.statsNotFound(Uris.Users.getStatsById(id), id)
+                    UserStatsError.UserDoesNotExist -> Problem.userDoesNotExists(Uris.Users.getUsersById(uid), uid)
+                    UserStatsError.UserStatsDoesNotExist -> Problem.statsNotFound(Uris.Users.getStatsById(uid), uid)
                 }
         }
 

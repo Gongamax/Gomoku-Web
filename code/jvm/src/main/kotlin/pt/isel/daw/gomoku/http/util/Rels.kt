@@ -16,45 +16,45 @@ object Rels {
 
     val LAST: LinkRelation = LinkRelation("last")
 
-    val HOME = LinkRelation(BASE_URL + "rels/home")
+    val HOME = LinkRelation(BASE_URL + "home")
 
-    val SYSTEM_INFO = LinkRelation(BASE_URL + "rels/system-info")
+    val SYSTEM_INFO = LinkRelation(BASE_URL + "system-info")
 
-    val REGISTER = LinkRelation(BASE_URL + "rels/create-a-user")
+    val REGISTER = LinkRelation(BASE_URL + "create-a-user")
 
-    val LOGIN = LinkRelation(BASE_URL + "rels/login")
+    val LOGIN = LinkRelation(BASE_URL + "login")
 
-    val LOGOUT = LinkRelation(BASE_URL + "rels/logout")
+    val LOGOUT = LinkRelation(BASE_URL + "logout")
 
-    val USER = LinkRelation(BASE_URL + "rels/get-user-by-id")
+    val USER = LinkRelation(BASE_URL + "get-user-by-id")
 
-    val AUTH_HOME = LinkRelation(BASE_URL + "rels/auth-home")
+    val AUTH_HOME = LinkRelation(BASE_URL + "auth-home")
 
-    val RANKING_INFO = LinkRelation(BASE_URL + "rels/ranking-info")
+    val RANKING_INFO = LinkRelation(BASE_URL + "ranking-info")
 
-    val USER_STATS = LinkRelation(BASE_URL + "rels/get-stats-by-id")
+    val USER_STATS = LinkRelation(BASE_URL + "get-user-stats")
 
-    val UPDATE_USER = LinkRelation(BASE_URL + "rels/update-user")
+    val UPDATE_USER = LinkRelation(BASE_URL + "update-user")
 
-    val CREATE_GAME = LinkRelation(BASE_URL + "rels/create-a-game")
+    val CREATE_GAME = LinkRelation(BASE_URL + "create-a-game")
 
-    val GAME = LinkRelation(BASE_URL + "rels/get-game-by-id")
+    val GAME = LinkRelation(BASE_URL + "get-game-by-id")
 
-    val PLAY = LinkRelation(BASE_URL + "rels/play")
+    val PLAY = LinkRelation(BASE_URL + "play")
 
-    val MATCHMAKING = LinkRelation(BASE_URL + "rels/matchmaking")
+    val MATCHMAKING = LinkRelation(BASE_URL + "matchmaking")
 
-    val MATCHMAKING_STATUS = LinkRelation(BASE_URL + "rels/get-matchmaking-status")
+    val MATCHMAKING_STATUS = LinkRelation(BASE_URL + "get-matchmaking-status")
 
-    val LEAVE = LinkRelation(BASE_URL + "rels/leave")
+    val LEAVE = LinkRelation(BASE_URL + "leave")
 
-    val GET_ALL_GAMES = LinkRelation(BASE_URL + "rels/get-all-games")
+    val GET_ALL_GAMES = LinkRelation(BASE_URL + "get-all-games")
 
-    val GET_ALL_GAMES_BY_USER = LinkRelation(BASE_URL + "rels/get-all-games-by-user")
+    val GET_ALL_GAMES_BY_USER = LinkRelation(BASE_URL + "get-all-games-by-user")
 
-    val EXIT_MATCHMAKING_QUEUE = LinkRelation(BASE_URL + "rels/exit-matchmaking-queue")
+    val EXIT_MATCHMAKING_QUEUE = LinkRelation(BASE_URL + "exit-matchmaking-queue")
 
-    val GET_ALL_VARIANTS = LinkRelation(BASE_URL + "rels/get-all-variants")
+    val GET_ALL_VARIANTS = LinkRelation(BASE_URL + "get-all-variants")
 
-    val VARIANT = LinkRelation(BASE_URL + "rels/get-variant")
+    val VARIANT = LinkRelation(BASE_URL + "get-variant")
 }

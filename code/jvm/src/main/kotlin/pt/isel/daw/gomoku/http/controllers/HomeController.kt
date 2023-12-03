@@ -4,6 +4,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.util.UriTemplate
 import pt.isel.daw.gomoku.http.media.siren.siren
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.http.util.Rels
@@ -34,17 +35,22 @@ class HomeController {
             link(URI(Uris.Users.RANKING_INFO + "?page=0" ), Rels.RANKING_INFO)
             link(URI(Uris.Users.AUTH_HOME), Rels.AUTH_HOME)
             link(URI(Uris.Games.MATCHMAKING), Rels.MATCHMAKING)
-            link(URI(Uris.Games.GET_MATCHMAKING_STATUS), Rels.MATCHMAKING_STATUS)
-            link(URI(Uris.Games.EXIT_MATCHMAKING_QUEUE), Rels.EXIT_MATCHMAKING_QUEUE)
+            link(UriTemplate(Uris.Games.GET_MATCHMAKING_STATUS).expand("{mid}"), Rels.MATCHMAKING_STATUS)
+            link(UriTemplate(Uris.Games.EXIT_MATCHMAKING_QUEUE).expand("{mid}"), Rels.EXIT_MATCHMAKING_QUEUE)
             link(URI(Uris.Games.GET_ALL_GAMES), Rels.GET_ALL_GAMES)
-            link(URI(Uris.Games.GET_ALL_GAMES_BY_USER), Rels.GET_ALL_GAMES_BY_USER)
-            link(URI(Uris.Users.GET_USER_BY_ID), Rels.USER)
-            link(URI(Uris.Users.GET_STATS_BY_ID), Rels.USER_STATS)
-            link(URI(Uris.Users.UPDATE_USER), Rels.UPDATE_USER)
+            link(UriTemplate(Uris.Games.GET_ALL_GAMES_BY_USER).expand("{uid}"), Rels.GET_ALL_GAMES_BY_USER)
+            link(UriTemplate(Uris.Users.GET_USER_BY_ID).expand("{uid}"), Rels.USER)
+            link(UriTemplate(Uris.Users.GET_STATS_BY_ID).expand("{uid}"), Rels.USER_STATS)
+            link(URI(Uris.Users.GET_STATS_BY_USERNAME + "?name={query}"), Rels.USER_STATS)
+            link(UriTemplate(Uris.Users.UPDATE_USER).expand("{uid}"), Rels.UPDATE_USER)
             link(URI(Uris.Users.LOGOUT), Rels.LOGOUT)
-            link(URI(Uris.Games.GET_GAME_BY_ID), Rels.GAME)
-            link(URI(Uris.Games.PLAY), Rels.PLAY)
-            link(URI(Uris.Games.LEAVE), Rels.LEAVE)
+            link(UriTemplate(Uris.Games.GET_GAME_BY_ID).expand("{gid}"), Rels.GAME)
+            link(UriTemplate(Uris.Games.PLAY).expand("{gid}"), Rels.PLAY)
+            link(UriTemplate(Uris.Games.LEAVE).expand("{gid}"), Rels.LEAVE)
+            link(URI(Uris.Users.LOGIN), Rels.LOGIN)
+            link(URI(Uris.Users.REGISTER), Rels.REGISTER)
+            link(URI(Uris.Games.GET_ALL_VARIANTS), Rels.GET_ALL_VARIANTS)
+            link(UriTemplate(Uris.Games.GET_VARIANT_BY_NAME).expand("{name}"), Rels.VARIANT)
             action("register", Uris.Users.register(), HttpMethod.POST, "application/x-www-form-urlencoded"){
                 textField("username")
                 textField("email")

@@ -3,7 +3,7 @@
 
 ## Backend Application Architecture:
 
-![Backend](./diagrams/gomoku_backend.png)
+![Backend](diagrams/backend/gomoku_backend.png)
 
 **The JVM application is organized as follows:**
 
@@ -16,7 +16,7 @@ repository, service layers and the HTTP layer;
 
 ## Data model:
 
-![Data model](./diagrams/gomoku-er-diagram.png)
+![Data model](diagrams/backend/gomoku-er-diagram.png)
 
 - **User** - Represents a user of the application. It has a:
   - `id`; 

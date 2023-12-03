@@ -28,8 +28,8 @@ class GameController(
     private val gameService: GamesService
 ) {
     @GetMapping(Uris.Games.GET_GAME_BY_ID)
-    fun getGameById(@PathVariable id: Int, user: AuthenticatedUser): ResponseEntity<*> {
-        return when (val game = gameService.getGameById(id)) {
+    fun getGameById(@PathVariable gid: Int, user: AuthenticatedUser): ResponseEntity<*> {
+        return when (val game = gameService.getGameById(gid)) {
             is Success -> ResponseEntity.ok(
                 siren(
                     GameGetByIdOutputModel(
@@ -45,10 +45,10 @@ class GameController(
                     )
                 ) {
                     clazz("game")
-                    link(Uris.Games.byId(id), Rels.SELF)
+                    link(Uris.Games.byId(gid), Rels.SELF)
                     action(
                         "play",
-                        Uris.Games.play(id),
+                        Uris.Games.play(gid),
                         HttpMethod.POST,
                         "application/x-www-form-urlencoded"
                     ) {
@@ -58,7 +58,7 @@ class GameController(
                     }
                     action(
                         "leave-game",
-                        Uris.Games.leave(id),
+                        Uris.Games.leave(gid),
                         HttpMethod.PUT,
                         "application/json"
                     ) {
@@ -69,19 +69,19 @@ class GameController(
             )
 
             is Failure -> when (game.value) {
-                GameGetError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.byId(id), gid = id)
+                GameGetError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.byId(gid), gid = gid)
             }
         }
     }
 
     @PostMapping(Uris.Games.PLAY)
     fun play(
-        @PathVariable id: Int,
+        @PathVariable gid: Int,
         @Valid @RequestBody inputModel: GamePlayInputModel,
         authenticatedUser: AuthenticatedUser
     ): ResponseEntity<*> {
         return when (val res =
-            gameService.play(id, authenticatedUser.user.id.value, inputModel.row, inputModel.column)) {
+            gameService.play(gid, authenticatedUser.user.id.value, inputModel.row, inputModel.column)) {
             is Success -> ResponseEntity.ok(
                 siren(
                     GameRoundOutputModel(
@@ -98,26 +98,26 @@ class GameController(
                     )
                 ) {
                     clazz("play")
-                    link(Uris.Games.play(id), Rels.SELF)
-                    link(Uris.Games.byId(id), Rels.GAME)
+                    link(Uris.Games.play(gid), Rels.SELF)
+                    link(Uris.Games.byId(gid), Rels.GAME)
                     requireAuth(true)
                 }
             )
 
             is Failure -> when (res.value) {
-                GamePlayError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.play(id), gid = id)
+                GamePlayError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.play(gid), gid = gid)
 
                 GamePlayError.InvalidUser -> Problem.invalidUser(
-                    instance = Uris.Games.play(id), userId = authenticatedUser.user.id.value
+                    instance = Uris.Games.play(gid), userId = authenticatedUser.user.id.value
                 )
 
-                GamePlayError.InvalidState -> Problem.invalidState(instance = Uris.Games.play(id), gid = id)
+                GamePlayError.InvalidState -> Problem.invalidState(instance = Uris.Games.play(gid), gid = gid)
 
-                GamePlayError.InvalidTime -> Problem.invalidTime(instance = Uris.Games.play(id), gid = id)
+                GamePlayError.InvalidTime -> Problem.invalidTime(instance = Uris.Games.play(gid), gid = gid)
 
-                GamePlayError.InvalidTurn -> Problem.invalidTurn(instance = Uris.Games.play(id), gid = id)
+                GamePlayError.InvalidTurn -> Problem.invalidTurn(instance = Uris.Games.play(gid), gid = gid)
 
-                GamePlayError.InvalidPosition -> Problem.invalidPosition(instance = Uris.Games.play(id), gid = id)
+                GamePlayError.InvalidPosition -> Problem.invalidPosition(instance = Uris.Games.play(gid), gid = gid)
             }
         }
     }
@@ -159,7 +159,7 @@ class GameController(
                         clazz("matchmaking")
                         link(Uris.Games.matchmaking(), Rels.SELF)
                         action("leave-matchmaking",
-                            Uris.Games.exitMatchmakingQueue(),
+                            Uris.Games.exitMatchmakingQueue(res.value.id),
                             HttpMethod.DELETE,
                             "application/json"
                         ) {
@@ -190,8 +190,8 @@ class GameController(
     }
 
     @GetMapping(Uris.Games.GET_MATCHMAKING_STATUS)
-    fun getMatchmakingStatus(authenticatedUser: AuthenticatedUser, @PathVariable id: Int): ResponseEntity<*> {
-        return when (val res = gameService.getMatchmakingStatus(id, authenticatedUser.user.id.value)) {
+    fun getMatchmakingStatus(authenticatedUser: AuthenticatedUser, @PathVariable mid: Int): ResponseEntity<*> {
+        return when (val res = gameService.getMatchmakingStatus(mid, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok(
                 siren(
                     GameMatchmakingStatusOutputModel(
@@ -204,46 +204,46 @@ class GameController(
                     )
                 ) {
                     clazz("matchmaking-status")
-                    link(Uris.Games.getMatchmakingStatus(id), Rels.SELF)
+                    link(Uris.Games.getMatchmakingStatus(mid), Rels.SELF)
                     requireAuth(true)
                 }
             )
 
             is Failure -> when (res.value) {
                 MatchmakingStatusError.InvalidUser -> Problem.invalidUser(
-                    instance = Uris.Games.getMatchmakingStatus(id),
+                    instance = Uris.Games.getMatchmakingStatus(mid),
                     userId = authenticatedUser.user.id.value
                 )
 
                 MatchmakingStatusError.MatchDoesNotExist -> Problem.matchNotFound(
-                    instance = Uris.Games.getMatchmakingStatus(id),
-                    matchEntryId = id
+                    instance = Uris.Games.getMatchmakingStatus(mid),
+                    matchEntryId = mid
                 )
             }
         }
     }
 
     @DeleteMapping(Uris.Games.EXIT_MATCHMAKING_QUEUE)
-    fun exitMatchmakingQueue(authenticatedUser: AuthenticatedUser, @PathVariable id: Int): ResponseEntity<*> {
-        return when (val res = gameService.exitMatchmakingQueue(id, authenticatedUser.user.id.value)) {
+    fun exitMatchmakingQueue(authenticatedUser: AuthenticatedUser, @PathVariable mid: Int): ResponseEntity<*> {
+        return when (val res = gameService.exitMatchmakingQueue(mid, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok(
                 siren(
                     "User left matchmaking queue"
                 ) {
                     clazz("leave-matchmaking")
-                    link(Uris.Games.exitMatchmakingQueue(id), Rels.SELF)
+                    link(Uris.Games.exitMatchmakingQueue(mid), Rels.SELF)
                     requireAuth(true)
                 }
             )
 
             is Failure -> when (res.value) {
                 LeaveMatchmakingError.MatchDoesNotExist -> Problem.matchNotFound(
-                    instance = Uris.Games.exitMatchmakingQueue(id),
-                    matchEntryId = id
+                    instance = Uris.Games.exitMatchmakingQueue(mid),
+                    matchEntryId = mid
                 )
 
                 LeaveMatchmakingError.InvalidUser -> Problem.invalidUser(
-                    instance = Uris.Games.exitMatchmakingQueue(id),
+                    instance = Uris.Games.exitMatchmakingQueue(mid),
                     userId = authenticatedUser.user.id.value
                 )
             }
@@ -266,7 +266,14 @@ class GameController(
                 ResponseEntity.ok(
                     siren(
                         GameGetAllOutputModel(
-                            games.value.content.map { game ->
+                            page.toInt(),
+                            games.value.pageSize
+                        )
+                    ) {
+                        clazz("game-list")
+                        link(Uris.Games.getAllGames(), Rels.SELF)
+                        games.value.content.forEach { game ->
+                            entity(
                                 GameOutputModel(
                                     game.id.value,
                                     game.board,
@@ -275,19 +282,13 @@ class GameController(
                                     game.state.toString(),
                                     game.variant.toString(),
                                     game.created.toString(),
-                                )
+                                ),
+                                Rels.GAME
+                            ) {
+                                clazz("game")
+                                link(Uris.Games.byId(game.id.value), Rels.GAME)
+                                requireAuth(true)
                             }
-                        )
-                    ) {
-                        clazz("game-list")
-                        link(Uris.Games.getAllGames(), Rels.SELF)
-                        entity(
-                            "{gid, board, playerBlack, playerWhite, state, variant, created}",
-                            Rels.GAME
-                        ) {
-                            clazz("game")
-                            link(URI(Uris.Games.GET_GAME_BY_ID), Rels.GAME)
-                            requireAuth(true)
                         }
                         requireAuth(true)
                     }
@@ -296,23 +297,23 @@ class GameController(
 
 
     @PutMapping(Uris.Games.LEAVE)
-    fun leave(@PathVariable id: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
-        return when (val res = gameService.leaveGame(id, authenticatedUser.user.id.value)) {
+    fun leave(@PathVariable gid: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
+        return when (val res = gameService.leaveGame(gid, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok(
                 siren(
                     "User can leave the game"
                 ) {
                     clazz("leave-game")
-                    link(Uris.Games.leave(id), Rels.SELF)
+                    link(Uris.Games.leave(gid), Rels.SELF)
                     requireAuth(true)
                 }
             )
 
             is Failure -> when (res.value) {
-                LeaveGameError.GameAlreadyEnded -> Problem.gameAlreadyEnded(instance = Uris.Games.leave(id), gid = id)
-                LeaveGameError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.leave(id), gid = id)
+                LeaveGameError.GameAlreadyEnded -> Problem.gameAlreadyEnded(instance = Uris.Games.leave(gid), gid = gid)
+                LeaveGameError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.leave(gid), gid = gid)
                 LeaveGameError.InvalidUser -> Problem.invalidUser(
-                    instance = Uris.Games.leave(id),
+                    instance = Uris.Games.leave(gid),
                     userId = authenticatedUser.user.id.value
                 )
             }
@@ -333,7 +334,15 @@ class GameController(
             is Success -> ResponseEntity.ok(
                 siren(
                     GameGetAllByUserOutputModel(
-                        games.value.content.map { game ->
+                        uid?.toInt() ?: authenticatedUser.user.id.value,
+                        page.toInt(),
+                        games.value.pageSize
+                    )
+                ) {
+                    clazz("game-list-of-user")
+                    link(Uris.Games.getAllGamesByUser(uid?.toInt() ?: authenticatedUser.user.id.value), Rels.SELF)
+                    games.value.content.forEach { game ->
+                        entity(
                             GameOutputModel(
                                 game.id.value,
                                 game.board,
@@ -342,19 +351,13 @@ class GameController(
                                 game.state.toString(),
                                 game.variant.toString(),
                                 game.created.toString(),
-                            )
+                            ),
+                            Rels.GAME
+                        ) {
+                            clazz("game")
+                            link(Uris.Games.byId(game.id.value), Rels.GAME)
+                            requireAuth(true)
                         }
-                    )
-                ) {
-                    clazz("game-list-of-user")
-                    link(Uris.Games.getAllGamesByUser(uid?.toInt() ?: authenticatedUser.user.id.value), Rels.SELF)
-                    entity(
-                        "{gid, board, playerBlack, playerWhite, state, variant, created}",
-                        Rels.GAME
-                    ) {
-                        clazz("game")
-                        link(URI(Uris.Games.GET_GAME_BY_ID), Rels.GAME)
-                        requireAuth(true)
                     }
                     requireAuth(true)
                 }
