@@ -1,1 +1,8 @@
-Please edit this file with instructions on how to build and run the project.
+## TODO:
+
+```
+- User Games
+- Lobby
+- Searching for a game page
+- Game
+```

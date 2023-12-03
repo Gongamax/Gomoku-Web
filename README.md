@@ -11,7 +11,6 @@
 ```
 - Gonçalo Frutuoso - 49495
 - Daniel Carvalho - 49419
-- Diogo Guerra - 49149
 ```
 
 ## Introduction
