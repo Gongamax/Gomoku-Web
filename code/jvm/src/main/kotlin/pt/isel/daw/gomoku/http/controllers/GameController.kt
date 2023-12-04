@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.http.media.Problem
+import pt.isel.daw.gomoku.http.media.siren.SirenModel
 import pt.isel.daw.gomoku.http.media.siren.siren
 import pt.isel.daw.gomoku.http.model.*
 import pt.isel.daw.gomoku.http.util.Rels
@@ -30,7 +31,7 @@ class GameController(
     @GetMapping(Uris.Games.GET_GAME_BY_ID)
     fun getGameById(@PathVariable gid: Int, user: AuthenticatedUser): ResponseEntity<*> {
         return when (val game = gameService.getGameById(gid)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     GameGetByIdOutputModel(
                         GameOutputModel(
@@ -82,7 +83,7 @@ class GameController(
     ): ResponseEntity<*> {
         return when (val res =
             gameService.play(gid, authenticatedUser.user.id.value, inputModel.row, inputModel.column)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     GameRoundOutputModel(
                         GameOutputModel(
@@ -133,7 +134,9 @@ class GameController(
                     .header(
                         "Location",
                         Uris.Games.byId(res.value.id).toASCIIString()
-                    ).body(
+                    )
+                    .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
+                    .body(
                         siren(
                             GameMatchmakingOutputModel(
                                 "Match found",
@@ -158,7 +161,8 @@ class GameController(
                     ) {
                         clazz("matchmaking")
                         link(Uris.Games.matchmaking(), Rels.SELF)
-                        action("leave-matchmaking",
+                        action(
+                            "leave-matchmaking",
                             Uris.Games.exitMatchmakingQueue(res.value.id),
                             HttpMethod.DELETE,
                             "application/json"
@@ -192,7 +196,7 @@ class GameController(
     @GetMapping(Uris.Games.GET_MATCHMAKING_STATUS)
     fun getMatchmakingStatus(authenticatedUser: AuthenticatedUser, @PathVariable mid: Int): ResponseEntity<*> {
         return when (val res = gameService.getMatchmakingStatus(mid, authenticatedUser.user.id.value)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     GameMatchmakingStatusOutputModel(
                         res.value.id,
@@ -226,7 +230,7 @@ class GameController(
     @DeleteMapping(Uris.Games.EXIT_MATCHMAKING_QUEUE)
     fun exitMatchmakingQueue(authenticatedUser: AuthenticatedUser, @PathVariable mid: Int): ResponseEntity<*> {
         return when (val res = gameService.exitMatchmakingQueue(mid, authenticatedUser.user.id.value)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     "User left matchmaking queue"
                 ) {
@@ -263,7 +267,7 @@ class GameController(
                 ).toResponse()
 
             is Success ->
-                ResponseEntity.ok(
+                ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                     siren(
                         GameGetAllOutputModel(
                             page.toInt(),
@@ -299,7 +303,7 @@ class GameController(
     @PutMapping(Uris.Games.LEAVE)
     fun leave(@PathVariable gid: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> {
         return when (val res = gameService.leaveGame(gid, authenticatedUser.user.id.value)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     "User can leave the game"
                 ) {
@@ -311,7 +315,11 @@ class GameController(
 
             is Failure -> when (res.value) {
                 LeaveGameError.GameAlreadyEnded -> Problem.gameAlreadyEnded(instance = Uris.Games.leave(gid), gid = gid)
-                LeaveGameError.GameDoesNotExist -> Problem.gameDoesNotExists(instance = Uris.Games.leave(gid), gid = gid)
+                LeaveGameError.GameDoesNotExist -> Problem.gameDoesNotExists(
+                    instance = Uris.Games.leave(gid),
+                    gid = gid
+                )
+
                 LeaveGameError.InvalidUser -> Problem.invalidUser(
                     instance = Uris.Games.leave(gid),
                     userId = authenticatedUser.user.id.value
@@ -331,7 +339,7 @@ class GameController(
                 uid?.toInt() ?: authenticatedUser.user.id.value, PositiveValue(page.toInt())
             )
         ) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     GameGetAllByUserOutputModel(
                         uid?.toInt() ?: authenticatedUser.user.id.value,
@@ -383,7 +391,7 @@ class GameController(
     @GetMapping(Uris.Games.GET_ALL_VARIANTS)
     fun getAllVariants(): ResponseEntity<*> {
         return when (val res = gameService.getAllVariants()) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     GameGetAllVariantsOutputModel(
                         res.value.map { variant ->

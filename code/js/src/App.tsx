@@ -7,6 +7,7 @@ import { Login } from './Components/Authentication/Login';
 import { RankingPage } from './Components/Ranking/Ranking';
 import { LobbyPage } from './Components/Game/Lobby/Lobby';
 import { ProfilePage } from './Components/Profile/Profile';
+import { MatchmakingPage } from './Components/Game/Matchmaking/Matchmaking';
 import { NavBar } from './Layout/NavBar';
 
 export function App() {
@@ -24,6 +25,7 @@ export function App() {
             <Route path="/lobby" element={<LobbyPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/users/:uid" element={<ProfilePage />} />
+            <Route path="/matchmaking/:mid" element={<MatchmakingPage />} />
             {/* TODO: ADD MORE ROUTS */}
           </Routes>
         </div>

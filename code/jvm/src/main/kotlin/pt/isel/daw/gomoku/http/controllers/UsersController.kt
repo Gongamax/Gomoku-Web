@@ -55,7 +55,16 @@ class UsersController(
     ): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
             is Success ->
-                ResponseEntity.status(200).header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
+                ResponseEntity.status(200)
+                    .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
+                    .header(
+                        "Set-Cookie",
+                        "token=${res.value.tokenValue}; Max-Age=${res.value.tokenExpiration};HttpOnly"
+                    )
+                    .header(
+                        "Set-Cookie",
+                        "username=${input.username}; Max-Age=${res.value.tokenExpiration}"
+                    )
                     .body(
                         siren(UserTokenCreateOutputModel(res.value.tokenValue)) {
                             clazz("login")
@@ -89,7 +98,7 @@ class UsersController(
     @GetMapping(Uris.Users.GET_USER_BY_ID)
     fun getById(@PathVariable uid: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
         when (val user = userService.getUserById(uid)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     UserGetByIdOutputModel(
                         user.value.id.value,
@@ -121,7 +130,7 @@ class UsersController(
 
     @GetMapping(Uris.Users.AUTH_HOME)
     fun getAuthHome(authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
-        ResponseEntity.ok(
+        ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
             siren(UserHomeOutputModel(authenticatedUser.user.id.value, authenticatedUser.user.username)) {
                 clazz("user-home")
                 link(Uris.Users.authHome(), Rels.SELF)
@@ -152,47 +161,49 @@ class UsersController(
     @GetMapping(Uris.Users.RANKING_INFO)
     fun getRankingInfo(@RequestParam page: String): ResponseEntity<*> =
         when (val res = userService.getRanking(PositiveValue(page.toInt()))) {
-            is Success -> ResponseEntity.ok(
-                siren(
-                    RankingInfoOutputModel(
-                        page.toInt(),
-                        res.value.pageSize
-                    )
-                ) {
-                    clazz("ranking-info")
-                    link(URI(Uris.Users.RANKING_INFO + "?page=" + page), Rels.SELF)
-                    res.value.content.forEach {
-                        entity(
-                            UserStatsOutputModel(
-                                it.user.id.value,
-                                it.user.username,
-                                it.gamesPlayed,
-                                it.wins,
-                                it.losses,
-                                it.rank,
-                                it.points
-                            ),
-                            Rels.USER_STATS
-                        ) {
-                            clazz("user-statistics")
-                            link(Uris.Users.getStatsById(it.user.id.value), Rels.SELF)
-                            requireAuth(false)
+            is Success -> ResponseEntity.ok()
+                .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
+                .body(
+                    siren(
+                        RankingInfoOutputModel(
+                            page.toInt(),
+                            res.value.pageSize
+                        )
+                    ) {
+                        clazz("ranking-info")
+                        link(URI(Uris.Users.RANKING_INFO + "?page=" + page), Rels.SELF)
+                        res.value.content.forEach {
+                            entity(
+                                UserStatsOutputModel(
+                                    it.user.id.value,
+                                    it.user.username,
+                                    it.gamesPlayed,
+                                    it.wins,
+                                    it.losses,
+                                    it.rank,
+                                    it.points
+                                ),
+                                Rels.USER_STATS
+                            ) {
+                                clazz("user-statistics")
+                                link(Uris.Users.getStatsById(it.user.id.value), Rels.SELF)
+                                requireAuth(false)
+                            }
                         }
+                        if (res.value.firstPage != null)
+                            link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.firstPage), Rels.FIRST)
+
+                        if (res.value.previousPage != null)
+                            link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.previousPage), Rels.PREVIOUS)
+
+                        if (res.value.nextPage != null)
+                            link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.nextPage), Rels.NEXT)
+
+                        link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.lastPage), Rels.LAST)
+
+                        requireAuth(false)
                     }
-                    if (res.value.firstPage != null)
-                        link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.firstPage), Rels.FIRST)
-
-                    if (res.value.previousPage != null)
-                        link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.previousPage), Rels.PREVIOUS)
-
-                    if (res.value.nextPage != null)
-                        link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.nextPage), Rels.NEXT)
-
-                    link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.lastPage), Rels.LAST)
-
-                    requireAuth(false)
-                }
-            )
+                )
 
             is Failure -> Problem.rankingNotFound(Uris.Users.rankingInfo())
         }
@@ -200,7 +211,7 @@ class UsersController(
     @GetMapping(Uris.Users.GET_STATS_BY_USERNAME)
     fun getStatsByUsername(@RequestParam username: String): ResponseEntity<*> =
         when (val stats = userService.getUserStatsByUsername(username)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     UserStatsOutputModel(
                         stats.value.user.id.value,
@@ -237,7 +248,7 @@ class UsersController(
     @GetMapping(Uris.Users.GET_STATS_BY_ID)
     fun getStatsById(@PathVariable uid: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
         when (val stats = userService.getUserStatsById(uid)) {
-            is Success -> ResponseEntity.ok(
+            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     UserStatsOutputModel(
                         stats.value.user.id.value,
@@ -273,13 +284,14 @@ class UsersController(
             is Success -> ResponseEntity.ok().header(
                 "Location",
                 Uris.Users.getUsersById(authenticatedUser.user.id.value).toASCIIString()
-            ).body(
-                siren(UserUpdateOutputModel("User with id ${authenticatedUser.user.id.value} updated successfully")) {
-                    clazz("update-user")
-                    link(Uris.Users.updateUser(), Rels.SELF)
-                    requireAuth(true)
-                }
-            )
+            ).header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
+                .body(
+                    siren(UserUpdateOutputModel("User with id ${authenticatedUser.user.id.value} updated successfully")) {
+                        clazz("update-user")
+                        link(Uris.Users.updateUser(), Rels.SELF)
+                        requireAuth(true)
+                    }
+                )
 
             is Failure -> when (res.value) {
                 UserUpdateError.UserDoesNotExist -> Problem.userDoesNotExists(
