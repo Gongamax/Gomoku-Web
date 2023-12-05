@@ -1,0 +1,33 @@
+import { EntityModel } from "./EntityModel";
+import { LinkModel } from "./LinkModel";
+import { ActionModel } from "./ActionModel";
+
+/**
+ * Siren is a hypermedia specification for representing entities in JSON.
+ *
+ * @property class is an array of strings that serves as an identifier for the link.
+ * @property properties represent the properties of the entity.
+ * @property entities represent sub-entities of the entity.
+ * @property actions represent the available actions on the entity.
+ * @property links represent navigational links, distinct from entity relationships.
+ * @property requireAuth is a boolean that indicates if the entity requires authentication.
+ * */
+export class SirenModel<T> {
+  public class: string[];
+  public properties: T;
+  public links: LinkModel[];
+  public entities: EntityModel<T>[];
+  public actions: ActionModel[];
+  public requireAuth: boolean;
+
+  constructor(model: SirenModel<T>) {
+    this.class = model.class;
+    this.properties = model.properties;
+    this.links = model.links;
+    this.entities = model.entities;
+    this.actions = model.actions;
+    this.requireAuth = model.requireAuth;
+  }
+}
+
+export const sirenMediaType = 'application/vnd.siren+json';
