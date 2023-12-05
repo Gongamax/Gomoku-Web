@@ -50,7 +50,6 @@ class HomeController {
             link(URI(Uris.Users.LOGIN), Rels.LOGIN)
             link(URI(Uris.Users.REGISTER), Rels.REGISTER)
             link(URI(Uris.Games.GET_ALL_VARIANTS), Rels.GET_ALL_VARIANTS)
-            link(UriTemplate(Uris.Games.GET_VARIANT_BY_NAME).expand("{name}"), Rels.VARIANT)
             action("register", Uris.Users.register(), HttpMethod.POST, "application/x-www-form-urlencoded"){
                 textField("username")
                 textField("email")

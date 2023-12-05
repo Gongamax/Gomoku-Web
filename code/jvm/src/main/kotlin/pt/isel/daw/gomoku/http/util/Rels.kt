@@ -55,6 +55,4 @@ object Rels {
     val EXIT_MATCHMAKING_QUEUE = LinkRelation(BASE_URL + "exit-matchmaking-queue")
 
     val GET_ALL_VARIANTS = LinkRelation(BASE_URL + "get-all-variants")
-
-    val VARIANT = LinkRelation(BASE_URL + "get-variant")
 }
