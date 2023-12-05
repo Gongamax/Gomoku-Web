@@ -199,6 +199,22 @@ class GameServiceTests {
         assertTrue { whiteStats.points > 0 }
     }
 
+    @Test
+    fun `get all variants`(){
+        //given: a game service
+        val testClock = TestClock()
+        val gamesService = createGamesService(testClock)
+
+        //when: getting all variants
+        val variants = gamesService.getAllVariants()
+
+        //then: the variants are not empty
+        when (variants) {
+            is Either.Left -> fail("Failed to get all variants for $variants")
+            is Either.Right -> assertTrue { variants.value.isNotEmpty() }
+        }
+    }
+
     companion object {
 
         private fun createGamesService(

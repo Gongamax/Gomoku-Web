@@ -5,4 +5,4 @@ interface GameGetByIdOutputModel {
     game : GameOutputModel;
 }
 
-export const GetGameOutput = SirenModel<GameGetByIdOutputModel>
+export type GetGameOutput = SirenModel<GameGetByIdOutputModel>

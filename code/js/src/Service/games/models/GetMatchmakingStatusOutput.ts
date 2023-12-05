@@ -9,4 +9,4 @@ interface GetMatchmakingStatusOutputModel {
     created : string;
 }
 
-export const GetMatchmakingStatusOutput = SirenModel<GetMatchmakingStatusOutputModel>
+export type GetMatchmakingStatusOutput = SirenModel<GetMatchmakingStatusOutputModel>

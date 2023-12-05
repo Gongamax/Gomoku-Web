@@ -5,4 +5,4 @@ interface UserHomeOutputModel {
     username : string;
 }
 
-export const GetUserHomeOutput = SirenModel<UserHomeOutputModel>
+export type GetUserHomeOutput = SirenModel<UserHomeOutputModel>

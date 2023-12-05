@@ -6,4 +6,4 @@ interface UserGetByIdOutputModel {
     email : string;
 }
 
-export const GetUserOutput = SirenModel<UserGetByIdOutputModel>
+export type GetUserOutput = SirenModel<UserGetByIdOutputModel>

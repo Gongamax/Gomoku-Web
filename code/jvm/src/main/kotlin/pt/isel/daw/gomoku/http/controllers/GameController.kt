@@ -406,14 +406,6 @@ class GameController(
                 ) {
                     clazz("variant-list")
                     link(Uris.Games.getAllVariants(), Rels.SELF)
-                    entity(
-                        "{vid, name, description}",
-                        Rels.VARIANT
-                    ) {
-                        clazz("variant")
-                        link(URI(Uris.Games.GET_VARIANT_BY_NAME), Rels.VARIANT)
-                        requireAuth(true)
-                    }
                     requireAuth(true)
                 }
             )

@@ -18,6 +18,7 @@ import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.Duration.Companion.minutes
 
@@ -61,6 +62,16 @@ class JdbiGamesRepositoryTests {
         // then: the two games are equal
         assertEquals(newGame, newRetrievedGame)
     }
+
+    @Test
+    fun `get variants returns all variants`() = runWithHandle { handle ->
+        val gameRepo = JdbiGamesRepository(handle)
+
+        // and: gettings all variants
+        val variants = gameRepo.getAllVariants()
+        assertTrue { variants.isNotEmpty()  }
+    }
+
 
     companion object {
 

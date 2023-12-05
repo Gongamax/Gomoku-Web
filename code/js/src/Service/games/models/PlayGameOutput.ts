@@ -7,4 +7,4 @@ interface GameRoundOutputModel {
     state : GameState;
 }
 
-export const PlayGameOutput = SirenModel<GameRoundOutputModel>
+export type PlayGameOutput = SirenModel<GameRoundOutputModel>

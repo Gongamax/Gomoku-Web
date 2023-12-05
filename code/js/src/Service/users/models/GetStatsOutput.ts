@@ -10,4 +10,4 @@ interface UserStatsOutputModel {
     points : number;
 }
 
-export const  GetStatsOutput = SirenModel<UserStatsOutputModel>
+export type  GetStatsOutput = SirenModel<UserStatsOutputModel>

@@ -48,7 +48,7 @@ type State =
   | { tag: 'loading' }
   | { tag: 'present'; username: string; points: number; variants: string[] }
   | { tag: 'edit'; selectedVariant: string; variants: string[]; username: string; points: number }
-  | { tag: 'redirect'; id: string; idType: string/*'game' | 'queue'*/ };
+  | { tag: 'redirect'; id: string; idType: string /*'game' | 'queue'*/ };
 
 type Action =
   | { type: 'startLoading' }

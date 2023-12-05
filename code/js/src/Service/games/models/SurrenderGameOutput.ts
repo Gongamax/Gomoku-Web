@@ -4,4 +4,4 @@ interface SurrenderGameOutputModel {
     message : string;
 }
 
-export const SurrenderGameOutput = SirenModel<SurrenderGameOutputModel>
+export type SurrenderGameOutput = SirenModel<SurrenderGameOutputModel>

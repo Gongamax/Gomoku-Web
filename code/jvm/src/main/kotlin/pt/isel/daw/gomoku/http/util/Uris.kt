@@ -43,7 +43,6 @@ object Uris {
         const val GET_ALL_GAMES_BY_USER = "$PREFIX/games/user/{uid}"
         const val EXIT_MATCHMAKING_QUEUE = "$PREFIX/games/matchmaking/{mid}/exit"
         const val GET_ALL_VARIANTS = "$PREFIX/games/variants"
-        const val GET_VARIANT_BY_NAME = "$PREFIX/games/variants/{name}"
 
         fun byId(id: Int) = UriTemplate(GET_GAME_BY_ID).expand(id)
         fun play(id : Int): URI = UriTemplate(PLAY).expand(id)

@@ -4,4 +4,4 @@ interface UserTokenRemoveOutputModel {
     message : string;
 }
 
-export const LogoutOutput = SirenModel<UserTokenRemoveOutputModel>
+export type LogoutOutput = SirenModel<UserTokenRemoveOutputModel>

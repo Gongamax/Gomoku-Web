@@ -1,53 +1,44 @@
-import { SirenModel } from './media/siren/SirenModel';
-
 export class HTTPService {
-  private apiEndpoint: string;
-
-  constructor(apiEndpoint: string) {
-    this.apiEndpoint = apiEndpoint;
-  }
-
-  private async makeAPIRequest<T>(path: string, method: string, body?: T, token?: string): Promise<SirenModel<T>> {
-    const url = `${this.apiEndpoint}/${path}`;
+  private async makeAPIRequest<T>(path: string, method: string, body?: string): Promise<T> {
     const headers: Record<string, string> = {
-      Accept: 'application/json',
       'Content-Type': 'application/json',
     };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const config: RequestInit = {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: body,
     };
 
-    const response = await fetch(url, config);
+    console.log(`Making ${method} request to ${path}`);
+    console.log(`Body: ${body}`);
+
+    const response = await fetch(path, config);
 
     if (!response.ok) {
-      // Handle error if needed
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      // Check if response is a Problem, not definitive solution
+      if (response.headers.get('Content-Type')?.includes('application/problem+json')) {
+        const problem = await response.json();
+        throw new Error(problem.detail);
+      } else throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    const responseData = (await response.json()) as SirenModel<T>;
-    return responseData;
+    return (await response.json()) as T;
   }
 
-  public async get<T>(path: string, token?: string): Promise<SirenModel<T>> {
-    return this.makeAPIRequest<T>(path, 'GET', undefined, token);
+  public async get<T>(path: string): Promise<T> {
+    return this.makeAPIRequest<T>(path, 'GET', undefined);
   }
 
-  public async post<T>(path: string, body: T, token?: string): Promise<SirenModel<T>> {
-    return this.makeAPIRequest<T>(path, 'POST', body, token);
+  public async post<T>(path: string, body?: string): Promise<T> {
+    return this.makeAPIRequest<T>(path, 'POST', body);
   }
 
-  public async put<T>(path: string, body: T, token?: string): Promise<SirenModel<T>> {
-    return this.makeAPIRequest<T>(path, 'PUT', body, token);
+  public async put<T>(path: string, body?: string): Promise<T> {
+    return this.makeAPIRequest<T>(path, 'PUT', body);
   }
 
-  public async delete<T>(path: string, body: T, token?: string): Promise<SirenModel<T>> {
-    return this.makeAPIRequest<T>(path, 'DELETE', body, token);
+  public async delete<T>(path: string, body?: string): Promise<T> {
+    return this.makeAPIRequest<T>(path, 'DELETE', body);
   }
 }

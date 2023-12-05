@@ -4,4 +4,4 @@ interface UserCreateOutputModel {
     uid : number;
 }
 
-export const RegisterOutput = SirenModel<UserCreateOutputModel>
+export type RegisterOutput = SirenModel<UserCreateOutputModel>

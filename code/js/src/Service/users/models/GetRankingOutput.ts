@@ -14,4 +14,4 @@ interface RankingInfoOutputModel {
     rankingTable : RankingEntry[]
 }
 
-export const GetRankingOutput = SirenModel<RankingInfoOutputModel>
+export type GetRankingOutput = SirenModel<RankingInfoOutputModel>

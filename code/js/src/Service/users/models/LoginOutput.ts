@@ -4,4 +4,4 @@ interface UserTokenCreateOutputModel {
     token : string;
 }
 
-export const LoginOutput = SirenModel<UserTokenCreateOutputModel>
+export type LoginOutput = SirenModel<UserTokenCreateOutputModel>

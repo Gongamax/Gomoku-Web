@@ -6,4 +6,4 @@ interface  GameMatchmakingOutputModel {
     id : number;
 }
 
-export const MatchmakingOutput = SirenModel<GameMatchmakingOutputModel>
+export type MatchmakingOutput = SirenModel<GameMatchmakingOutputModel>

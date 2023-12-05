@@ -4,4 +4,4 @@ interface CancelMatchmakingOutputModel {
     message : string;
 }
 
-export const CancelMatchmakingOutput = SirenModel<CancelMatchmakingOutputModel>
+export type CancelMatchmakingOutput = SirenModel<CancelMatchmakingOutputModel>

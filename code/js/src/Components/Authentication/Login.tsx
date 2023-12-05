@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSetUser } from './Authn';
+import { UsersService } from '../../Service/users/UserServices';
 
 type State =
   | { tag: 'editing'; error?: string; inputs: { username: string; password: string } }
@@ -45,18 +46,12 @@ function reduce(state: State, action: Action): State {
   }
 }
 
-function delay(delayInMs: number) {
-  return new Promise(resolve => {
-    setTimeout(() => resolve(undefined), delayInMs);
-  });
-}
-
 export async function authenticate(username: string, password: string): Promise<string | undefined> {
-  await delay(3000);
-  if ((username == 'alice' || username == 'bob') && password == '1234') {
-    return username;
+  const usersService = new UsersService();
+  const res = await usersService.login(username, password);
+  if (res) {
+    return res.properties.token;
   }
-  return undefined;
 }
 
 export function Login() {

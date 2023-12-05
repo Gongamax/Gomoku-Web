@@ -22,7 +22,7 @@ Retrieve information about the Gomoku game system.
 
 		"systemInfo": "Gomoku Game",
 
-		"systemAuthors": "Diogo Guerra, Gonçalo Frutuoso, Daniel Carvalho",
+		"systemAuthors": "Gonçalo Frutuoso and Daniel Carvalho",
 
 		"systemVersion": "0.1.0"
 
