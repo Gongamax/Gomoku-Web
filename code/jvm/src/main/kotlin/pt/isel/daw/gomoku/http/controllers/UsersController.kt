@@ -59,11 +59,11 @@ class UsersController(
                     .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                     .header(
                         "Set-Cookie",
-                        "token=${res.value.tokenValue}; Max-Age=${res.value.tokenExpiration};HttpOnly"
+                        "token=${res.value.tokenValue}; Max-Age=${res.value.tokenExpiration.epochSeconds};HttpOnly"
                     )
                     .header(
                         "Set-Cookie",
-                        "username=${input.username}; Max-Age=${res.value.tokenExpiration}"
+                        "login=${input.username}; Max-Age=${res.value.tokenExpiration.epochSeconds}"
                     )
                     .body(
                         siren(UserTokenCreateOutputModel(res.value.tokenValue)) {

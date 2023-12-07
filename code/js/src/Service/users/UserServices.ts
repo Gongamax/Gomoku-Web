@@ -5,9 +5,10 @@ import { GetUserOutput } from './models/GetUserOutput';
 import { LoginOutput } from './models/LoginOutput';
 import { LogoutOutput } from './models/LogoutOutput';
 import { RegisterOutput } from './models/RegisterOutput';
+import { GetStatsOutput } from './models/GetStatsOutput';
 
 export class UsersService extends HTTPService {
-  public async regisert(username: string, email: string, password: string): Promise<RegisterOutput> {
+  public async register(username: string, email: string, password: string): Promise<RegisterOutput> {
     return await this.post<RegisterOutput>(
       '/users',
       JSON.stringify({
@@ -44,7 +45,7 @@ export class UsersService extends HTTPService {
     return await this.get<GetRankingOutput>(`/api/users/ranking?page=${page}`);
   }
 
-  public async getStatsByUsername(username: string): Promise<GetUserOutput> {
-    return await this.get<GetUserOutput>(`/api/stats/username?username=${username}`); //CHANGE THIS ON API TO PATH PARAM
+  public async getStatsByUsername(username: string): Promise<GetStatsOutput> {
+    return await this.get<GetStatsOutput>(`/api/stats/username?username=${username}`); //CHANGE THIS ON API TO PATH PARAM
   }
 }

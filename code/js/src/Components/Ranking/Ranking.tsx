@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useEffect} from 'react';
-import { Link} from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 // Simulating API request
 const fetchPlayers = () => {
@@ -11,7 +11,7 @@ const fetchPlayers = () => {
         { name: 'Alice', score: 10, id: 1 },
         { name: 'Bob', score: 20, id: 2 },
         { name: 'Charlie', score: 30, id: 3 },
-      ]
+      ];
       resolve(players);
     }, 2000); // Simulating a 2-second delay for the API request
   });

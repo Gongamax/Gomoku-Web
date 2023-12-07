@@ -10,6 +10,7 @@ const LoggedInContext = createContext<ContextType>({
   setUser: () => {},
 });
 
+//Not being used anymore
 export function AuthnContainer({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState(undefined);
   console.log(`AuthnContainer: ${user}`);

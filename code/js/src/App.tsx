@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Register } from './Components/Authentication/Register';
 import { AboutPage } from './Components/About/About';
 import { HomePage } from './Components/Home/Home';
@@ -8,29 +8,75 @@ import { RankingPage } from './Components/Ranking/Ranking';
 import { LobbyPage } from './Components/Game/Lobby/Lobby';
 import { ProfilePage } from './Components/Profile/Profile';
 import { MatchmakingPage } from './Components/Game/Matchmaking/Matchmaking';
-import { NavBar } from './Layout/NavBar';
+import { RequireAuthn } from './Components/Authentication/RequireAuthn';
+import { Me } from './Components/Home/Me';
+import { NavBarWrapper } from './Layout/NavBar';
 
-//TODO: CHANGE ROUTER TO USE CHILDREN METHOD
 export function App() {
   return (
-    <div className='App'>
-      <Router>
-        <NavBar />
-
-        <div className='App-body'>
-          <Routes>
-            <Route path='/' element={<HomePage />} />
-            <Route path='/login' element={<Login />} />
-            <Route path='/register' element={<Register />} />
-            <Route path='/ranking' element={<RankingPage />} />
-            <Route path='/lobby' element={<LobbyPage />} />
-            <Route path='/about' element={<AboutPage />} />
-            <Route path='/users/:uid' element={<ProfilePage />} />
-            <Route path='/matchmaking/:mid' element={<MatchmakingPage />} />
-            {/* TODO: ADD MORE ROUTS */}
-          </Routes>
-        </div>
-      </Router>
-    </div>
+    <RouterProvider router={router} />
   );
 }
+
+const router = createBrowserRouter([
+  {
+    'path': '/',
+    'element': <NavBarWrapper />,
+    'children': [
+      {
+        'path': '/',
+        'element': <HomePage />,
+        'children': [
+          {
+            'path': 'about',
+            'element': <AboutPage />,
+          },
+          {
+            'path': 'users/:uid',
+            'element': <ProfilePage />,
+            'children': [
+              // {
+              //   'path': 'edit',
+              //   'element': <p>Edit</p>,
+              // },
+              // {
+              //   'path': '/history',
+              //   'element': <p>UserHistory</p>,
+              // },
+              // {
+              //   'path': '/stats',
+              //   'element': <p>UserStats</p>,
+              // },
+            ],
+          },
+        ],
+      },
+      {
+        'path': '/login',
+        'element': <Login />,
+      },
+      {
+        'path': '/register',
+        'element': <Register />,
+      },
+      {
+        'path': '/me',
+        'element': <RequireAuthn><Me /></RequireAuthn>,
+      },
+      {
+        'path': '/lobby',
+        'element': <RequireAuthn><LobbyPage /></RequireAuthn>,
+        'children': [
+          {
+            'path': 'matchmaking',
+            'element': <MatchmakingPage />,
+          },
+        ],
+      },
+      {
+        'path': '/ranking',
+        'element': <RankingPage />,
+      },
+    ],
+  },
+]);

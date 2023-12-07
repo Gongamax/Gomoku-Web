@@ -1,38 +1,15 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
-// Simulating API request
-const fetchUserInfo = (userId: string) => {
-  return new Promise<UserInfo>(resolve => {
-    setTimeout(() => {
-      // Simulated user information
-      const user = {
-        username: `Player ${userId}`,
-        wins: 10,
-        losses: 5,
-        draws: 3,
-        gamesPlayed: 18,
-        matchHistory: [
-          { opponent: 'Player 1', result: 'Win' },
-          { opponent: 'Player 2', result: 'Loss' },
-          { opponent: 'Player 3', result: 'Draw' },
-        ],
-      };
-      resolve(user);
-    }, 2000); // Simulating a 2-second delay for the API request
-  });
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////
+import { UsersService } from '../../Service/users/UserServices';
 
 type UserInfo = {
   username: string;
   wins: number;
   losses: number;
-  draws: number;
+  //draws: number;
   gamesPlayed: number;
-  matchHistory: { opponent: string; result: string }[];
+  //matchHistory: { opponent: string; result: string }[];
 };
 
 type State = { tag: 'loading' } | { tag: 'presenting'; userInfo: UserInfo } | { tag: 'error'; message: string };
@@ -70,17 +47,24 @@ export function ProfilePage() {
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchData() {
       try {
         dispatch({ type: 'startLoading' });
-        const userInfo = await fetchUserInfo(uid);
+        const userServices = new UsersService();
+        const userResponse = await userServices.getStatsByUsername(uid);
+        const userInfo = {
+          username: userResponse.properties.username,
+          wins: userResponse.properties.wins,
+          losses: userResponse.properties.losses,
+          gamesPlayed: userResponse.properties.gamesPlayed,
+        };
         dispatch({ type: 'loadSuccess', userInfo });
       } catch (error) {
         dispatch({ type: 'loadError', message: error.message });
       }
-    };
+    }
 
-    fetchData();
+    fetchData().then(r => console.log(r));
   }, [uid]);
 
   switch (state.tag) {
@@ -93,17 +77,17 @@ export function ProfilePage() {
           <h1>User Profile: {state.userInfo.username}</h1>
           <p>Wins: {state.userInfo.wins}</p>
           <p>Losses: {state.userInfo.losses}</p>
-          <p>Draws: {state.userInfo.draws}</p>
+          {/*<p>Draws: {state.userInfo.draws}</p>*/}
           <p>Games Played: {state.userInfo.gamesPlayed}</p>
 
           <h2>Match History</h2>
-          <ul>
-            {state.userInfo.matchHistory.map((match, index) => (
-              <li key={index}>
-                Opponent: {match.opponent}, Result: {match.result}
-              </li>
-            ))}
-          </ul>
+          {/*<ul>*/}
+          {/*  {state.userInfo.matchHistory.map((match, index) => (*/}
+          {/*    <li key={index}>*/}
+          {/*      Opponent: {match.opponent}, Result: {match.result}*/}
+          {/*    </li>*/}
+          {/*  ))}*/}
+          {/*</ul>*/}
         </div>
       );
 

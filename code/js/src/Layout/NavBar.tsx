@@ -1,31 +1,51 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 
-export function NavBar() {
+function NavBar() {
+  const navStyle = {
+    backgroundColor: '#333',
+    display: 'flex',
+    justifyContent: 'space-around',
+    padding: '1em',
+    listStyleType: 'none',
+  };
+
+  const ulStyle = {
+    display: 'flex',
+    justifyContent: 'space-around',
+    listStyleType: 'none',
+    padding: 0,
+    margin: 0,
+  };
+
+  const liStyle = {
+    display: 'inline',
+    margin: '0 1em',
+  };
+
+  const linkStyle = {
+    color: 'white',
+    textDecoration: 'none',
+  };
+
   return (
-    <nav>
-      <ul>
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/login">Login</Link>
-        </li>
-        <li>
-          <Link to="/register">Register</Link>
-        </li>
-        <li>
-          <Link to="/ranking">Ranking</Link>
-        </li>
-        <li>
-          <Link to="/lobby">Lobby</Link>
-        </li>
-        <li>
-          <Link to="/about">About</Link>
-        </li>
-
-        {/* Add a Logout option here if the user is authenticated */}
+    <nav style={navStyle}>
+      <ul style={ulStyle}>
+        <li style={liStyle}><Link to='/' style={linkStyle}>Home</Link></li>
+        <li style={liStyle}><Link to='/about' style={linkStyle}>About</Link></li>
+        <li style={liStyle}><Link to='/login' style={linkStyle}>Login</Link></li>
+        <li style={liStyle}><Link to='/register' style={linkStyle}>Register</Link></li>
+        <li style={liStyle}><Link to='/lobby' style={linkStyle}>Lobby</Link></li>
+        <li style={liStyle}><Link to='/ranking' style={linkStyle}>Ranking</Link></li>
       </ul>
     </nav>
+  );
+}
+export function NavBarWrapper() {
+  return (
+    <div>
+      <NavBar />
+      <Outlet />
+    </div>
   );
 }

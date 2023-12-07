@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSetUser } from './Authn';
+import { UsersService } from '../../Service/users/UserServices';
 
 type State =
   | {
@@ -56,18 +57,10 @@ function reduce(state: State, action: Action): State {
   }
 }
 
-function delay(delayInMs: number) {
-  return new Promise(resolve => {
-    setTimeout(() => resolve(undefined), delayInMs);
-  });
-}
-
 export async function register(username: string, password: string, email: string): Promise<string | undefined> {
-  await delay(3000); // Simulating a delay for testing purposes
-  // Perform registration logic, e.g., make API call to register the user
-  if ((username == 'alice' || username == 'bob') && password == '1234' && email == 'alice@gmail.com') {
-    return username;
-  }
+  const userServices = new UsersService();
+  const res = await userServices.register(username, email, password);
+  console.log('Registered user with id: ' + res.properties.uid);
   return username;
 }
 

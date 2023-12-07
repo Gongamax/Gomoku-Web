@@ -50,7 +50,7 @@ export async function authenticate(username: string, password: string): Promise<
   const usersService = new UsersService();
   const res = await usersService.login(username, password);
   if (res) {
-    return res.properties.token;
+    return username;
   }
 }
 
@@ -62,9 +62,11 @@ export function Login() {
   if (state.tag === 'redirect') {
     return <Navigate to={location.state?.source?.pathname || '/me'} replace={true} />;
   }
+
   function handleChange(ev: React.FormEvent<HTMLInputElement>) {
     dispatch({ type: 'edit', inputName: ev.currentTarget.name, inputValue: ev.currentTarget.value });
   }
+
   function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
     if (state.tag !== 'editing') {
@@ -94,15 +96,15 @@ export function Login() {
     <form onSubmit={handleSubmit}>
       <fieldset disabled={state.tag !== 'editing'}>
         <div>
-          <label htmlFor="username">Username</label>
-          <input id="username" type="text" name="username" value={username} onChange={handleChange} />
+          <label htmlFor='username'>Username</label>
+          <input id='username' type='text' name='username' value={username} onChange={handleChange} />
         </div>
         <div>
-          <label htmlFor="password">Password</label>
-          <input id="password" type="text" name="password" value={password} onChange={handleChange} />
+          <label htmlFor='password'>Password</label>
+          <input id='password' type='text' name='password' value={password} onChange={handleChange} />
         </div>
         <div>
-          <button type="submit">Login</button>
+          <button type='submit'>Login</button>
         </div>
       </fieldset>
       {state.tag === 'editing' && state.error}
