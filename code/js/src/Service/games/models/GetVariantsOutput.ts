@@ -1,10 +1,11 @@
 import { SirenModel } from '../../media/siren/SirenModel';
 
-type Variant = {
+export type Variant = {
   name: string;
-  boardDim: number;
+  board_dim: number;
   playRule: string;
   openingRule: string;
+  points: number;
 };
 
 export interface GetVariants {

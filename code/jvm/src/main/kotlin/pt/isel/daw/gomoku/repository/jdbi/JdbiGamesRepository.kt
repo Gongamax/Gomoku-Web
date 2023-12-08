@@ -217,7 +217,7 @@ class JdbiGamesRepository(
             .bind("status", status)
             .execute()
 
-    override fun storeMatchmakingEntry(userId: Int, variant: String, status: MatchmakingStatus, created: Instant) =
+    override fun storeMatchmakingEntry(userId: Int, variant: String, status: MatchmakingStatus, created: Instant): Int =
         handle.createUpdate(
             """
                 insert into dbo.matchmaking(user_id, variant, status, created)
@@ -266,7 +266,7 @@ class JdbiGamesRepository(
     override fun getAllVariants(): List<GameVariant> =
         handle.createQuery(
             """
-                select v.variant_name, v.board_dim, v.opening_rule, v.play_rule
+                select v.variant_name, v.board_dim, v.opening_rule, v.play_rule, v.points
                 from dbo.Variant v
             """.trimIndent()
         )
@@ -336,13 +336,15 @@ class GameVariantDbModel(
     val variant_name: String,
     val board_dim: Int,
     val opening_rule: String,
-    val play_rule: String
+    val play_rule: String,
+    val points: Int
 ) {
     fun toGameVariant(): GameVariant =
         GameVariant(
             variant_name,
             BoardDim.fromInt(board_dim),
             PlayingRule.valueOf(play_rule),
-            OpeningRule.valueOf(opening_rule)
+            OpeningRule.valueOf(opening_rule),
+            points
         )
 }

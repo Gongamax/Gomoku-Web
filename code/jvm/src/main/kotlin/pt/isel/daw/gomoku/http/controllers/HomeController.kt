@@ -19,7 +19,7 @@ class HomeController {
        siren( SystemInfoOutputModel()){
               clazz("system-info")
               link(URI(Uris.SYSTEM_INFO), Rels.SELF)
-              link(URI(Uris.HOME), Rels.HOME)
+              link(Uris.home(), Rels.HOME)
               link(URI(Uris.Users.AUTH_HOME), Rels.AUTH_HOME)
               requireAuth(false)
        }
@@ -29,9 +29,9 @@ class HomeController {
     fun getHome(): ResponseEntity<*> = ResponseEntity.ok(
         siren(HomeOutputModel()) {
             clazz("home")
-            link(URI(Uris.HOME), Rels.SELF)
-            link(URI(Uris.HOME), Rels.HOME)
-            link(URI(Uris.SYSTEM_INFO), Rels.SYSTEM_INFO)
+            link(Uris.home(), Rels.SELF)
+            link(Uris.home(), Rels.HOME)
+            link(Uris.systemInfo(), Rels.SYSTEM_INFO)
             link(URI(Uris.Users.RANKING_INFO + "?page=0" ), Rels.RANKING_INFO)
             link(URI(Uris.Users.AUTH_HOME), Rels.AUTH_HOME)
             link(URI(Uris.Games.MATCHMAKING), Rels.MATCHMAKING)
@@ -41,7 +41,7 @@ class HomeController {
             link(UriTemplate(Uris.Games.GET_ALL_GAMES_BY_USER).expand("{uid}"), Rels.GET_ALL_GAMES_BY_USER)
             link(UriTemplate(Uris.Users.GET_USER_BY_ID).expand("{uid}"), Rels.USER)
             link(UriTemplate(Uris.Users.GET_STATS_BY_ID).expand("{uid}"), Rels.USER_STATS)
-            link(URI(Uris.Users.GET_STATS_BY_USERNAME + "?name={query}"), Rels.USER_STATS)
+            link(URI(Uris.Users.GET_STATS_BY_USERNAME + "?name"), Rels.USER_STATS)
             link(UriTemplate(Uris.Users.UPDATE_USER).expand("{uid}"), Rels.UPDATE_USER)
             link(URI(Uris.Users.LOGOUT), Rels.LOGOUT)
             link(UriTemplate(Uris.Games.GET_GAME_BY_ID).expand("{gid}"), Rels.GAME)

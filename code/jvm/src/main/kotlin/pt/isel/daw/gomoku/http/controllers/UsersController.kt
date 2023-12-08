@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
+import kotlinx.datetime.Clock
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -24,9 +25,7 @@ class UsersController(
 ) {
     @PostMapping(Uris.Users.REGISTER)
     fun create(@RequestBody @Valid input: UserCreateInputModel): ResponseEntity<*> {
-        val res = userService.createUser(input.username, input.email, input.password)
-        println(res)
-        return when (res) {
+        return when (val res = userService.createUser(input.username, input.email, input.password)) {
             is Success -> ResponseEntity.status(201)
                 .header(
                     "Location",
@@ -54,16 +53,17 @@ class UsersController(
         @Valid @RequestBody input: UserCreateTokenInputModel
     ): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
-            is Success ->
-                ResponseEntity.status(200)
+            is Success -> {
+                 val cookieMaxAge = (Clock.System.now() - res.value.tokenExpiration).inWholeSeconds
+                 ResponseEntity.status(200)
                     .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                     .header(
                         "Set-Cookie",
-                        "token=${res.value.tokenValue}; Max-Age=${res.value.tokenExpiration.epochSeconds};HttpOnly"
+                        "token=${res.value.tokenValue}; Max-Age=${cookieMaxAge}; HttpOnly; SameSite=Strict"
                     )
                     .header(
                         "Set-Cookie",
-                        "login=${input.username}; Max-Age=${res.value.tokenExpiration.epochSeconds}"
+                        "login=${input.username}; Max-Age=${cookieMaxAge}; SameSite=Strict"
                     )
                     .body(
                         siren(UserTokenCreateOutputModel(res.value.tokenValue)) {
@@ -72,7 +72,7 @@ class UsersController(
                             requireAuth(false)
                         }
                     )
-
+            }
             is Failure -> when (res.value) {
                 TokenCreationError.UserOrPasswordAreInvalid -> Problem.userOrPasswordAreInvalid(Uris.Users.login())
             }
@@ -82,15 +82,25 @@ class UsersController(
     @PostMapping(Uris.Users.LOGOUT)
     fun logout(authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
         when (userService.revokeToken(authenticatedUser.token)) {
-            is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
-                siren(
-                    UserTokenRemoveOutputModel("Token ${authenticatedUser.token} revoked. Logout succeeded")
-                ) {
-                    clazz("logout")
-                    link(Uris.Users.logout(), Rels.SELF)
-                    requireAuth(true)
-                }
-            )
+            is Success -> ResponseEntity.status(200)
+                .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
+                .header(
+                    "Set-Cookie",
+                    "token=${authenticatedUser.token}; Max-Age=0; HttpOnly; SameSite=Strict"
+                )
+                .header(
+                    "Set-Cookie",
+                    "username=${authenticatedUser.user.username}; Max-Age=0; SameSite=Strict"
+                )
+                .body(
+                    siren(
+                        UserTokenRemoveOutputModel("Token ${authenticatedUser.token} revoked. Logout succeeded")
+                    ) {
+                        clazz("logout")
+                        link(Uris.Users.logout(), Rels.SELF)
+                        requireAuth(true)
+                    }
+                )
 
             is Failure -> Problem.tokenNotRevoked(Uris.Users.logout(), authenticatedUser.token)
         }

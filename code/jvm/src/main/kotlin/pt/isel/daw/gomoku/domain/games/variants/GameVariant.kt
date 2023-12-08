@@ -6,5 +6,6 @@ data class GameVariant(
     val name: String,
     val boardDim: BoardDim,
     val playingRule: PlayingRule,
-    val openingRule: OpeningRule
+    val openingRule: OpeningRule,
+    val points: Int
 )

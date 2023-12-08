@@ -4,7 +4,7 @@ create schema dbo;
 
 drop trigger if exists check_points on dbo.statistics cascade;
 drop trigger if exists add_user_to_statistics on dbo.users cascade;
-drop trigger if exists update_rank on dbo.games cascade;
+drop trigger if exists update_points_and_rank on dbo.games cascade;
 drop trigger if exists increment_games_played on dbo.games cascade;
 drop function if exists dbo.check_points() cascade;
 drop function if exists dbo.add_user_to_statistics() cascade;
@@ -41,7 +41,8 @@ create table dbo.Variant
     variant_name VARCHAR(64) primary key,
     board_dim    int         not null,
     play_rule    VARCHAR(64) not null,
-    opening_rule VARCHAR(64) not null
+    opening_rule VARCHAR(64) not null,
+    points       int         not null
 );
 
 create table dbo.Games
@@ -113,7 +114,7 @@ end;
 $$ language plpgsql;
 
 create trigger check_points
-    before update
+    after update
     on dbo.Statistics
     for each row
 execute procedure dbo.check_points();
@@ -159,10 +160,48 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger update_rank
+-- Trigger for updating the points of a user
+-- Points are calculated by the formula:
+-- If the player wins, he gets the points of the variant
+-- If the player loses, he loses the points of the variant
+-- If the player draws, stays the same
+create or replace function dbo.update_points()
+    returns trigger as
+$$
+begin
+    if new.state = 'PLAYER_BLACK_WON' then
+        update dbo.Statistics
+        set points = points + (select points from dbo.Variant where variant_name = new.variant)
+        where user_id = new.player_black;
+        update dbo.Statistics
+        set points = points - (select points from dbo.Variant where variant_name = new.variant)
+        where user_id = new.player_white;
+    elsif new.state = 'PLAYER_WHITE_WON' then
+        update dbo.Statistics
+        set points = points + (select points from dbo.Variant where variant_name = new.variant)
+        where user_id = new.player_white;
+        update dbo.Statistics
+        set points = points - (select points from dbo.Variant where variant_name = new.variant)
+        where user_id = new.player_black;
+    end if;
+    return new;
+end;
+$$ language plpgsql;
+
+create or replace function dbo.update_point_and_rank()
+    returns trigger as
+$$
+begin
+    perform dbo.update_points();
+    perform dbo.update_rank();
+    return new;
+end;
+$$ language plpgsql;
+
+-- Trigger for updating the points and rank of a user
+create trigger update_points_and_rank
     after update
     on dbo.Games
     for each row
     when ( new.state = 'PLAYER_BLACK_WON' or new.state = 'PLAYER_WHITE_WON' )
-execute procedure dbo.update_rank();
-
+execute procedure dbo.update_point_and_rank();

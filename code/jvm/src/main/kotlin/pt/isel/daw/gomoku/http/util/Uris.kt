@@ -33,7 +33,6 @@ object Uris {
     }
 
     object Games {
-        const val CREATE_GAME = "$PREFIX/games"
         const val GET_GAME_BY_ID = "$PREFIX/games/{gid}"
         const val PLAY = "$PREFIX/games/{gid}/play"
         const val MATCHMAKING = "$PREFIX/games/matchmaking"
@@ -46,7 +45,6 @@ object Uris {
 
         fun byId(id: Int) = UriTemplate(GET_GAME_BY_ID).expand(id)
         fun play(id : Int): URI = UriTemplate(PLAY).expand(id)
-        fun create(): URI = URI(CREATE_GAME)
 
         fun matchmaking(): URI = URI(MATCHMAKING)
 

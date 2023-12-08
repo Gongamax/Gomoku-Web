@@ -11,6 +11,7 @@ import { MatchmakingPage } from './Components/Game/Matchmaking/Matchmaking';
 import { RequireAuthn } from './Components/Authentication/RequireAuthn';
 import { Me } from './Components/Home/Me';
 import { NavBarWrapper } from './Layout/NavBar';
+import {GamePage} from "./Components/Game/GamePlay/Game";
 
 export function App() {
   return (
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         'path': '/ranking',
         'element': <RankingPage />,
+      },
+      {
+            'path': '/game:gameId',
+            'element': <RequireAuthn><GamePage/></RequireAuthn>,
       },
     ],
   },

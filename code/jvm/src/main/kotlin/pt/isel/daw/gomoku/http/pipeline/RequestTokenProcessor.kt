@@ -1,5 +1,6 @@
 package pt.isel.daw.gomoku.http.pipeline
 
+import jakarta.servlet.http.Cookie
 import org.springframework.stereotype.Component
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.services.users.UsersService
@@ -30,6 +31,19 @@ class RequestTokenProcessor(
             AuthenticatedUser(
                 it,
                 parts[1]
+            )
+        }
+    }
+
+    fun processAuthorizationCookieValue(cookie: Cookie): AuthenticatedUser? {
+        val user = when (val result = usersService.getUserByToken(cookie.value)) {
+            is Success -> result.value
+            is Failure -> null
+        }
+        return user?.let {
+            AuthenticatedUser(
+                it,
+                cookie.value
             )
         }
     }

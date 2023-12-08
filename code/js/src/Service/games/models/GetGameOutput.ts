@@ -1,8 +1,9 @@
-import { SirenModel } from "../../media/siren/SirenModel"
-import { GameOutputModel } from "./GameModelsUtil"
+import { SirenModel } from '../../media/siren/SirenModel';
+import { GameOutputModel } from './GameModelsUtil';
 
 interface GameGetByIdOutputModel {
-    game : GameOutputModel;
+  game: GameOutputModel;
+  pollingTimeOut: number;
 }
 
-export type GetGameOutput = SirenModel<GameGetByIdOutputModel>
+export type GetGameOutput = SirenModel<GameGetByIdOutputModel>;

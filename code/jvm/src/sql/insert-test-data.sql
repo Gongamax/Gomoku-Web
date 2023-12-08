@@ -11,14 +11,14 @@ VALUES ('token1', 1, 1634260800, 1634260810),
        ('token3', 3, 1634260840, 1634260850);
 
 -- Inserting default values for the variant table
-insert into dbo.Variant (variant_name, board_dim, play_rule, opening_rule)
-values ('STANDARD', 15, 'STANDARD', 'STANDARD'),
-       ('SWAP', 15, 'STANDARD', 'SWAP'),
-       ('RENJU', 15, 'THREE_AND_THREE', 'STANDARD'),
-       ('CARO', 15, 'STANDARD', 'STANDARD'),
-       ('PENTE', 19, 'STANDARD', 'STANDARD'),
-       ('OMOK', 19, 'THREE_AND_THREE', 'STANDARD'),
-       ('NINUKI_RENJU', 15, 'THREE_AND_THREE', 'STANDARD');
+insert into dbo.Variant (variant_name, board_dim, play_rule, opening_rule, points)
+values ('STANDARD', 15, 'STANDARD', 'STANDARD', 110),
+       ('SWAP', 15, 'STANDARD', 'SWAP', 140),
+       ('RENJU', 15, 'THREE_AND_THREE', 'STANDARD', 150),
+       ('CARO', 15, 'STANDARD', 'STANDARD', 120),
+       ('PENTE', 19, 'STANDARD', 'STANDARD', 130),
+       ('OMOK', 19, 'THREE_AND_THREE', 'STANDARD',170),
+       ('NINUKI_RENJU', 15, 'THREE_AND_THREE', 'STANDARD',160);
 
 -- Inserting default values for the rule table
 INSERT INTO dbo.Games (id, state, board, created, updated, deadline, player_black, player_white, variant)

@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.http.model
 
 import jakarta.validation.constraints.NotBlank
+import kotlinx.datetime.Instant
 import pt.isel.daw.gomoku.domain.games.board.Board
 import pt.isel.daw.gomoku.domain.games.variants.GameVariant
 import pt.isel.daw.gomoku.domain.games.variants.OpeningRule
@@ -18,11 +19,12 @@ data class GameOutputModel(
     val userBlack: User,
     val userWhite: User,
     val state: String,
-    val variant: String,
+    val variant: VariantOutputModel,
     val created: String
 )
 
-data class GameGetByIdOutputModel(val game: GameOutputModel)
+
+data class GameGetByIdOutputModel(val game: GameOutputModel, val pollingTimOut: Instant)
 
 data class GameMatchmakingInputModel(@field:NotBlank val variant: String)
 
@@ -34,7 +36,8 @@ data class GameMatchmakingStatusOutputModel(
     val gameId: Int?,
     val state: String,
     val variant: String,
-    val created: String
+    val created: String,
+    val pollingTimOut: Instant
 )
 
 data class GameGetAllOutputModel(
@@ -50,7 +53,13 @@ data class GameGetAllByUserOutputModel(
 
 data class GameGetAllVariantsOutputModel(val variants: List<VariantOutputModel>)
 
-data class VariantOutputModel(val name: String, val boardDim: Int, val playRule: String, val openingRule: String)
+data class VariantOutputModel(
+    val name: String,
+    val boardDim: Int,
+    val playRule: String,
+    val openingRule: String,
+    val points: Int
+)
 
 data class GameExitMatchmakingQueueOutputModel(val message: String)
 

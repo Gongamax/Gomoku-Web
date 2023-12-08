@@ -2,7 +2,6 @@ package pt.isel.daw.gomoku.http.media.siren
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import java.net.URI
 
 /**

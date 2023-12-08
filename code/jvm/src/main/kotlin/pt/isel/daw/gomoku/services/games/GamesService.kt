@@ -6,6 +6,7 @@ import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.games.board.BoardWin
 import pt.isel.daw.gomoku.domain.games.board.Cell
 import pt.isel.daw.gomoku.domain.games.variants.Variants
+import pt.isel.daw.gomoku.domain.games.variants.toVariant
 import pt.isel.daw.gomoku.http.util.PageResult.Companion.toPage
 import pt.isel.daw.gomoku.repository.util.TransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
@@ -30,7 +31,7 @@ class GamesService(
                 return@run failure(GameCreationError.VariantDoesNotExist)
 
             val gamesRepository = it.gamesRepository
-            val gameModel = gamesDomain.createGameModel(userBlack, userWhite, Variants.valueOf(variant))
+            val gameModel = gamesDomain.createGameModel(userBlack, userWhite, variant.toVariant())
             val id = gamesRepository.createGame(gameModel)
             success(id)
         }
@@ -64,7 +65,7 @@ class GamesService(
                         userId,
                         opponent.id.value,
                         EndGameResult.WIN
-                    );
+                    )
                 }
 
                 is RoundResult.Draw -> result.game.also {
@@ -72,7 +73,7 @@ class GamesService(
                         userId,
                         opponent.id.value,
                         EndGameResult.DRAW
-                    );
+                    )
                 }
 
                 is RoundResult.TooLate -> result.game

@@ -36,8 +36,6 @@ object Rels {
 
     val UPDATE_USER = LinkRelation(BASE_URL + "update-user")
 
-    val CREATE_GAME = LinkRelation(BASE_URL + "create-a-game")
-
     val GAME = LinkRelation(BASE_URL + "get-game-by-id")
 
     val PLAY = LinkRelation(BASE_URL + "play")

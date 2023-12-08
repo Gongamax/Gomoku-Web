@@ -1,6 +1,6 @@
 package pt.isel.daw.gomoku.http.util
 
-
+/*TODO(CREATE FUNCTION THAT TURNS SEARCH INTO PAGE)*/
 data class PageResult<T>(
     val content: List<T>,
     val nextPage: Int?,

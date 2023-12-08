@@ -20,8 +20,13 @@ class AuthenticationInterceptor(
         }
         ) {
             // enforce authentication
-            val user = authorizationHeaderProcessor
-                .processAuthorizationHeaderValue(request.getHeader(NAME_AUTHORIZATION_HEADER))
+            val userToken = request.cookies.find { it.name == "token" }
+            val user =
+                if ( userToken != null)
+                    authorizationHeaderProcessor.processAuthorizationCookieValue(userToken)
+                else
+                    authorizationHeaderProcessor
+                        .processAuthorizationHeaderValue(request.getHeader(NAME_AUTHORIZATION_HEADER))
             return if (user == null) {
                 response.status = 401
                 response.addHeader(NAME_WWW_AUTHENTICATE_HEADER, RequestTokenProcessor.SCHEME)
@@ -34,12 +39,10 @@ class AuthenticationInterceptor(
                 true
             }
         }
-
         return true
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(AuthenticationInterceptor::class.java)
         const val NAME_AUTHORIZATION_HEADER = "Authorization"
         private const val NAME_WWW_AUTHENTICATE_HEADER = "WWW-Authenticate"

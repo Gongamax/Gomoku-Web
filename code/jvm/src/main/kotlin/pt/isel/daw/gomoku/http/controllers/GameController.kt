@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
+import kotlinx.datetime.Instant
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -22,7 +23,6 @@ import pt.isel.daw.gomoku.services.games.*
 import pt.isel.daw.gomoku.utils.Failure
 import pt.isel.daw.gomoku.utils.PositiveValue
 import pt.isel.daw.gomoku.utils.Success
-import java.net.URI
 
 @RestController
 class GameController(
@@ -40,9 +40,16 @@ class GameController(
                             game.value.playerBLACK,
                             game.value.playerWHITE,
                             game.value.state.toString(),
-                            game.value.variant.toString(),
+                            VariantOutputModel(
+                                game.value.variant.name,
+                                game.value.variant.boardDim.toInt(),
+                                game.value.variant.playingRule.toString(),
+                                game.value.variant.openingRule.toString(),
+                                game.value.variant.points
+                            ),
                             game.value.created.toString()
-                        )
+                        ),
+                        Instant.fromEpochMilliseconds(3000)
                     )
                 ) {
                     clazz("game")
@@ -92,7 +99,13 @@ class GameController(
                             res.value.playerBLACK,
                             res.value.playerWHITE,
                             res.value.state.toString(),
-                            res.value.variant.toString(),
+                            VariantOutputModel(
+                                res.value.variant.name,
+                                res.value.variant.boardDim.toInt(),
+                                res.value.variant.playingRule.toString(),
+                                res.value.variant.openingRule.toString(),
+                                res.value.variant.points
+                            ),
                             res.value.created.toString()
                         ),
                         res.value.state.toString()
@@ -204,7 +217,8 @@ class GameController(
                         res.value.gameId,
                         res.value.status.toString(),
                         res.value.variant,
-                        res.value.created.toString()
+                        res.value.created.toString(),
+                        Instant.fromEpochMilliseconds(3000)
                     )
                 ) {
                     clazz("matchmaking-status")
@@ -284,7 +298,13 @@ class GameController(
                                     game.playerBLACK,
                                     game.playerWHITE,
                                     game.state.toString(),
-                                    game.variant.toString(),
+                                    VariantOutputModel(
+                                        game.variant.name,
+                                        game.variant.boardDim.toInt(),
+                                        game.variant.playingRule.toString(),
+                                        game.variant.openingRule.toString(),
+                                        game.variant.points
+                                    ),
                                     game.created.toString(),
                                 ),
                                 Rels.GAME
@@ -357,7 +377,13 @@ class GameController(
                                 game.playerBLACK,
                                 game.playerWHITE,
                                 game.state.toString(),
-                                game.variant.toString(),
+                                VariantOutputModel(
+                                    game.variant.name,
+                                    game.variant.boardDim.toInt(),
+                                    game.variant.playingRule.toString(),
+                                    game.variant.openingRule.toString(),
+                                    game.variant.points
+                                ),
                                 game.created.toString(),
                             ),
                             Rels.GAME
@@ -399,7 +425,8 @@ class GameController(
                                 variant.name,
                                 variant.boardDim.toInt(),
                                 variant.playingRule.toString(),
-                                variant.openingRule.toString()
+                                variant.openingRule.toString(),
+                                variant.points
                             )
                         }
                     )
