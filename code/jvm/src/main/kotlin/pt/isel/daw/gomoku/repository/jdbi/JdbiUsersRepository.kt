@@ -53,11 +53,7 @@ class JdbiUsersRepository(
                             update dbo.Statistics
                             set
                                 wins = case when user_id = :id then wins + 1 else wins end,
-                                losses = case when user_id = :opponent then losses + 1 else losses end,
-                                points = case 
-                                    when user_id = :id then points + 12 
-                                    when user_id = :opponent then points - 3 
-                                    else points end
+                                losses = case when user_id = :opponent then losses + 1 else losses end
                             where user_id in (:id, :opponent)
                         """
                 )
@@ -69,7 +65,7 @@ class JdbiUsersRepository(
                 handle.createUpdate(
                     """
                             update dbo.Statistics
-                            set draws = draws + 1, points = points + 6
+                            set draws = draws + 1
                             where user_id in (:id, :opponent)
                         """
                 )
