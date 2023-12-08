@@ -9,6 +9,8 @@ drop trigger if exists increment_games_played on dbo.games cascade;
 drop function if exists dbo.check_points() cascade;
 drop function if exists dbo.add_user_to_statistics() cascade;
 drop function if exists dbo.update_rank() cascade;
+drop function if exists dbo.update_points() cascade;
+drop function if exists dbo.update_point_and_rank() cascade;
 drop function if exists dbo.increment_games_played() cascade;
 drop table if exists dbo.variant cascade;
 drop table if exists dbo.matchmaking cascade;
@@ -102,22 +104,16 @@ execute procedure dbo.add_user_to_statistics();
 
 -- Trigger to ensure points dont go below 0
 
-create or replace function dbo.check_points()
-    returns trigger as
+create or replace function dbo.check_points(points int)
+    returns int as
 $$
 begin
-    if new.points < 0 then
-        new.points = 0;
+    if points < 0 then
+        points = 0;
     end if;
-    return new;
+    return points;
 end;
 $$ language plpgsql;
-
-create trigger check_points
-    after update
-    on dbo.Statistics
-    for each row
-execute procedure dbo.check_points();
 
 -- Trigger for incrementing the games played by a user
 
@@ -144,7 +140,7 @@ execute procedure dbo.increment_games_played();
 -- Who has more points is ranked higher
 -- The rank is updated after every game
 create or replace function dbo.update_rank()
-    returns trigger as
+    returns void as
 $$
 begin
     with ranked_users
@@ -155,8 +151,6 @@ begin
     set rank = ru.rank
     from ranked_users as ru
     where s.user_id = ru.user_id;
-
-    return new;
 end;
 $$ language plpgsql;
 
@@ -165,8 +159,8 @@ $$ language plpgsql;
 -- If the player wins, he gets the points of the variant
 -- If the player loses, he loses the points of the variant
 -- If the player draws, stays the same
-create or replace function dbo.update_points()
-    returns trigger as
+create or replace function dbo.update_points(new dbo.Games)
+    returns void as
 $$
 begin
     if new.state = 'PLAYER_BLACK_WON' then
@@ -174,17 +168,16 @@ begin
         set points = points + (select points from dbo.Variant where variant_name = new.variant)
         where user_id = new.player_black;
         update dbo.Statistics
-        set points = points - (select points from dbo.Variant where variant_name = new.variant)
+        set points = dbo.check_points (points - (select points from dbo.Variant where variant_name = new.variant))
         where user_id = new.player_white;
     elsif new.state = 'PLAYER_WHITE_WON' then
         update dbo.Statistics
         set points = points + (select points from dbo.Variant where variant_name = new.variant)
         where user_id = new.player_white;
         update dbo.Statistics
-        set points = points - (select points from dbo.Variant where variant_name = new.variant)
+        set points = dbo.check_points (points - (select points from dbo.Variant where variant_name = new.variant))
         where user_id = new.player_black;
     end if;
-    return new;
 end;
 $$ language plpgsql;
 
@@ -192,7 +185,7 @@ create or replace function dbo.update_point_and_rank()
     returns trigger as
 $$
 begin
-    perform dbo.update_points();
+    perform dbo.update_points(new);
     perform dbo.update_rank();
     return new;
 end;
