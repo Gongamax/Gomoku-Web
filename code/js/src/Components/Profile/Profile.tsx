@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { UsersService } from '../../Service/users/UserServices';
+import { getStatsByUsername } from '../../Service/users/UserServices';
 
 type UserInfo = {
   username: string;
@@ -50,8 +50,7 @@ export function ProfilePage() {
     async function fetchData() {
       try {
         dispatch({ type: 'startLoading' });
-        const userServices = new UsersService();
-        const userResponse = await userServices.getStatsByUsername(uid);
+        const userResponse = await getStatsByUsername(uid);
         const userInfo = {
           username: userResponse.properties.username,
           wins: userResponse.properties.wins,

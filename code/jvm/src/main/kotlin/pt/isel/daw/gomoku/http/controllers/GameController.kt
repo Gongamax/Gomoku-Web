@@ -220,7 +220,7 @@ class GameController(
                         res.value.status.toString(),
                         res.value.variant,
                         res.value.created.toString(),
-                        Instant.fromEpochMilliseconds(3000)
+                        5000
                     )
                 ) {
                     clazz("matchmaking-status")

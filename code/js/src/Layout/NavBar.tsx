@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { Link, Outlet } from 'react-router-dom';
+import { useLoggedIn } from '../Components/Authentication/RequireAuthn';
+import { logout } from '../Service/users/UserServices';
 
 function NavBar() {
   const navStyle = {
@@ -28,19 +30,33 @@ function NavBar() {
     textDecoration: 'none',
   };
 
+  const loggedIn = useLoggedIn();
+
   return (
     <nav style={navStyle}>
       <ul style={ulStyle}>
-        <li style={liStyle}><Link to='/' style={linkStyle}>Home</Link></li>
-        <li style={liStyle}><Link to='/about' style={linkStyle}>About</Link></li>
-        <li style={liStyle}><Link to='/login' style={linkStyle}>Login</Link></li>
-        <li style={liStyle}><Link to='/register' style={linkStyle}>Register</Link></li>
-        <li style={liStyle}><Link to='/lobby' style={linkStyle}>Lobby</Link></li>
-        <li style={liStyle}><Link to='/ranking' style={linkStyle}>Ranking</Link></li>
+        <li style={liStyle}><Link to="/" style={linkStyle}>Home</Link></li>
+        <li style={liStyle}><Link to="/about" style={linkStyle}>About</Link></li>
+        <li style={liStyle}><Link to="/ranking" style={linkStyle}>Ranking</Link></li>
+        {loggedIn ? (
+          <>
+            <li style={liStyle}><Link to="/lobby" style={linkStyle}>Lobby</Link></li>
+            <li style={liStyle}><Link to="/profile" style={linkStyle}>Profile</Link></li>
+            <li style={liStyle}>
+              <button onClick={logout} style={linkStyle}>Logout</button>
+            </li>
+          </>
+        ) : (
+          <>
+            <li style={liStyle}><Link to="/login" style={linkStyle}>Login</Link></li>
+            <li style={liStyle}><Link to="/register" style={linkStyle}>Register</Link></li>
+          </>
+        )}
       </ul>
     </nav>
   );
 }
+
 export function NavBarWrapper() {
   return (
     <div>

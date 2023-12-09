@@ -11,6 +11,7 @@ import { MatchmakingPage } from './Components/Game/Matchmaking/Matchmaking';
 import { RequireAuthn } from './Components/Authentication/RequireAuthn';
 import { Me } from './Components/Home/Me';
 import { NavBarWrapper } from './Layout/NavBar';
+import { AuthnContainer } from './Components/Authentication/Authn';
 import {GamePage} from "./Components/Game/GamePlay/Game";
 
 export function App() {
@@ -22,18 +23,15 @@ export function App() {
 const router = createBrowserRouter([
   {
     'path': '/',
-    'element': <NavBarWrapper />,
+    // 'element': <NavBarWrapper />,
+    'element': <AuthnContainer><NavBarWrapper /></AuthnContainer>,
     'children': [
       {
         'path': '/',
         'element': <HomePage />,
         'children': [
           {
-            'path': 'about',
-            'element': <AboutPage />,
-          },
-          {
-            'path': 'users/:uid',
+            'path': '/users/:uid',
             'element': <ProfilePage />,
             'children': [
               // {
@@ -41,16 +39,20 @@ const router = createBrowserRouter([
               //   'element': <p>Edit</p>,
               // },
               // {
-              //   'path': '/history',
+              //   'path': 'history',
               //   'element': <p>UserHistory</p>,
               // },
               // {
-              //   'path': '/stats',
+              //   'path': 'stats',
               //   'element': <p>UserStats</p>,
               // },
             ],
           },
         ],
+      },
+      {
+        'path': '/about',
+        'element': <AboutPage />,
       },
       {
         'path': '/login',
@@ -67,12 +69,10 @@ const router = createBrowserRouter([
       {
         'path': '/lobby',
         'element': <RequireAuthn><LobbyPage /></RequireAuthn>,
-        'children': [
-          {
-            'path': 'matchmaking',
-            'element': <MatchmakingPage />,
-          },
-        ],
+      },
+      {
+        'path': '/matchmaking/:mid',
+        'element': <MatchmakingPage />,
       },
       {
         'path': '/ranking',

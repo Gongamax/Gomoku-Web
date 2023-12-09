@@ -37,7 +37,7 @@ data class GameMatchmakingStatusOutputModel(
     val state: String,
     val variant: String,
     val created: String,
-    val pollingTimOut: Instant
+    val pollingTimOut: Int
 )
 
 data class GameGetAllOutputModel(

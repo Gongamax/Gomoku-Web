@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSetUser } from './Authn';
-import { UsersService } from '../../Service/users/UserServices';
+import { register } from '../../Service/users/UserServices';
 
 type State =
   | {
@@ -56,14 +56,6 @@ function reduce(state: State, action: Action): State {
       return state;
   }
 }
-
-export async function register(username: string, password: string, email: string): Promise<string | undefined> {
-  const userServices = new UsersService();
-  const res = await userServices.register(username, email, password);
-  console.log('Registered user with id: ' + res.properties.uid);
-  return username;
-}
-
 export function Register() {
   console.log('Register');
   const [state, dispatch] = React.useReducer(reduce, {
@@ -94,7 +86,7 @@ export function Register() {
       .then(res => {
         if (res) {
           console.log(`setUser(${res})`);
-          setUser(res);
+          setUser(username);
           dispatch({ type: 'success' });
         } else {
           dispatch({ type: 'error', message: 'Registration failed. Please try again.' });

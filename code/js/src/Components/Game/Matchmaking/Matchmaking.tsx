@@ -1,42 +1,8 @@
 import * as React from 'react';
-
-// Simulating API request for macthmaking entry, example of entry:
-// {
-//   "id": 1,
-//   userId: 1,
-//   variant: "Standard",
-//   status: "Pending",
-//   gameId: null,
-//   createdAt: "2021-03-23T15:00:00.000Z",
-// }
-
-const fetchMatchmakingEntry = (queueEntryId: number) => {
-  return new Promise<QueueEntry>(resolve => {
-    setTimeout(() => {
-      // Simulated matchmaking entry
-      const matchmakingEntry: QueueEntry = {
-        id: queueEntryId,
-        userId: 1,
-        variant: 'Standard',
-        status: 'Pending',
-        gameId: null,
-        createdAt: '2021-03-23T15:00:00.000Z',
-      };
-      resolve(matchmakingEntry);
-    }, 2000); // Simulating a 2-second delay for the API request
-  });
-};
-
-type QueueEntry = {
-  id: number;
-  userId: number;
-  variant: string;
-  status: string;
-  gameId: number | null;
-  createdAt: string;
-};
-
-/////////////////////////////////////////////////////////////////////
+import { getMatchmakingStatus } from '../../../Service/games/GamesServices';
+import { useParams } from 'react-router-dom';
+import { QueueEntry } from '../../../Domain/games/QueueEntry';
+import { useRef } from 'react';
 
 type State = { tag: 'readingStatus'; queueEntryId: number } | { tag: 'redirect'; gameId: number; queueEntryId: number };
 
@@ -50,52 +16,55 @@ const logUnexpectedAction = (state: State, action: Action) => {
   console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
 };
 
-// complete version of the reducer
 function reduce(state: State, action: Action): State {
   switch (state.tag) {
     case 'readingStatus':
       if (action.type === 'readSuccess') {
-        if (action.queueEntry.status === 'Pending') {
+        if (action.queueEntry.status === 'PENDING') {
           return state;
-        } else if (action.queueEntry.status === 'Matched') {
+        } else if (action.queueEntry.status === 'MATCHED') {
           return { tag: 'redirect', gameId: action.queueEntry.gameId!, queueEntryId: state.queueEntryId };
         } else {
           return state;
         }
       } else if (action.type === 'readError') {
         return state;
+      } else if (action.type === 'redirect') {
+        // Handle 'redirect' action in 'readingStatus' state
+        return { tag: 'redirect', gameId: action.gameId, queueEntryId: state.queueEntryId };
       } else {
         logUnexpectedAction(state, action);
         return state;
       }
     case 'redirect':
+      // Handle the 'redirect' case
       return state;
   }
 }
 
-// Complete version of the component using the reducer without hardcoding the queue entry id
 export function MatchmakingPage() {
-  const [state, dispatch] = React.useReducer(reduce, { tag: 'readingStatus', queueEntryId: 1 });
+  const { mid } = useParams<{ mid: string }>();
+  const [state, dispatch] = React.useReducer(reduce, { tag: 'readingStatus', queueEntryId: Number(mid) });
+  const pollingTimeout = useRef(1000);
 
-  // Simulating polling for the matchmaking status
-  // if status is pending, do nothing
-  // if status is matched, redirect to game
-  // if status is error, show error message
   React.useEffect(() => {
     const interval = setInterval(async () => {
       console.log('Polling for matchmaking status... on id ' + state.queueEntryId);
-      const queueEntry = await fetchMatchmakingEntry(state.queueEntryId);
-      if (queueEntry.status === 'Matched') {
-        dispatch({ type: 'redirect', gameId: queueEntry.gameId! });
+      const queueEntry = await getMatchmakingStatus(state.queueEntryId);
+      pollingTimeout.current = queueEntry.properties.pollingTimOut;
+      if (queueEntry.properties.state === 'MATCHED') {
+        dispatch({ type: 'redirect', gameId: queueEntry.properties.gameId! });
+        // leave the interval running
+        clearInterval(interval);
       }
-    }, 1000); // Simulating a 1-second delay for the API request
+    }, pollingTimeout.current); // Simulating a 1-second delay for the API request
     return () => clearInterval(interval);
   }, [state.queueEntryId]);
 
   switch (state.tag) {
     case 'readingStatus':
-      return <div>Loading...</div>;
+      return <div>Searching for a opponent...</div>;
     case 'redirect':
-      return <div>Redirecting to game {state.gameId}...</div>;
+      return <div>Opponent found! Redirecting to game {state.gameId}...</div>;
   }
 }

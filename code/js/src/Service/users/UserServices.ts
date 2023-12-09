@@ -7,45 +7,46 @@ import { LogoutOutput } from './models/LogoutOutput';
 import { RegisterOutput } from './models/RegisterOutput';
 import { GetStatsOutput } from './models/GetStatsOutput';
 
-export class UsersService extends HTTPService {
-  public async register(username: string, email: string, password: string): Promise<RegisterOutput> {
-    return await this.post<RegisterOutput>(
-      '/users',
-      JSON.stringify({
-        username,
-        email,
-        password,
-      })
-    );
-  }
+const httpService = new HTTPService();
 
-  public async login(username: string, password: string): Promise<LoginOutput> {
-    return await this.post<LoginOutput>(
-      '/api/users/token',
-      JSON.stringify({
-        username,
-        password,
-      })
-    );
-  }
-
-  public async logout(): Promise<LogoutOutput> {
-    return await this.post<LogoutOutput>('/api/users/logout', JSON.stringify({}));
-  }
-
-  public async getUser(uid: number): Promise<GetUserOutput> {
-    return await this.get<GetUserOutput>(`/api/users/${uid}`);
-  }
-
-  public async getAuthHome(): Promise<GetUserHomeOutput> {
-    return await this.get<GetUserHomeOutput>('/api/me');
-  }
-
-  public async getRankingInfo(page: number): Promise<GetRankingOutput> {
-    return await this.get<GetRankingOutput>(`/api/users/ranking?page=${page}`);
-  }
-
-  public async getStatsByUsername(username: string): Promise<GetStatsOutput> {
-    return await this.get<GetStatsOutput>(`/api/stats/username?username=${username}`); //CHANGE THIS ON API TO PATH PARAM
-  }
+export async function register(username: string, email: string, password: string): Promise<RegisterOutput> {
+  return await httpService.post<RegisterOutput>(
+    '/api/users',
+    JSON.stringify({
+      username,
+      email,
+      password,
+    }),
+  );
 }
+
+export async function login(username: string, password: string): Promise<LoginOutput> {
+  return await httpService.post<LoginOutput>(
+    '/api/users/token',
+    JSON.stringify({
+      username,
+      password,
+    }),
+  );
+}
+
+export async function logout(): Promise<LogoutOutput> {
+  return await httpService.post<LogoutOutput>('/api/logout');
+}
+
+export async function getUser(id: number): Promise<GetUserOutput> {
+  return await httpService.get<GetUserOutput>(`/api/users/${id}`);
+}
+
+export async function getUserHome(): Promise<GetUserHomeOutput> {
+  return await httpService.get<GetUserHomeOutput>(`/api/me`);
+}
+
+export async function getRanking(page:number): Promise<GetRankingOutput> {
+  return await httpService.get<GetRankingOutput>(`/api/users/ranking?page=${page}`);
+}
+
+export async function getStatsByUsername(username: string): Promise<GetStatsOutput> {
+  return await httpService.get<GetStatsOutput>(`/api/stats/username?username=${username}`); //CHANGE THIS ON API TO PATH PARAM
+}
+

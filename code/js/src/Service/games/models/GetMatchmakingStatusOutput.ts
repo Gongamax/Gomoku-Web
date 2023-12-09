@@ -7,6 +7,7 @@ interface GetMatchmakingStatusOutputModel {
     state : string;
     variant : string;
     created : string;
+    pollingTimOut: number
 }
 
 export type GetMatchmakingStatusOutput = SirenModel<GetMatchmakingStatusOutputModel>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSetUser } from './Authn';
-import { UsersService } from '../../Service/users/UserServices';
+import { login } from '../../Service/users/UserServices';
 
 type State =
   | { tag: 'editing'; error?: string; inputs: { username: string; password: string } }
@@ -46,14 +46,6 @@ function reduce(state: State, action: Action): State {
   }
 }
 
-export async function authenticate(username: string, password: string): Promise<string | undefined> {
-  const usersService = new UsersService();
-  const res = await usersService.login(username, password);
-  if (res) {
-    return username;
-  }
-}
-
 export function Login() {
   console.log('Login');
   const [state, dispatch] = React.useReducer(reduce, { tag: 'editing', inputs: { username: '', password: '' } });
@@ -75,11 +67,11 @@ export function Login() {
     dispatch({ type: 'submit' });
     const username = state.inputs.username;
     const password = state.inputs.password;
-    authenticate(username, password)
+    login(username, password)
       .then(res => {
         if (res) {
           console.log(`setUser(${res})`);
-          setUser(res);
+          setUser(username);
           dispatch({ type: 'success' });
         } else {
           dispatch({ type: 'error', message: 'Invalid username or password' });
@@ -90,21 +82,21 @@ export function Login() {
       });
   }
 
-  const username = state.tag === 'submitting' ? state.username : state.inputs.username;
-  const password = state.tag === 'submitting' ? '' : state.inputs.password;
+  const username = state.tag === 'submitting' ? state.username : state.inputs.username
+  const password = state.tag === 'submitting' ? "" : state.inputs.password
   return (
     <form onSubmit={handleSubmit}>
       <fieldset disabled={state.tag !== 'editing'}>
         <div>
-          <label htmlFor='username'>Username</label>
-          <input id='username' type='text' name='username' value={username} onChange={handleChange} />
+          <label htmlFor="username">Username</label>
+          <input id="username" type="text" name="username" value={username} onChange={handleChange} />
         </div>
         <div>
-          <label htmlFor='password'>Password</label>
-          <input id='password' type='text' name='password' value={password} onChange={handleChange} />
+          <label htmlFor="password">Password</label>
+          <input id="password" type="password" name="password" value={password} onChange={handleChange} />
         </div>
         <div>
-          <button type='submit'>Login</button>
+          <button type="submit">Login</button>
         </div>
       </fieldset>
       {state.tag === 'editing' && state.error}

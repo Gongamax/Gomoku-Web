@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Navigate} from 'react-router-dom';
 import {Game, GameState} from '../../../Domain/games/Game';
 import * as GameService from '../../../Service/games/GamesServices';
-import {Board} from "../../../Domain/games/Board";
+// import {Board} from "../../../Domain/games/Board";
 import {GameOutputModel} from "../../../Service/games/models/GameModelsUtil";
 import {User} from "../../../Domain/users/User";
 
@@ -160,19 +160,19 @@ export function GamePage() {
 }
 
 /*create a html function to create a board given the game.board*/
-function createBoard(board: Board, board_dim: number) {
-    let table: HTMLTableElement = document.createElement('table');
-    for (let i: number = 0; i < board_dim; i++) {
-        let row: HTMLTableRowElement = document.createElement('tr');
-        for (let j: number = 0; board_dim; j++) {
-            let cell: HTMLTableCellElement = document.createElement('td');
-            cell.innerHTML = board.moves[i*board_dim+j].piece;
-            row.appendChild(cell);
-        }
-        table.appendChild(row);
-    }
-    return table;
-}
+// function createBoard(board: Board, board_dim: number) {
+//     const table: HTMLTableElement = document.createElement('table');
+//     for (let i: number = 0; i < board_dim; i++) {
+//         const row: HTMLTableRowElement = document.createElement('tr');
+//         for (let j: number = 0; board_dim; j++) {
+//             const cell: HTMLTableCellElement = document.createElement('td');
+//             cell.innerHTML = board.moves[i*board_dim+j].piece;
+//             row.appendChild(cell);
+//         }
+//         table.appendChild(row);
+//     }
+//     return table;
+// }
 
 /*check if it is the player's turn*/
 function checkTurn(username: string, game: GameOutputModel) {

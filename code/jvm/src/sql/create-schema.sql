@@ -1,4 +1,4 @@
-create schema dbo;
+--create schema dbo;
 
 -- Table and Trigger Dropping
 
