@@ -1,21 +1,23 @@
 import * as React from 'react';
-import { Navigate } from 'react-router-dom';
-import { Game, GameState } from '../../../Domain/games/Game';
-import { GamesServices } from '../../../Service/games/GamesServices';
+import {Navigate} from 'react-router-dom';
+import {Game, GameState} from '../../../Domain/games/Game';
+import * as GameService from '../../../Service/games/GamesServices';
 import {Board} from "../../../Domain/games/Board";
+import {GameOutputModel} from "../../../Service/games/models/GameModelsUtil";
+import {User} from "../../../Domain/users/User";
 
 type State =
   | { tag: 'loading' }
   | { tag: 'turn'; game: Game; isMyTurn: boolean }
   | { tag: 'loadingPlay'; game: Game; resign: boolean }
-  | { tag: 'gameOver'; game: Game; winner: string }
+  | { tag: 'gameOver'; game: Game; winner: User }
   | { tag: 'redirect' }
   | { tag: 'error'; message: string };
 
 type Action =
   | { type: 'makePlay'; game: Game; isMyTurn: boolean; resign: boolean }
   | { type: 'error'; message: string; game?: Game; isMyTurn?: boolean }
-  | { type: 'success'; game: Game; isMyTurn: boolean; isOver: boolean; winner: string };
+  | { type: 'success'; game: Game; isMyTurn: boolean; isOver: boolean; winner?: User };
 
 function logUnexpectedAction(state: State, action: Action) {
   console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
@@ -59,6 +61,13 @@ function reduce(state: State, action: Action): State {
         logUnexpectedAction(state, action);
         return state;
       }
+    case 'gameOver':
+        if (action.type === 'success') {
+            return { tag: 'redirect' };
+        } else {
+            logUnexpectedAction(state, action);
+            return state;
+        }
     case 'error':
       return state
     case 'redirect':
@@ -70,9 +79,8 @@ function reduce(state: State, action: Action): State {
 export function GamePage() {
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
   async function fetchData() {
-    const gameServices = new GamesServices();
-    const response = (await gameServices.getGame(1)).properties;
-    const isMyTurn = "username" == response.game.userBlack.username;
+    const response = (await GameService.getGame(1)).properties;
+    const isMyTurn: boolean =  checkTurn("username", response.game);
     dispatch({
       type: 'success',
       game: {
@@ -87,11 +95,7 @@ export function GamePage() {
         },
       },
       isMyTurn: isMyTurn,
-      isOver: response.game.state == GameState.PLAYER_BLACK_WON || response.game.state == GameState.PLAYER_WHITE_WON,
-      winner:
-        response.game.state == GameState.PLAYER_BLACK_WON
-          ? response.game.userBlack.username
-          : response.game.userWhite.username,
+      isOver: response.game.state == GameState.PLAYER_BLACK_WON || response.game.state == GameState.PLAYER_WHITE_WON
     });
   }
   React.useEffect(() => {
@@ -101,6 +105,20 @@ export function GamePage() {
           });
   }, []);
 
+  async function handleResign(): Promise<void> {
+      const gameState = state as { tag: 'turn'; game: Game; isMyTurn: boolean };
+      await GameService.surrenderGame(gameState.game.id);
+      dispatch(
+          {
+              type: 'success',
+              game: gameState.game,
+              isMyTurn: gameState.isMyTurn,
+              isOver: true,
+              winner: handleWinner(gameState.game)
+          }
+      );
+  }
+
   switch (state.tag) {
     case 'loading':
       return <div>Loading...</div>;
@@ -109,6 +127,7 @@ export function GamePage() {
       return (
             <div>
               <h1>{state.game.players[0].username} vs {state.game.players[1].username}</h1>
+                <button onClick={handleResign}>Surender</button>
             </div>
       );
 
@@ -124,11 +143,17 @@ export function GamePage() {
       return (
           <div>
             <h1>{state.game.players[0].username} vs {state.game.players[1].username}</h1>
-            <h1>{state.winner} won!</h1>
+            <h1>{state.winner.username} won!</h1>
             <h2>Points: +{state.game.variant.points}</h2>
           </div>
       );
-
+    case 'error':
+        return (
+            <div>
+              <h3>{state.message}</h3>
+              <button onClick={() => fetchData()}>Retry</button>
+            </div>
+        );
     case 'redirect':
       return <Navigate to="/"/>;
   }
@@ -147,4 +172,19 @@ function createBoard(board: Board, board_dim: number) {
         table.appendChild(row);
     }
     return table;
+}
+
+/*check if it is the player's turn*/
+function checkTurn(username: string, game: GameOutputModel) {
+    if (game.state == GameState.NEXT_PLAYER_BLACK && game.userBlack.username == username) {
+        return true;
+    } else return game.state == GameState.NEXT_PLAYER_WHITE && game.userWhite.username == username;
+
+}
+
+/*check who is the winner*/
+function handleWinner(game: Game): User {
+    if (game.state == GameState.PLAYER_BLACK_WON) {
+        return game.players[0];
+    } else return game.players[1];
 }
