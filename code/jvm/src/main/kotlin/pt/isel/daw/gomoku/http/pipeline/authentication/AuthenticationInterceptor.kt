@@ -20,10 +20,16 @@ class AuthenticationInterceptor(
         }
         ) {
             // enforce authentication
-            val userToken = request.cookies.find { it.name == "token" }
-            val user =
-                if ( userToken != null)
-                    authorizationHeaderProcessor.processAuthorizationCookieValue(userToken)
+            val cookies = request.cookies
+            val user  =
+                if (cookies != null) {
+                    val userToken = cookies.find { it.name == "token" }
+                    if (userToken != null)
+                        authorizationHeaderProcessor.processAuthorizationCookieValue(userToken)
+                    else
+                        authorizationHeaderProcessor
+                            .processAuthorizationHeaderValue(request.getHeader(NAME_AUTHORIZATION_HEADER))
+                }
                 else
                     authorizationHeaderProcessor
                         .processAuthorizationHeaderValue(request.getHeader(NAME_AUTHORIZATION_HEADER))
@@ -32,10 +38,7 @@ class AuthenticationInterceptor(
                 response.addHeader(NAME_WWW_AUTHENTICATE_HEADER, RequestTokenProcessor.SCHEME)
                 false
             } else {
-                if (request.requestURI.contains("logout"))
-                    AuthenticatedUserArgumentResolver.removeUserFrom(request)
-                else
-                    AuthenticatedUserArgumentResolver.addUserTo(user, request)
+                AuthenticatedUserArgumentResolver.addUserTo(user, request)
                 true
             }
         }

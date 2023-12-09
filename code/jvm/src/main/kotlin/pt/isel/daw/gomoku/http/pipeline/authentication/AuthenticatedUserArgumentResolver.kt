@@ -22,8 +22,12 @@ class AuthenticatedUserArgumentResolver : HandlerMethodArgumentResolver {
         binderFactory: WebDataBinderFactory?
     ): Any? {
         val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
-            ?: throw IllegalStateException("TODO")
-        return getUserFrom(request) ?: throw IllegalStateException("TODO")
+            ?: throw IllegalStateException("Should be called in a servlet environment")
+        val user = getUserFrom(request)
+        if(request.requestURI.contains("logout")) {
+            removeUserFrom(request)
+        }
+        return user ?: throw IllegalStateException("Should be called only if user is authenticated")
     }
 
     companion object {

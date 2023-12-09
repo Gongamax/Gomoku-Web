@@ -8,37 +8,37 @@ import { MatchmakingOutput } from './models/MatchmakingOutput';
 import { PlayGameOutput } from './models/PlayGameOutput';
 import { SurrenderGameOutput } from './models/SurrenderGameOutput';
 
-export class GamesServices extends HTTPService {
+const httpService = new HTTPService();
 
-  public async getGame(id: number): Promise<GetGameOutput> {
-    return await this.get<GetGameOutput>(`/api/games/${id}`);
+  export async function getGame(id: number): Promise<GetGameOutput> {
+    return await httpService.get<GetGameOutput>(`/api/games/${id}`);
   }
 
-  public async playGame(gid: number, row: number, col: number): Promise<PlayGameOutput> {
-    return await this.post<PlayGameOutput>(`/api/games/${gid}/play`, JSON.stringify({ row, col }));
+  export async function playGame(gid: number, row: number, col: number): Promise<PlayGameOutput> {
+    return await httpService.post<PlayGameOutput>(`/api/games/${gid}/play`, JSON.stringify({ row, col }));
   }
 
-  public async matchmaking(variant: string): Promise<MatchmakingOutput> {
-    return await this.post<MatchmakingOutput>(`/api/games/matchmaking`, JSON.stringify({ variant }));
+  export async function matchmaking(variant: string): Promise<MatchmakingOutput> {
+    return await httpService.post<MatchmakingOutput>(`/api/games/matchmaking`, JSON.stringify({ variant }));
   }
 
-  public async getMatchmakingStatus(mid: number): Promise<GetMatchmakingStatusOutput> {
-    return await this.get<GetMatchmakingStatusOutput>(`/api/games/matchmaking/${mid}/status`);
+  export async function getMatchmakingStatus(mid: number): Promise<GetMatchmakingStatusOutput> {
+    return await httpService.get<GetMatchmakingStatusOutput>(`/api/games/matchmaking/${mid}/status`);
   }
 
-  public async cancelMatchmaking(mid: number): Promise<CancelMatchmakingOutput> {
-    return await this.delete<CancelMatchmakingOutput>(`/api/games/matchmaking/${mid}/exit`);
+  export async function cancelMatchmaking(mid: number): Promise<CancelMatchmakingOutput> {
+    return await httpService.delete<CancelMatchmakingOutput>(`/api/games/matchmaking/${mid}/exit`);
   }
 
-  public async surrenderGame(gid: number): Promise<SurrenderGameOutput> {
-    return await this.put<SurrenderGameOutput>(`/api/games/${gid}/leave`);
+  export async function surrenderGame(gid: number): Promise<SurrenderGameOutput> {
+    return await httpService.put<SurrenderGameOutput>(`/api/games/${gid}/leave`);
   }
 
-  public async getAllGamesByUser(uid: number): Promise<GetAllGamesByUserOutput> {
-    return await this.get<GetAllGamesByUserOutput>(`/api/games/user/${uid}`);
+  export async function getAllGamesByUser(uid: number): Promise<GetAllGamesByUserOutput> {
+    return await httpService.get<GetAllGamesByUserOutput>(`/api/games/user/${uid}`);
   }
 
-  public async getVariantList(): Promise<GetVariantsOutput> {
-    return await this.get<GetVariantsOutput>(`/api/games/variants`);
+  export async function getVariantList(): Promise<GetVariantsOutput> {
+    return await httpService.get<GetVariantsOutput>(`/api/games/variants`);
   }
-}
+

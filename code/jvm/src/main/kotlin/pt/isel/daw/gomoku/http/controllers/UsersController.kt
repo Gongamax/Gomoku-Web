@@ -54,7 +54,7 @@ class UsersController(
     ): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
             is Success -> {
-                 val cookieMaxAge = (Clock.System.now() - res.value.tokenExpiration).inWholeSeconds
+                 val cookieMaxAge = res.value.tokenExpiration.epochSeconds
                  ResponseEntity.status(200)
                     .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                     .header(

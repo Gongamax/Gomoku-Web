@@ -164,7 +164,9 @@ class GameController(
                         }
                     )
 
-                is MatchmakingSuccess.OnWaitingQueue -> ResponseEntity.ok().body(
+                is MatchmakingSuccess.OnWaitingQueue -> ResponseEntity.ok()
+                    .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
+                    .body(
                     siren(
                         GameMatchmakingOutputModel(
                             "User on waiting queue",

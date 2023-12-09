@@ -4,10 +4,13 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.web.reactive.server.WebTestClient
-import pt.isel.daw.gomoku.domain.users.Email
+import pt.isel.daw.gomoku.http.media.siren.SirenModel
 import pt.isel.daw.gomoku.http.model.TokenResponse
-import kotlin.math.abs
-import kotlin.random.Random
+import pt.isel.daw.gomoku.util.AuxiliaryFunctions.getClientToken
+import pt.isel.daw.gomoku.util.AuxiliaryFunctions.newTestEmail
+import pt.isel.daw.gomoku.util.AuxiliaryFunctions.newTestPassword
+import pt.isel.daw.gomoku.util.AuxiliaryFunctions.newTestUserName
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -42,6 +45,9 @@ class UserTests {
             .expectHeader().value("location") {
                 assertTrue(it.startsWith("/api/users/"))
             }
+            .expectHeader().value("Content-Type") {
+                assertEquals("application/vnd.siren+json", it)
+            }
     }
 
     @Test
@@ -69,35 +75,22 @@ class UserTests {
             .expectHeader().value("location") {
                 assertTrue(it.startsWith("/api/users/"))
             }
+            .expectHeader().value("Content-Type") {
+                assertEquals("application/vnd.siren+json", it)
+            }
 
         // when: creating a token
         // then: the response is a 200
-        val result = client.post().uri("/users/token")
-            .bodyValue(
-                mapOf(
-                    "username" to username,
-                    "password" to password
-                )
-            )
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(TokenResponse::class.java)
-            .returnResult()
-            .responseBody!!
+        val token = getClientToken(client, username, password)
 
         // when: getting the user home with a valid token
         // then: the response is a 200 with the proper representation
-        client.get().uri("/me")
-            .header("Authorization", "Bearer ${result.token}")
-            .exchange()
-            .expectStatus().isOk
-            .expectBody()
-            .jsonPath("username").isEqualTo(username)
+        assertEquals(getClientUserName(client, token), username)
 
         // when: getting the user home with an invalid token
         // then: the response is a 4001 with the proper problem
         client.get().uri("/me")
-            .header("Authorization", "Bearer ${result.token}-invalid")
+            .header("Authorization", "Bearer ${token}-invalid")
             .exchange()
             .expectStatus().isUnauthorized
             .expectHeader().valueEquals("WWW-Authenticate", "bearer")
@@ -105,14 +98,17 @@ class UserTests {
         // when: revoking the token
         // then: response is a 200
         client.post().uri("/logout")
-            .header("Authorization", "Bearer ${result.token}")
+            .header("Authorization", "Bearer $token")
             .exchange()
             .expectStatus().isOk
+            .expectHeader().value("Content-Type") {
+                assertEquals("application/vnd.siren+json", it)
+            }
 
         // when: getting the user home with the revoked token
         // then: response is a 401
         client.get().uri("/me")
-            .header("Authorization", "Bearer ${result.token}")
+            .header("Authorization", "Bearer $token")
             .exchange()
             .expectStatus().isUnauthorized
             .expectHeader().valueEquals("WWW-Authenticate", "bearer")
@@ -139,34 +135,42 @@ class UserTests {
                 )
             )
             .exchange()
+            .expectStatus().isCreated
+            .expectHeader().value("location") {
+                assertTrue(it.startsWith("/api/users/"))
+            }
+            .expectHeader().value("Content-Type") {
+                assertEquals("application/vnd.siren+json", it)
+            }
 
         // when: creating a token
-        val token = client.post().uri("/users/token")
-            .bodyValue(
-                mapOf(
-                    "username" to username,
-                    "password" to password
-                )
-            )
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(TokenResponse::class.java)
-            .returnResult()
-            .responseBody!!
+        val token = getClientToken(client, username, password)
 
         // when: getting the user by id
         client.get().uri("/users/1")
-            .header("Authorization", "Bearer ${token.token}")
+            .header("Authorization", "Bearer $token")
             .exchange()
             .expectStatus().isOk
+            .expectHeader().value("Content-Type") {
+                assertEquals("application/vnd.siren+json", it)
+            }
             .expectBody()
     }
 
     companion object {
-        private fun newTestEmail() = "email-${abs(Random.nextLong())}@test.com"
-
-        private fun newTestUserName() = "user-${abs(Random.nextLong())}"
-
-        private fun newTestPassword() = "TestPassword${abs(Random.nextLong())}"
+        private fun getClientUserName(client: WebTestClient, token: String): String{
+            val properties = client.get().uri("/me")
+                .header("Authorization", "Bearer $token")
+                .exchange()
+                .expectStatus().isOk
+                .expectHeader().value("Content-Type") {
+                    assertEquals("application/vnd.siren+json", it)
+                }
+                .expectBody(SirenModel::class.java)
+                .returnResult()
+                .responseBody!!
+                .properties
+            return (properties as LinkedHashMap<*,*>)["username"].toString()
+        }
     }
 }
