@@ -11,7 +11,6 @@ import { MatchmakingPage } from './Components/Game/Matchmaking/Matchmaking';
 import { RequireAuthn } from './Components/Authentication/RequireAuthn';
 import { Me } from './Components/Home/Me';
 import { NavBarWrapper } from './Layout/NavBar';
-import { AuthnContainer } from './Components/Authentication/Authn';
 import { GamePage } from './Components/Game/GamePlay/Game';
 import { MatchHistory } from './Components/Profile/MatchHistory';
 
@@ -24,8 +23,7 @@ export function App() {
 const router = createBrowserRouter([
   {
     'path': '/',
-    // 'element': <NavBarWrapper />,
-    'element': <AuthnContainer><NavBarWrapper /></AuthnContainer>,
+    'element': <NavBarWrapper />,
     'children': [
       {
         'path': '/',
@@ -35,18 +33,10 @@ const router = createBrowserRouter([
         'path': '/users/:uid',
         'element': <RequireAuthn><ProfilePage /></RequireAuthn>,
         'children': [
-          // {
-          //   'path': 'edit',
-          //   'element': <p>Edit</p>,
-          // },
           {
             'path': 'history',
             'element': <MatchHistory />,
           },
-          // {
-          //   'path': 'stats',
-          //   'element': <p>UserStats</p>,
-          // },
         ],
       },
       {
@@ -78,7 +68,7 @@ const router = createBrowserRouter([
         'element': <RankingPage />,
       },
       {
-        'path': '/game:gameId',
+        'path': '/game/:gid',
         'element': <RequireAuthn><GamePage /></RequireAuthn>,
       },
     ],

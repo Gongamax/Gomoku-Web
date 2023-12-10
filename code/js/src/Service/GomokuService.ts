@@ -1,5 +1,6 @@
 import {HTTPService} from "./HttpService";
 import {SirenModel} from "./media/siren/SirenModel";
+import { HomeOutputModel } from './home/HomeOutputModel';
 
 
 const httpService: HTTPService = new HTTPService();

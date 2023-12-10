@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getVariantList, matchmaking } from '../../../Service/games/GamesServices';
-import { useCurrentUser } from '../../Authentication/Authn';
 import { getStatsByUsername } from '../../../Service/users/UserServices';
+import { getCookie } from '../../Authentication/RequireAuthn';
 
 async function fetchPlayerInfo(username: string): Promise<{ username: string, points: number }> {
   const user = await getStatsByUsername(username);
@@ -93,7 +93,7 @@ const reduce = (state: State, action: Action): State => {
 export function LobbyPage() {
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
   const [selectedVariant, setSelectedVariant] = useState<string>('STANDARD');
-  const currentUser = useCurrentUser();
+  const currentUser = getCookie('login')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,8 +118,11 @@ export function LobbyPage() {
 
   async function handleMatchmaking() {
     const { selectedVariant } = state as { selectedVariant: string };
-    const response = await initiateMatchmaking(selectedVariant);
-    dispatch({ type: 'initiateMatchmaking', response });
+    initiateMatchmaking(selectedVariant).then(response => {
+      dispatch({ type: 'initiateMatchmaking', response });
+    }).catch(error => {
+      dispatch({ type: 'loadError', message: error.message });
+    });
   }
 
   switch (state.tag) {
@@ -184,13 +187,13 @@ export function LobbyPage() {
           </div>
         );
       else if (state.idType === 'mid')
-      return (
-        <div>
-          <p>Redirecting...</p>
-          {/* Navigate to matchmaking page*/}
-          <Navigate to={`/matchmaking/${state.id}`} replace={true} />
-        </div>
-      );
+        return (
+          <div>
+            <p>Redirecting...</p>
+            {/* Navigate to matchmaking page*/}
+            <Navigate to={`/matchmaking/${state.id}`} replace={true} />
+          </div>
+        );
       else
         return <div>Unexpected idType</div>;
 

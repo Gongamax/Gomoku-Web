@@ -1,6 +1,5 @@
-import { User } from '../../../Domain/users/User';
-import { Board } from '../../../Domain/games/Board';
 import { Variant } from './GetVariantsOutput';
+import { User } from '../../../Domain/users/User';
 
 export type GameOutputModel = {
   id: number;

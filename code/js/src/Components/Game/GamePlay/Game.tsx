@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { Game, GameState } from '../../../Domain/games/Game';
 import * as GameService from '../../../Service/games/GamesServices';
-// import {Board} from "../../../Domain/games/Board";
-import { GameOutputModel } from '../../../Service/games/models/GameModelsUtil';
 import { User } from '../../../Domain/users/User';
+import { GameBoard } from './GameBoard';
+import { checkTurn, convertToDomainGame, deserializeBoard, handleWinner } from './GameUtils';
+import { getCookie } from '../../Authentication/RequireAuthn';
 
 type State =
   | { tag: 'loading' }
@@ -77,60 +78,94 @@ function reduce(state: State, action: Action): State {
 
 export function GamePage() {
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
-
-  async function fetchData() {
-    const response = (await GameService.getGame(1)).properties;
-    const isMyTurn: boolean = checkTurn('username', response.game);
-    dispatch({
-      type: 'success',
-      game: {
-        id: response.game.id,
-        players: [response.game.userBlack, response.game.userWhite],
-        board: response.game.board,
-        state: response.game.state,
-        variant: {
-          name: response.game.variant.name,
-          board_dim: response.game.variant.board_dim,
-          points: response.game.variant.points,
-        },
-      },
-      isMyTurn: isMyTurn,
-      isOver: response.game.state == GameState.PLAYER_BLACK_WON || response.game.state == GameState.PLAYER_WHITE_WON,
-    });
-  }
+  const { gid } = useParams<{ gid: string }>();
+  const gameId = Number(gid);
+  const currentUser = getCookie('login');
 
   React.useEffect(() => {
-    fetchData()
-      .catch((error) => {
-        dispatch({ type: 'error', message: error.message });
-      });
-  }, []);
+    const fetchData = async () => {
+      if (state.tag === 'loading' || (state.tag === 'turn' && !state.isMyTurn || state.tag === 'loadingPlay')) {
+        const interval = setInterval(async () => {
+            const response = (await GameService.getGame(gameId)).properties;
+            const isMyTurn: boolean = checkTurn(currentUser, response.game);
+            console.log('Game state: ' + response.game.state);
+            dispatch({
+              type: 'success',
+              game: convertToDomainGame(response.game),
+              isMyTurn: isMyTurn,
+              isOver: response.game.state === GameState.PLAYER_BLACK_WON || response.game.state === GameState.PLAYER_WHITE_WON,
+            });
+            if (checkTurn(currentUser, response.game))
+              clearInterval(interval);
+          }
+          , 5000);
+      }
+    };
+    fetchData();
+  }, [gameId, currentUser, state]);
+
+  async function handlePlay(row: number, col: number) {
+    const gameState = state as { tag: 'turn'; game: Game; isMyTurn: boolean };
+    if (gameState.isMyTurn) {
+      try {
+        // Send a request to the server to make a move
+        const updatedGame = await GameService.playGame(gameState.game.id, row, col);
+        console.log('Turn: ' + updatedGame.properties.game.board.turn);
+        // Update the local game state based on the server's response
+        dispatch({
+          type: 'makePlay',
+          game: convertToDomainGame(updatedGame.properties.game),
+          isMyTurn: checkTurn(currentUser, updatedGame.properties.game),
+          resign: false,
+        });
+      } catch (error) {
+        console.error('Failed to make a move:', error);
+      }
+    }
+  }
 
   async function handleResign(): Promise<void> {
     const gameState = state as { tag: 'turn'; game: Game; isMyTurn: boolean };
-    await GameService.surrenderGame(gameState.game.id);
-    dispatch(
-      {
-        type: 'success',
-        game: gameState.game,
-        isMyTurn: gameState.isMyTurn,
-        isOver: true,
-        winner: handleWinner(gameState.game),
-      },
-    );
+    try {
+      await GameService.surrenderGame(gameState.game.id);
+      dispatch(
+        {
+          type: 'success',
+          game: gameState.game,
+          isMyTurn: gameState.isMyTurn,
+          isOver: true,
+          winner: handleWinner(gameState.game),
+        },
+      );
+    } catch (error) {
+      console.error('Failed to resign:', error);
+    }
   }
 
   switch (state.tag) {
     case 'loading':
       return <div>Loading...</div>;
 
-    case 'turn':
+    case 'turn': {
+      const {
+        board,
+        turn,
+      } = deserializeBoard(
+        state.game.board.moves,
+        state.game.board.turn?.toString() ?? state.game.board.winner.toString(),
+        15,
+      );
       return (
         <div>
           <h1>{state.game.players[0].username} vs {state.game.players[1].username}</h1>
-          <button onClick={handleResign}>Surender</button>
+          <h2>Turn: {turn}</h2>
+          <GameBoard board={board} onPlay={handlePlay} />
+          <button
+            onClick={handleResign}>Surrender
+          </button>
         </div>
       );
+    }
 
     case 'loadingPlay':
       return <div>
@@ -143,16 +178,17 @@ export function GamePage() {
     case 'gameOver':
       return (
         <div>
-          <h1>{state.game.players[0].username} vs {state.game.players[1].username}</h1>
-          <h1>{state.winner.username} won!</h1>
+          <h1>Game Over</h1>
+          <h2>{state.winner.username} won!</h2>
           <h2>Points: +{state.game.variant.points}</h2>
+          <Navigate to="/" />
         </div>
       );
     case 'error':
       return (
         <div>
           <h3>{state.message}</h3>
-          <button onClick={() => fetchData()}>Retry</button>
+          {/*<button onClick={() => fetchData()}>Retry</button>*/}
         </div>
       );
     case 'redirect':
@@ -160,32 +196,4 @@ export function GamePage() {
   }
 }
 
-/*create a html function to create a board given the game.board*/
-// function createBoard(board: Board, board_dim: number) {
-//     const table: HTMLTableElement = document.createElement('table');
-//     for (let i: number = 0; i < board_dim; i++) {
-//         const row: HTMLTableRowElement = document.createElement('tr');
-//         for (let j: number = 0; board_dim; j++) {
-//             const cell: HTMLTableCellElement = document.createElement('td');
-//             cell.innerHTML = board.moves[i*board_dim+j].piece;
-//             row.appendChild(cell);
-//         }
-//         table.appendChild(row);
-//     }
-//     return table;
-// }
 
-/*check if it is the player's turn*/
-function checkTurn(username: string, game: GameOutputModel) {
-  if (game.state == GameState.NEXT_PLAYER_BLACK && game.userBlack.username == username) {
-    return true;
-  } else return game.state == GameState.NEXT_PLAYER_WHITE && game.userWhite.username == username;
-
-}
-
-/*check who is the winner*/
-function handleWinner(game: Game): User {
-  if (game.state == GameState.PLAYER_BLACK_WON) {
-    return game.players[0];
-  } else return game.players[1];
-}

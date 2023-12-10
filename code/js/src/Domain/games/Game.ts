@@ -1,5 +1,4 @@
 import { User } from '../users/User';
-import { Board } from './Board';
 import { Variant } from './Variant';
 
 export type Game = {

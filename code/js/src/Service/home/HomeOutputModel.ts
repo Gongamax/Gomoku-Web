@@ -1,3 +1,3 @@
-type HomeOutputModel = {
+export type HomeOutputModel = {
     message: string;
 }

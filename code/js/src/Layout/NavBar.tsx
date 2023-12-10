@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useLoggedIn } from '../Components/Authentication/RequireAuthn';
 import { logout } from '../Service/users/UserServices';
-import { useSetUser } from '../Components/Authentication/Authn';
 
 function NavBar() {
   const navStyle = {
@@ -33,11 +32,9 @@ function NavBar() {
 
   const navigate = useNavigate();
   const loggedIn = useLoggedIn();
-  const setUser = useSetUser();
 
   const handleLogout = async () => {
     await logout();
-    setUser(null);
     navigate('/');
   }
 

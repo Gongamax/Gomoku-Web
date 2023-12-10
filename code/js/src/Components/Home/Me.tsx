@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { useCurrentUser } from '../Authentication/Authn';
+import { getCookie } from '../Authentication/RequireAuthn';
 
 export function Me() {
-  const currentUser = useCurrentUser();
+  const currentUser = getCookie('login')
   return (
     <div>
       {`Hello ${currentUser}`}

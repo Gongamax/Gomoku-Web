@@ -9,8 +9,8 @@ function calculateResult(game: GameOutputModel, userId: number): string {
     return 'WIN';
   } else if (game.userBlack.id.value === userId && game.board.winner === 'BLACK') {
     return 'WIN';
-  } else if (game.board.winner === 'DRAW') {
-    return 'DRAW';
+  // } else if (game.board.winner === 'DRAW') {
+  //   return 'DRAW';
   } else if (game.board.winner === undefined) {
     return 'IN PROGRESS';
   } else {
