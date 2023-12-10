@@ -51,7 +51,7 @@ class JdbiUsersRepository(
                 handle.createUpdate(
                     """
                             update dbo.Statistics
-                            set
+                            set games_played = games_played + 1,
                                 wins = case when user_id = :id then wins + 1 else wins end,
                                 losses = case when user_id = :opponent then losses + 1 else losses end
                             where user_id in (:id, :opponent)
@@ -65,7 +65,8 @@ class JdbiUsersRepository(
                 handle.createUpdate(
                     """
                             update dbo.Statistics
-                            set draws = draws + 1
+                            set games_played = games_played + 1,
+                                draws = draws + 1
                             where user_id in (:id, :opponent)
                         """
                 )

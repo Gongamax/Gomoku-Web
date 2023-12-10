@@ -1,17 +1,13 @@
---create schema dbo;
-
 -- Table and Trigger Dropping
 
 drop trigger if exists check_points on dbo.statistics cascade;
 drop trigger if exists add_user_to_statistics on dbo.users cascade;
 drop trigger if exists update_points_and_rank on dbo.games cascade;
-drop trigger if exists increment_games_played on dbo.games cascade;
 drop function if exists dbo.check_points() cascade;
 drop function if exists dbo.add_user_to_statistics() cascade;
 drop function if exists dbo.update_rank() cascade;
 drop function if exists dbo.update_points() cascade;
 drop function if exists dbo.update_point_and_rank() cascade;
-drop function if exists dbo.increment_games_played() cascade;
 drop table if exists dbo.variant cascade;
 drop table if exists dbo.matchmaking cascade;
 drop table if exists dbo.tokens cascade;
@@ -19,6 +15,11 @@ drop table if exists dbo.statistics cascade;
 drop table if exists dbo.users cascade;
 drop table if exists dbo.game_config cascade;
 drop table if exists dbo.games cascade;
+drop schema if exists dbo cascade;
+
+-- Schema Creation
+
+create schema dbo;
 
 -- Table Creation
 
@@ -114,26 +115,6 @@ begin
     return points;
 end;
 $$ language plpgsql;
-
--- Trigger for incrementing the games played by a user
-
-create or replace function dbo.increment_games_played()
-    returns trigger as
-$$
-begin
-    update dbo.Statistics
-    set games_played = games_played + 1
-    where user_id = new.player_black
-       or user_id = new.player_white;
-    return new;
-end;
-$$ language plpgsql;
-
-create trigger increment_games_played
-    after insert
-    on dbo.Games
-    for each row
-execute procedure dbo.increment_games_played();
 
 -- Trigger for updating the rank of a user
 -- Rank is calculated by the formula:
