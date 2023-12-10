@@ -84,3 +84,22 @@ tasks.named("check") {
     dependsOn("dbTestsWait")
     finalizedBy("dbTestsDown")
 }
+
+/**
+ * Docker related tasks
+ * */
+
+tasks.register<Copy>("extractUberJar") {
+    dependsOn("assemble")
+    from(zipTree("$buildDir/libs/${rootProject.name}-$version.jar"))
+    into("build/dependency")
+}
+
+task<Exec>("composeUp") {
+    commandLine("docker-compose", "up", "--build", "--force-recreate", "--scale", "spring-service=3")
+    dependsOn("extractUberJar")
+}
+
+task<Exec>("composeDown") {
+    commandLine("docker-compose", "down")
+}

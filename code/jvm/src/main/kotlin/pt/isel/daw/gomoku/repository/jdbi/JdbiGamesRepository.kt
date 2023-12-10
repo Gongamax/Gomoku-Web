@@ -6,7 +6,8 @@ import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.statement.Update
 import org.postgresql.util.PGobject
-import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.games.Game
+import pt.isel.daw.gomoku.domain.games.GameCreationModel
 import pt.isel.daw.gomoku.domain.games.board.Board
 import pt.isel.daw.gomoku.domain.games.board.BoardDim
 import pt.isel.daw.gomoku.domain.games.variants.*
@@ -106,6 +107,7 @@ class JdbiGamesRepository(
                        games.created,
                        games.updated,
                        games.deadline,
+                       games.variant,
                        users_black.id                  as playerBlack_id,
                        users_black.username            as playerBlack_username,
                        users_black.email               as playerBlack_email,

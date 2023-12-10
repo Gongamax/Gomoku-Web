@@ -1,8 +1,7 @@
 package pt.isel.daw.gomoku.http.model
 
-import jakarta.validation.constraints.Size
 import jakarta.validation.constraints.Email
-import pt.isel.daw.gomoku.domain.users.UserStatistics
+import jakarta.validation.constraints.Size
 
 const val MIN_USERNAME_LENGTH = 3
 const val MAX_USERNAME_LENGTH = 40
@@ -47,13 +46,13 @@ class UserCreateOutputModel(
 )
 
 class UserGetByIdOutputModel(
-    val id: Int,
+    val uid: Int,
     val username: String,
     val email: String
 )
 
 class UserStatsOutputModel(
-    val id: Int,
+    val uid: Int,
     val username: String,
     val gamesPlayed: Int,
     val wins: Int,
@@ -63,7 +62,7 @@ class UserStatsOutputModel(
 )
 
 class UserHomeOutputModel(
-    val id: Int,
+    val uid: Int,
     val username: String,
     val message: String = "Welcome Player! Lets play."
 )

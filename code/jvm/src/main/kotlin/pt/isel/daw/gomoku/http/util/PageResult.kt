@@ -12,7 +12,7 @@ data class PageResult<T>(
     companion object {
         private const val PAGE_SIZE = 20
         fun <T> toPage(objects: Collection<T>, page: Int): PageResult<T> {
-            val from = page * PAGE_SIZE
+            val from = (page - 1) * PAGE_SIZE
             var content: List<T> = emptyList()
             if (from < objects.size) {
                 var to = from + PAGE_SIZE
@@ -21,8 +21,8 @@ data class PageResult<T>(
             }
             val lastPage = (objects.size / PAGE_SIZE.toFloat()).toInt()
             val nextPage = if (page < lastPage) page + 1 else null
-            val previousPage = if (page > 0) page - 1 else null
-            val firstPage = if (page > 0) 0 else null
+            val previousPage = if (page > 1) page - 1 else null
+            val firstPage = if (page > 1) 1 else null
             return PageResult(
                 content,
                 nextPage,

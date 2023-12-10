@@ -1,901 +1,1822 @@
 # Server 
 
-**Description** : Local server of a gomoku game 
-**URL**: http://localhost:8080
+**Description** : 
 
-
+- The server application runs local on **URL**: http://localhost:8080
+- All the responses have *`application/vnd.siren+json`* as content-type
+	for more information about the Siren format go to: https://github.com/kevinswiber/siren
 
 # Home
 
 **Description**: HTTP API requests for all types of users, authenticated or not, to retrieve system information and statistic information.
 
-### Get System Info
-Retrieve information about the Gomoku game system.
+#
+# Get System Info
+	Retrieve information about the Gomoku game system.
 
 **Endpoint:** `/api/system`
+
  **Method:** GET
 
-**Response Example:**
+**Success Response Example:**
 
 ```json
 	{
-
-		"systemInfo": "Gomoku Game",
-
-		"systemAuthors": "Gonçalo Frutuoso and Daniel Carvalho",
-
-		"systemVersion": "0.1.0"
-
+		"class": [
+			"system-info"
+		],
+		"properties": {
+			"systemInfo": "Gomoku Royale",
+			"systemAuthors": "Gonçalo Frutuoso and Daniel Carvalho",
+			"systemVersion": "0.1.3"
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/system"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/home"
+				],
+				"href": "/api"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/auth-home"
+				],
+				"href": "/api/me"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			false
+		]
 	}
 ```
-### Get Home Page (Unauthenticated User)
+#
+# Get Home Page (Unauthenticated User)
 
-Retrieve the home page for unauthenticated users.
+	Retrieve the home page for unauthenticated users and the link 
+	recipe to all the important URIs.
 
-**Endpoint:** `/api` 
+**Endpoint:** `/api`
+
 **Method:** GET
 
-**Response Example:**
+
+**Success Response Example:**
 ```json
-{
-	"message": "Welcome to Gomoku! Please log in to play."
-}
+		{
+		"class": [
+			"home"
+		],
+		"properties": {
+			"message": "Welcome to Gomoku Royale! Please log in to play."
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/home"
+				],
+				"href": "/api"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/system-info"
+				],
+				"href": "/api/system"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/ranking-info"
+				],
+				"href": "/api/ranking?page=0"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/auth-home"
+				],
+				"href": "/api/me"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/matchmaking"
+				],
+				"href": "/api/games/matchmaking"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-matchmaking-status"
+				],
+				"href": "/api/games/matchmaking/%7Bmid%7D/status"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/exit-matchmaking-queue"
+				],
+				"href": "/api/games/matchmaking/%7Bmid%7D/exit"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-games"
+				],
+				"href": "/api/games"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-games-by-user"
+				],
+				"href": "/api/games/user/%7Buid%7D"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-by-id"
+				],
+				"href": "/api/users/%7Buid%7D"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
+				],
+				"href": "/api/stats/%7Buid%7D"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
+				],
+				"href": "/api/stats/username?name"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/update-user"
+				],
+				"href": "/api/users/update"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/logout"
+				],
+				"href": "/api/logout"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+				],
+				"href": "/api/games/%7Bgid%7D"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/play"
+				],
+				"href": "/api/games/%7Bgid%7D/play"
+			},
+			{	
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/leave"
+				],
+				"href": "/api/games/%7Bgid%7D/leave"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/login"
+				],
+				"href": "/api/users/token"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/create-a-user"
+				],
+				"href": "/api/users"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-variants"
+				],
+				"href": "/api/games/variants"
+			}
+		],
+		"entities": [],
+		"actions": [
+			{
+				"name": "register",
+				"href": "/api/users",
+				"method": "POST",
+				"type": "application/x-www-form-urlencoded",
+				"fields": [
+					{
+						"name": "username",
+						"type": "text",
+						"value": null
+					},
+					{
+						"name": "email",
+						"type": "text",
+						"value": null
+					},
+					{
+						"name": "password",
+						"type": "text",
+						"value": null
+					}
+				],
+				"requireAuth": [
+					false
+				]
+			},
+			{
+				"name": "login",
+				"href": "/api/users/token",
+				"method": "POST",
+				"type": "application/x-www-form-urlencoded",
+				"fields": [
+					{
+						"name": "username",
+						"type": "text",
+						"value": null
+					},
+					{
+						"name": "password",
+						"type": "text",
+						"value": null
+					}
+				],
+				"requireAuth": [
+					false
+				]
+			}
+		],
+		"requireAuth": [
+			false
+		]
+	}
 ```
 
+#
 # Users
 
 **Description**: HTTP API requests to create authenticated users and perform others functionalities for the same type of users
 
-### Create User
+#
+# Create User
 
-Create a new user to be able to play Gomoku.
+	Create a new user to be able to play Gomoku.
 
 **Endpoint:** `/api/users`
- **Method:** POST
 
-- **Success**	
-	- **First Example**:
-	**Request Example:**
-		```json
-		{
-
-			"email": "backfire@gmail.com",
-
-			"username": "backfire",
-
-			"password": "Abacat345"
-
-		}
-		```
-	
-		**Header location Example**: 
-	/api/users/6
-	- **Second Example**:
-	 **Request Example:**
-		```json
-		{
-			"email": "deluxe@gmail.com",
-
-			"username": "deluxe",
-
-			"password": "Inthemorning123"
-		}
-		```
-		**Header location Example**: 
-	/api/users/7
-
-- **Failure**
-		- Insecure password
-		- User already exists
-		- Insecure email
-
-### Create Token
-
-Create an authentication token for a user.
-
-**Endpoint:** `/api/users/token`
- **Method:** POST
-- **Success**
-	- **First Example**:
-		**Request Example:**
-		```json
-		{
-
-			"username": "backfire",
-
-			"password": "Abacat345"
-
-		}
-		```
-
-		**Response Example**: 
-		```json
-		{
-
-			"token": "-SRA222bPYTSs8yohzTG3Tq24IJ43NgBHIBEXxj948k="
-
-		}
-		```
-
-	- **Second Example**:
-	**Request Example:**
-		```json
-		{
-
-			"username": "deluxe",
-
-			"password": "Inthemorning123"
-
-		}
-		```
-
-		**Response Example**:  
-		```json
-		{
-
-			"token": "zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s="
-
-		}
-		```
-- **Failure**
-	- User or password are invalid 
-
-### Logout 
-Log out a user and invalidate their token.
-
-**Endpoint:** `/api/users/logout` 
 **Method:** POST
-
-**Authorization Bearer token Example:**
-zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
-
-### Get User by ID
-
-Retrieve user information by their ID.
-
-**Endpoint:** `/api/users/{userId}` 
-**Method:** GET
-
-**Parameters:**
--   `userId` (integer, path) - The ID of the user 
-e.g: {userId} = 4.
-
-- **Success**
-**Response Example:**
-	```json
-	{
-
-		"id": 7,
-
-		"email": "deluxe@gmail.com",
-
-		"username": "deluxe",
-
-	}
-	```
-- **Failure**
-	- User does not exist
-	- Invalid token
-	- Token expired
-	-  User is not authenticated
-
-#### Get Home Page with User Login
-
-Retrieve the home page with user login for authenticated users.
-
-**Endpoint:** `/api/me` 
-**Method:** GET
-
-**Authorization Bearer token Example:**
-zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
-
-**Response Example:**
-```json
-{
-
-	"id": 7,
-
-	"username": "deluxe"
-
-}
-```
-
-#### Get Stats Page of User by Id
-
-Retrieve the stats page of a user by his Id.
-
-**Endpoint:** `/api/stats/{userId}` 
-**Method:** GET
-**Parameter** 
--   `userId` (integer, path) - The ID of the user 
-e.g: {userId} = 7.
-
-**Authorization Bearer token Example:**
-zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
-
-**Response Example:**
-```json
-{
-
-	"id": 7,
-
-	"username": "deluxe",
-
-	"gamesPlayed": 0,
-
-	"wins": 0,
-
-	"losses": 0,
-
-	"rank": 0,
-
-	"points": 0
-
-}
-```
-
-#### Get Ranking Info Page of all Users
-
-Retrieve the ranking page of all users.
-
-**Endpoint:** `/api/ranking` 
-**Method:** GET
-
-**Response Example:**
-```json
-{
-	"rankingTable": [
-
-{
-
-	"rank": 1,
-
-	"username": "jcbackfire",
-
-	"points": 48
-
-	},
-
-	{
-
-	"rank": 2,
-
-	"username": "mrdeluxe",
-
-	"points": 12
-
-	},
-
-	{
-
-	"rank": 3,
-
-	"username": "alice",
-
-	"points": 0
-
-	},
-
-	{
-
-	"rank": 4,
-
-	"username": "bob",
-
-	"points": 0
-
-	},
-
-	{
-
-	"rank": 5,
-
-	"username": "charlie",
-
-	"points": 0
-
-	}
-
-	]
-}
-```
-
-# Game
-
-### Create Game 
-
-Create a gomoku game between two users.
-
-**Endpoint:** `/api/games` 
-**Method:** POST
-
-**Authorization Bearer token Example:**
-zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 **Request Example:**
 ```json
-{	
-	"userBlack": 6,
-
-	"userWhite": 7,
-
-	"variant": "STANDARD"
-
-}
+		{	
+			"email": "backfire@gmail.com",
+			"username": "backfire",
+			"password": "Abacat345"
+		}
 ```
-
-**Success**:
-**Header location example:**
-/api/games/2
+**Success Response Example:**
+```json
+	{
+		"class": [
+			"register"
+		],
+		"properties": {
+			"uid": 133
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/users"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			false
+		]
+	}
+```
+	
+**Response Header location**: /api/users/133
 
 **Failure**
-- Game already exists
-- User does not exists
-- Variant does not exists
+- Insecure password
+- User already exists
+- Insecure email
 
-### Get Game Info by Id
+#
+# Create Token
 
-Retrieve information about a specific Gomoku game by its ID.
+	Create an authentication token for a user.
+	If request is made by a browser, the token is returned 
+	as a cookie as well the username.
 
-**Endpoint:** `/api/games/{gameId}` 
+**Endpoint:** `/api/users/token`
+
+**Method:** POST
+
+**Request Example:**
+```json
+	{
+		"username": "backfire",
+		"password": "Abacat345"
+	}
+```
+
+**SuccessResponse Example**: 
+```json
+	{
+		"class": [
+			"login"
+		],
+		"properties": {
+			"token": "dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o="
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/users/token"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			false
+		]
+	}
+```
+**Failure**
+- User or password are invalid 
+
+#
+# Logout 
+
+	Log out a user and invalidate their token.
+
+**Endpoint:** `/api/users/logout` 
+
+**Method:** POST
+
+**Request Example with authorization Bearer token:** dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
+
+**Success Response Example:**
+```json
+	{
+		"class": [
+				"logout"
+		],
+		"properties": {
+			"message": "Token dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o= revoked. Logout succeeded"
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/logout"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
+	}
+```
+
+**Failure**
+- Token not revoked
+- Authorization token is invalid
+
+#
+## Get User by ID
+
+	Retrieve user information by their ID.
+
+**Endpoint:** `/api/users/{uid}` 
 **Method:** GET
 
 **Parameters:**
--   `gameId` (integer, path) - The ID of the game. = 2
+- `uid` (integer, path) - The ID of the user 
+- if not passed, the user id will be the one of the authenticated user
+- e.g: {uid} = 1.
+
+**Success Response Example:**
+  ```json
+      {
+           "class": [
+                  "user"
+           ],
+          "properties": {
+                  "id": 1,
+                  "username": "alice",
+                  "email": "alicepereira@gmail.com"
+          },
+          "links": [
+              {
+                  "rel": [
+                      "self"
+                  ],
+                  "href": "/api/users/1"
+              }
+          ],
+          "entities": [],
+          "actions": [
+              {
+                  "name": "update-user",
+                  "href": "/api/users/update",
+                  "method": "PUT",
+                  "type": "application/x-www-form-urlencoded",
+                  "fields": [
+                      {
+                          "name": "username",
+                          "type": "text",
+                          "value": null
+                      },
+                      {
+                          "name": "email",
+                          "type": "text",
+                          "value": null
+                      },
+                      {
+                          "name": "password",
+                          "type": "text",
+                          "value": null
+                      }
+                  ]
+              }
+          ],
+          "requireAuth": [
+                  true
+          ]
+      }
+  ```
+**Failure**
+- User does not exist
+- Authorization token is invalid
+
+#
+## Get Home Page with User Login
+
+	Retrieve the home page with user login for authenticated users.
+
+**Endpoint:** `/api/me` 
+
+**Method:** GET
 
 **Authorization Bearer token Example:**
-zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
-**Success**:
-**Response Example:**
+dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
+
+**Success Response Example:**
 ```json
-{
-
-	"game": {
-
-		"id": 2,
-
-		"board": {
-
-			"moves": {},
-
-			"turn": "BLACK",
-
-			"variant": "STANDARD",
-
-			"maxMoves": 225
-
-		},
-
-		"userBlack": {
-
-			"id": {
-
-				"value": 6
-
-			},
-
+	{
+		"class": [
+			"user-home"
+		],
+		"properties": {
+			"id": 133,
 			"username": "backfire",
-
-				"email": {
-
-				"value": "backfire@gmail.com"
-
-			},
-
-			"passwordValidation": {
-
-				"validationInfo": "$2a$10$TZ1h3WMi4fhixpn3haexIu9vbx.1OH2k7l5QkwkLaSttEZrwRQBNS"
-
-			}
-
+			"message": "Welcome Player! Lets play."
 		},
-
-		"userWhite": {
-
-			"id": {
-
-				"value": 7
-
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/me"
 			},
-
-				"username": "deluxe",
-
-				"email": {
-
-				"value": "deluxe@gmail.com"
-
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/system-info"
+				],
+				"href": "/api/system"
 			},
-
-			"passwordValidation": {
-
-				"validationInfo": "$2a$10$BU6.Qjm8DkrvbnNKxG34KOdT.wsKSECfiId3lyCfaCUwHRECrZmG."
-
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/ranking-info"
+				],
+				"href": "/api/ranking?page=0"
 			}
-
-		}
+		],
+		"entities": [],
+		"actions": [
+			{
+				"name": "matchmaking",
+				"href": "/api/games/matchmaking",
+				"method": "POST",
+				"type": "application/x-www-form-urlencoded",
+				"fields": [
+					{
+						"name": "uid",
+						"type": "hidden",
+						"value": "133"
+					},
+					{
+						"name": "variant",
+						"type": "text",
+						"value": null
+					}
+				],
+				"requireAuth": [
+					true
+				]
+			},
+			{
+				"name": "logout",
+				"href": "/api/logout",
+				"method": "POST",
+				"type": "application/json",
+				"fields": [],
+				"requireAuth": [
+					true
+				]
+			}
+		],
+		"requireAuth": [
+				true
+		]
 	}
+```
 
-}
+**Failure**
+- Authorization token is invalid
+
+#
+### Get Stats Page of User by Id
+	Retrieve the stats page of a user by his Id.
+
+**Endpoint:** `/api/stats/{uid}` 
+
+**Method:** GET
+**Parameter** 
+-   `uid` (integer, path) - The ID of the user 
+- if not passed, the user id will be the one of the authenticated user
+- e.g: {uid} = 7.
+
+**Authorization Bearer token Example:**
+dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
+
+**Success Response Example:**
+```json
+	{
+		"class": [
+			"user-statistics"
+		],
+		"properties": {
+			"id": 7,
+			"username": "user-1412827057457771723",
+			"gamesPlayed": 0,
+			"wins": 0,
+			"losses": 0,
+			"rank": 7,
+			"points": 0
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/stats/7"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-games-by-user"
+				],
+				"href": "/api/games/user/7"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			false
+		]
+	}
+```
+
+**Failure**
+- User does not exist
+- Stats of user does not exist
+
+#
+# Get Ranking Info Page of all Users
+
+	Retrieve the ranking page of all users. Each page contains 20 users.
+
+**Endpoint:** `/api/ranking?page={page}` 
+
+**Method:** GET
+
+**Success Response Example:**
+```json
+	{
+		"class": [
+			"ranking-info"
+		],
+		"properties": {
+			"page": 0,
+			"pageSize": 20
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/ranking?page=0"
+			},
+			{
+				"rel": [
+					"last"
+				],
+				"href": "/api/ranking?page=0"
+			}
+		],
+		"entities": [
+			{
+				"clazz": [
+					"user-statistics"
+				],
+				"properties": {
+					"id": 13,
+					"username": "user-1489691534341247057",
+					"gamesPlayed": 1,
+					"wins": 1,
+					"losses": 0,
+					"rank": 1,
+					"points": 110
+				},
+				"links": [
+					{
+						"rel": [
+							"self"
+						],
+						"href": "/api/stats/13"
+					}
+				],
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
+				],
+				"requireAuth": [
+					false
+				]
+			},
+			{
+				"clazz": [
+					"user-statistics"
+				],
+				"properties": {
+					"id": 1,
+					"username": "alice",
+					"gamesPlayed": 1,
+					"wins": 0,
+					"losses": 0,
+					"rank": 2,
+					"points": 0
+				},
+				"links": [
+					{
+						"rel": [
+							"self"
+						],
+						"href": "/api/stats/1"
+					}
+				],
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
+				],
+				"requireAuth": [
+					false
+				]
+			},
+			{
+				"clazz": [
+					"user-statistics"
+				],
+				"properties": {
+					"id": 2,
+					"username": "bob",
+					"gamesPlayed": 1,
+					"wins": 0,
+					"losses": 0,
+					"rank": 3,
+					"points": 0
+				},
+				"links": [
+					{
+						"rel": [
+							"self"
+						],
+						"href": "/api/stats/2"
+					}
+				],
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
+				],
+				"requireAuth": [
+					false
+				]
+			},
+			"..."
+		],
+		"actions": [],
+		"requireAuth": [
+			false
+		]
+	}
+```
+
+**Failure**
+- Ranking does not exist
+- Invalid page
+
+#
+# Update User
+
+	Update the information of a user.
+	Can update the username, email and password.
+
+**Endpoint:** `/api/users/update`
+
+**Method:** PUT
+
+**Request Example:**
+```json
+    {
+  		"username": "backfire",
+		"email": "backfire@gmail.com",
+		"password": "Abnasmdka345"
+	}
+```
+
+**Authorization Bearer token Example:** dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
+
+**Success Response Example:**
+```json
+	{
+		
+	}
+```
+
+**Failure**
+- User does not exist
+- Authorization token is invalid
+- Insecure email
+- Insecure password
+
+#
+# Get User Stats by Username
+
+	Retrieve the stats page of a user by his username.
+	
+**Endpoint:** `/api/stats/username/{name}`
+
+**Method:** GET
+
+**Parameters:**
+- `name` (string, path) - The username of the user
+- e.g: {name} = alice
+
+**Success Response Example:**
+```json
+	{
+		"class": [
+			"user-statistics"
+		],
+		"properties": {
+			"uid": 1,
+			"username": "alice",
+			"gamesPlayed": 1,
+			"wins": 0,
+			"losses": 0,
+			"rank": 78,
+			"points": 0
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/stats/username/alice"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-games-by-user"
+				],
+				"href": "/api/games/user/1"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			false
+		]
+	}
+```
+**Failure**
+- User does not exist
+- Stats of user does not exist
+
+#
+# Game
+
+**Description**: HTTP API requests to create games, enter matchmaking ,play rounds and get information about the games.
+
+### Get Game Info by Id
+
+	Retrieve information about a specific Gomoku game by its ID.
+
+**Endpoint:** `/api/games/{gid}` 
+
+**Method:** GET
+
+**Parameters:**
+-   `gid` (integer, path) - The ID of the game. 
+- e.g: {gid} = 2
+
+**Authorization Bearer token Example:** dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
+
+**Success Response Example:**
+```json
+	 {
+		"class": [
+			"game"
+		],
+		"properties": {
+			"game": {
+				"id": 2,
+				"board": {
+					"moves": {},
+					"turn": "BLACK"
+				},
+				"userBlack": {
+					"id": {
+						"value": 8
+					},
+					"username": "user-3273650057670013291",
+					"email": {
+						"value": "email-3765094180298157455@test.com"
+					},
+					"passwordValidation": {
+						"validationInfo": "$2a$10$TMGrBD5aP6pUfUIu5BHq.umRCRFZWx.y.n7U5k0MaZzf3RgB2x5a."
+					}
+				},
+				"userWhite": {
+					"id": {
+						"value": 9
+					},
+					"username": "user-3773754256422436144",
+					"email": {
+						"value": "email-2852595943512092003@test.com"
+					},
+					"passwordValidation": {
+						"validationInfo": "$2a$10$rqubWPTlzEDRRzOGhg3UTuWutwyAbySmF39F87cOqHvf7sZsxPGI6"
+					}
+				},
+				"state": "NEXT_PLAYER_BLACK",
+				"variant": {
+					"name": "STANDARD",
+					"boardDim": 15,
+					"playRule": "STANDARD",
+					"openingRule": "STANDARD",
+					"points": 110
+				},
+				"created": "2023-12-08T20:30:41Z"
+			},
+			"pollingTimOut": 3000
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games/2"
+			}
+		],
+		"entities": [],
+		"actions": [
+			{
+				"name": "play",
+				"href": "/api/games/2/play",
+				"method": "POST",
+				"type": "application/x-www-form-urlencoded",
+				"fields": [
+					{
+						"name": "row",
+						"type": "number",
+						"value": null
+					},
+					{
+						"name": "column",
+						"type": "number",
+						"value": null
+					}
+				],
+				"requireAuth": [
+					true
+				]
+			},
+			{
+				"name": "leave-game",
+				"href": "/api/games/2/leave",
+				"method": "PUT",
+				"type": "application/json",
+				"fields": [],
+				"requireAuth": [
+					true
+				]
+			}
+		],
+		"requireAuth": [
+			true
+		]
+	}
 ```
 
 **Failure**
 - Game does not exist
+- Authorization token is invalid
 
-### Play a Round
+#
+# Play a Round
 
-Make a move in the Gomoku game.
+	Make a move in the Gomoku game.
 
-**Endpoint:** `/api/games/{gameId}/play` 
+**Endpoint:** `/api/games/{gid}/play` 
+
 **Method:** PUT
 
 **Parameters:**
 
--   `gameId` (integer, path) - The ID of the game.
-e.g: {gameId}: 2
+- `gid` (integer, path) - The ID of the game.
+- e.g: {gid}: 51
 
-- **Success**
-	- **First Request Example**
-		**Request example**
-		```json
-		{
-
-				"userId": 6,
-
-				"column": 3,
-
-				"row": 3
-
-		}
-		```
+**First Request Example**
+```json
+	{
+		"column": 3,
+		"row": 3
+	}
+```
 	
-		**Authorization Bearer token Example:**
-		-SRA222bPYTSs8yohzTG3Tq24IJ43NgBHIBEXxj948k=
+**Authorization Bearer token Example:** dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
-		**Response example**
-		```json
-		{
+**Success Response example**
+```json
+	{
+		"class": [
+			"play"
+		],
+		"properties": {
 			"game": {
-
-			"id": 2,
-
-			"board": {
-
-			"moves": {
-
-			"3D": "BLACK"
-
+				"id": 51,
+				"board": {
+					"moves": {
+						"3D": "BLACK"
+					},
+					"turn": "WHITE"
+				},
+				"userBlack": {
+					"id": {
+						"value": 134
+					},
+					"username": "world",
+					"email": {
+						"value": "hello@gmail.com"
+					},
+					"passwordValidation": {
+					"validationInfo": "$2a$10$3rdLevKFqK.gpGxoVgDG/.zZho7cv15M7obSjgB4VrH9f5pJhofg6"
+					}
+				},
+				"userWhite": {
+					"id": {
+						"value": 133
+					},
+					"username": "backfire",
+					"email": {
+						"value": "backfire@gmail.com"
+					},
+					"passwordValidation": {
+						"validationInfo": "$2a$10$hnwigk1HMn5fGcqUGRaEr.UHrIDpBa2IVZX863L.ZBbPsqWLJ0r3a"
+					}
+				},
+				"state": "NEXT_PLAYER_BLACK",
+				"variant": {
+					"name": "STANDARD",
+					"boardDim": 15,
+					"playRule": "STANDARD",
+					"openingRule": "STANDARD",
+					"points": 110
+				},
+				"created": "2023-12-09T23:13:06Z"
 			},
-
-			"turn": "WHITE",
-
-			"variant": "STANDARD",
-
-			"maxMoves": 225
-
-			},
-
-			"userBlack": {
-
-			"id": {
-
-			"value": 6
-
-			},
-
-			"username": "backfire",
-
-			"email": {
-
-			"value": "backfire@gmail.com"
-
-			},
-
-			"passwordValidation": {
-
-			"validationInfo": "$2a$10$TZ1h3WMi4fhixpn3haexIu9vbx.1OH2k7l5QkwkLaSttEZrwRQBNS"
-
-			}
-
-			},
-
-			"userWhite": {
-
-			"id": {
-
-			"value": 7
-
-			},
-
-			"username": "deluxe",
-
-			"email": {
-
-			"value": "deluxe@gmail.com"
-
-			},
-
-			"passwordValidation": {
-
-			"validationInfo": "$2a$10$BU6.Qjm8DkrvbnNKxG34KOdT.wsKSECfiId3lyCfaCUwHRECrZmG."
-
-			}
-
-			}
-
-			},
-
-			"state": "NEXT_PLAYER_WHITE"
-		}
-		```
-	- **First Request Example**
-		**Request example**
-		```json
-		{
-
-				"userId": 7,
-
-				"column": 2,
-
-				"row": 1
-
-		}
-		```
-	
-		**Authorization Bearer token Example:**
-		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
-
-		**Response example**
-		```json
-		{
-			"game": {
-
-			"id": 2,
-
-			"board": {
-
-			"moves": {
-
-			"2B": "WHITE"
-
-			},
-
-			"turn": "BLACK",
-
-			"variant": "STANDARD",
-
-			"maxMoves": 225
-
-			},
-
-			"userBlack": {
-
-			"id": {
-
-			"value": 6
-
-			},
-
-			"username": "backfire",
-
-			"email": {
-
-			"value": "backfire@gmail.com"
-
-			},
-
-			"passwordValidation": {
-
-			"validationInfo": "$2a$10$TZ1h3WMi4fhixpn3haexIu9vbx.1OH2k7l5QkwkLaSttEZrwRQBNS"
-
-			}
-
-			},
-
-			"userWhite": {
-
-			"id": {
-
-			"value": 7
-
-			},
-
-			"username": "deluxe",
-
-			"email": {
-
-			"value": "deluxe@gmail.com"
-
-			},
-
-			"passwordValidation": {
-
-			"validationInfo": "$2a$10$BU6.Qjm8DkrvbnNKxG34KOdT.wsKSECfiId3lyCfaCUwHRECrZmG."
-
-			}
-
-			}
-
-			},
-
 			"state": "NEXT_PLAYER_BLACK"
-		}
-		```
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games/51/play"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+				],
+				"href": "/api/games/51"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]	
+	}
+```
+
+**Second Request Example**
+```json
+    {
+       	 "column": 2,
+		 "row": 1
+	}
+```
+	
+**Authorization Bearer token Example:**
+        zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+
+**Success Response example**
+```json
+    {
+		"class": [
+			"play"
+		],
+		"properties": {
+			"game": {
+				"id": 51,
+				"board": {
+					"moves": {
+						"3D": "BLACK",
+						"1C": "WHITE"
+					},
+					"turn": "BLACK"
+				},
+				"userBlack": {
+					"id": {
+						"value": 134
+					},
+					"username": "world",
+					"email": {
+						"value": "hello@gmail.com"
+					},
+					"passwordValidation": {
+						"validationInfo": "$2a$10$3rdLevKFqK.gpGxoVgDG/.zZho7cv15M7obSjgB4VrH9f5pJhofg6"
+					}
+				},
+				"userWhite": {
+					"id": {
+						"value": 133
+					},
+					"username": "backfire",
+					"email": {
+						"value": "backfire@gmail.com"
+					},
+					"passwordValidation": {
+						"validationInfo": "$2a$10$hnwigk1HMn5fGcqUGRaEr.UHrIDpBa2IVZX863L.ZBbPsqWLJ0r3a"
+					}
+				},
+				"state": "NEXT_PLAYER_BLACK",
+				"variant": {
+					"name": "STANDARD",
+					"boardDim": 15,
+					"playRule": "STANDARD",
+					"openingRule": "STANDARD",
+					"points": 110
+				},
+				"created": "2023-12-09T23:13:06Z"
+			},
+			"state": "NEXT_PLAYER_BLACK"
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games/51/play"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+				],
+				"href": "/api/games/51"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
+	}
+```
 		
-- **Failures**
-	- Game does not exist
-	- Invalid User
-	- Invalid State
-	- Invalid Time
-	- Invalid Turn
-	- Invalid Position
+**Failures**
+- Game does not exist
+- Invalid User
+- Invalid State
+- Invalid Time
+- Invalid Turn
+- Invalid Position
+- Authorization token is invalid
 
 
-### Get All Games By User
-Get all games by a user Id.
+### Get All Games By User Page
+	Get a page with all the games of a user. Each page contains 20 games.
 
-**Endpoint:** `/api/games/user` 
+**Endpoint:** `/api/games/user/{uid}?page={page}` 
 **Method:** GET
 
-- **Success**
+**Parameters:**
+- `uid` (integer, path) - The ID of the user.
+-  if not passed, the user id will be the one of the authenticated user
+-  e.g: {uid} = 13
 	
-	**Authorization Bearer token Example:**
-		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+**Authorization Bearer token Example:** zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
-	**Response example**
-		
-	```json
+**Success Response example**
+```json
 		{
-			"games": [
-
-			{
-
-			"id": 2,
-
-			"board": {
-
-			"moves": {
-
-			"3D": "BLACK"
-
+			"class": [
+				"game-list-of-user"
+			],
+			"properties": {
+				"uid": 13,
+				"page": 1,
+				"pageSize": 20
 			},
-
-			"turn": "WHITE",
-
-			"variant": "STANDARD",
-
-			"maxMoves": 225
-
-			},
-
-			"userBlack": {
-
-			"id": {
-
-			"value": 6
-
-			},
-
-			"username": "backfire",
-
-			"email": {
-
-			"value": "backfire@gmail.com"
-
-			},
-
-			"passwordValidation": {
-
-			"validationInfo": "$2a$10$TZ1h3WMi4fhixpn3haexIu9vbx.1OH2k7l5QkwkLaSttEZrwRQBNS"
-
-			}
-
-			},
-
-			"userWhite": {
-
-			"id": {
-
-			"value": 7
-
-			},
-
-			"username": "deluxe",
-
-			"email": {
-
-			"value": "deluxe@gmail.com"
-
-			},
-
-			"passwordValidation": {
-
-			"validationInfo": "$2a$10$BU6.Qjm8DkrvbnNKxG34KOdT.wsKSECfiId3lyCfaCUwHRECrZmG."
-
-			}
-
-			}
-
-			}
-
+			"links": [
+				{
+					"rel": [
+						"self"
+					],
+					"href": "/api/games/user/13?page=1"
+				},
+				{
+					"rel": [
+						"last"
+					],
+					"href": "/api/games/user/13?page=0"
+				}
+			],
+			"entities": [
+				{
+					"clazz": [
+						"game"
+					],
+					"properties": {
+						"id": 4,
+						"board": {
+							"moves": {
+								"1B": "BLACK"
+							},
+							"winner": "WHITE"
+						},
+						"userBlack": {
+							"id": {
+								"value": 12
+							},
+							"username": "user-3902351303747100599",
+							"email": {
+								"value": "email-1124265068213431992@test.com"
+							},
+							"passwordValidation": {
+								"validationInfo": "$2a$10$uLTovN1ou3Vr84R9FcHg1OBRtZGvTNzY91UecTqIzagw1cNs7fdVi"
+							}
+						},
+						"userWhite": {
+							"id": {
+								"value": 13
+							},
+							"username": "user-1489691534341247057",
+							"email": {
+								"value": "email-2586148888159197119@test.com"
+							},
+							"passwordValidation": {
+								"validationInfo": "$2a$10$/ewkZsnuqin/L/W5C.n6Funa/s71MmMJA/lJ.1I7FHDNWgaAwdobS"
+							}
+						},
+						"state": "PLAYER_WHITE_WON",
+						"variant": {
+							"name": "STANDARD",
+							"boardDim": 15,
+							"playRule": "STANDARD",
+							"openingRule": "STANDARD",
+							"points": 110
+						},
+						"created": "2023-12-08T20:30:43Z"
+					},
+					"links": [
+						{
+							"rel": [
+								"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+							],
+							"href": "/api/games/4"
+						}
+					],
+					"rel": [
+						"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+					],
+					"requireAuth": [
+						true
+					]
+				}
+			],
+			"actions": [],
+			"requireAuth": [
+				true
 			]
 		}
-	```
+```
 		
-- **Failures**
-	- User does not exists
+**Failures**
+- User does not exists
+- Game not found
+- Authorization token is invalid
 
-### Get All Games 
-Get all gomoku games.
+#
+# Get All Games 
+	Get a page with all games ever made in gomoku. Each page contains 20 games.
 
-**Endpoint:** `/api/games` 
+**Endpoint:** `/api/games?page={page}` 
+
 **Method:** GET
 
-- **Success**
-		**Response example**
-	```json
-		{
-			"game": {
+**Authorization Bearer token Example:** zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
-			"id": 2,
-
-			"board": {
-
-			"moves": {
-
-			"3D": "BLACK"
-
+**SuccessResponse example**
+```json
+	{
+		"class": [
+			"game-list"
+		],
+		"properties": {
+			"page": 1,
+			"pageSize": 20
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games?page=1"
 			},
-
-			"turn": "WHITE",
-
-			"variant": "STANDARD",
-
-			"maxMoves": 225
-
+			{
+				"rel": [
+					"next"
+				],
+				"href": "/api/games?page=2"
 			},
-
-			"userBlack": {
-
-			"id": {
-
-			"value": 6
-
-			},
-
-			"username": "backfire",
-
-			"email": {
-
-			"value": "backfire@gmail.com"
-
-			},
-
-			"passwordValidation": {
-
-			"validationInfo": "$2a$10$TZ1h3WMi4fhixpn3haexIu9vbx.1OH2k7l5QkwkLaSttEZrwRQBNS"
-
+			{
+				"rel": [
+					"last"
+				],
+				"href": "/api/games?page=2"
 			}
-
+		],
+		"entities": [
+			{
+				"clazz": [
+					"game"
+				],
+				"properties": {
+					"id": 50,
+					"board": {
+						"moves": {
+							"1B": "BLACK"
+						},
+						"turn": "WHITE"
+					},
+					"userBlack": {
+						"id": {
+							"value": 113
+						},
+						"username": "user-8308787776620469888",
+						"email": {
+							"value": "email-795825740530440591@test.com"
+						},
+						"passwordValidation": {
+							"validationInfo": "$2a$10$PuiBAR4FdJlXEXWWuikpR.T6P9j8UawLIz/7QVzqEWBpL48K1EXny"
+						}
+					},
+					"userWhite": {
+						"id": {
+							"value": 112
+						},
+						"username": "user-1099048709064103996",
+						"email": {
+							"value": "email-1642238726093648339@test.com"
+						},
+						"passwordValidation": {
+							"validationInfo": "$2a$10$4LkDbEJPv/I/GwBhOIh9buriNiYQz6/jZ4o56FolW.IlTTg9jqTq2"
+						}
+					},
+					"state": "NEXT_PLAYER_WHITE",
+					"variant": {
+						"name": "STANDARD",
+						"boardDim": 15,
+						"playRule": "STANDARD",
+						"openingRule": "STANDARD",
+						"points": 110
+					},
+					"created": "2023-12-08T23:25:09Z"
+				},
+				"links": [
+					{
+						"rel": [
+							"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+						],
+						"href": "/api/games/50"
+					}
+				],
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+				],
+				"requireAuth": [
+					true
+				]
 			},
-
-			"userWhite": {
-
-			"id": {
-
-			"value": 7
-
+			{
+				"clazz": [
+					"game"
+				],
+				"properties": {
+					"id": 49,
+					"board": {
+						"moves": {
+							"1B": "BLACK"
+						},
+						"turn": "WHITE"
+					},
+					"userBlack": {
+						"id": {
+							"value": 111
+						},
+						"username": "user-248295855920547322",
+						"email": {
+							"value": "email-2386282122637424199@test.com"
+						},
+						"passwordValidation": {
+							"validationInfo": "$2a$10$OfHYbzue4mIZFXKDLhz/QOOdN.Zn06LZdrD0OIh3LTHBU6qGCm3nm"
+						}
+					},
+					"userWhite": {
+						"id": {
+							"value": 110
+						},
+						"username": "user-6838309380964837008",
+						"email": {
+							"value": "email-6391751316540922375@test.com"
+						},
+						"passwordValidation": {
+							"validationInfo": "$2a$10$3Ho/MRITWKP35wgREnnIjeXh0fXyKhZtZBAfILdU.CJAdHMlOrcfe"
+						}
+					},
+					"state": "NEXT_PLAYER_WHITE",
+					"variant": {
+						"name": "STANDARD",
+						"boardDim": 15,
+						"playRule": "STANDARD",
+						"openingRule": "STANDARD",
+						"points": 110
+					},
+					"created": "2023-12-08T23:25:07Z"
+				},
+				"links": [
+					{
+						"rel": [
+							"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+						],
+						"href": "/api/games/49"
+					}
+				],
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+				],
+				"requireAuth": [
+					true
+				]
 			},
-
-			"username": "deluxe",
-
-			"email": {
-
-			"value": "deluxe@gmail.com"
-
+			{
+				"clazz": [
+					"game"
+				],
+				"properties": {
+					"id": 48,
+					"board": {
+						"moves": {
+							"1B": "BLACK"
+						},
+						"turn": "WHITE"
+					},
+					"userBlack": {
+						"id": {
+							"value": 109
+						},
+						"username": "user-8810124594880709527",
+						"email": {
+							"value": "email-6615536679771616680@test.com"
+						},
+						"passwordValidation": {
+							"validationInfo": "$2a$10$GaqSArpecoRAXCN.6qX4L.uoX401xQHn9abHFpPFAy05ec6snLbSO"
+						}
+					},
+					"userWhite": {
+						"id": {
+							"value": 108
+						},
+						"username": "user-6905392365555344835",
+						"email": {
+							"value": "email-5272107337195305591@test.com"
+						},
+						"passwordValidation": {
+							"validationInfo": "$2a$10$XS.ohTQohZ3PUfaVNGOk4emOgBYL.b2wsKM95Hr2q8aBpFngU3Br2"
+						}
+					},
+					"state": "NEXT_PLAYER_WHITE",
+					"variant": {
+						"name": "STANDARD",
+						"boardDim": 15,
+						"playRule": "STANDARD",
+						"openingRule": "STANDARD",
+						"points": 110
+					},
+					"created": "2023-12-08T23:25:05Z"
+				},
+				"links": [
+					{
+						"rel": [
+							"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+						],
+						"href": "/api/games/48"
+					}
+				],
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+				],
+				"requireAuth": [
+					true
+				]
 			},
+			"..."
+		],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
+	}
+```
 
-			"passwordValidation": {
+**Failures**
+- Game does not exist
+- Invalid page
+- Authorization token is invalid
 
-			"validationInfo": "$2a$10$BU6.Qjm8DkrvbnNKxG34KOdT.wsKSECfiId3lyCfaCUwHRECrZmG."
+#
+# Leave Game
+	Leave the game by it's Id .
 
-			}
+**Endpoint:** `/api/games/{gid}/leave` 
 
-			}
-
-			},
-
-			"state": "NEXT_PLAYER_WHITE"
-		}
-	```
-
-### Leave Game
-Leave the game by it's Id .
-
-**Endpoint:** `/api/games/{gameId}/leave` 
 **Method:** PUT
 
-**Authorization Bearer token Example:**
-		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+**Parameters:**
+- `gid` (integer, path) - The ID of the game.
+- e.g: {gid} = 51
+
+**Authorization Bearer token Example:** zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+
+**Success Response example**
+```json
+	{
+		"class": [
+			"leave-game"
+		],
+		"properties": {
+			"message": "User world left the game"
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games/52/leave"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
+	}
+```
 
 **Failures**
 - Game already ended
-- Game does not exists
+- Game does not exist
 - Invalid user
+- Authorization token is invalid
 
+#
+# Matchmaking
+	Enter or create a lobby of a game.
 
+**Endpoint:** `/api/games/matchmaking`
 
-### Matchmaking
-Enter or create a lobby of a game.
-
-**Endpoint:** `/api/games/matchmaking` 
 **Method:** POST
 
-**Authorization Bearer token Example:**
-		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
-**First Example**	
-- **Request Example**
+**First Request Example**
 ```json
-{
-	"userId": 6, 
-	"variant": "STANDARD"
-}
+	{
+		"variant": "STANDARD"
+	}
 ```
-- **Response Example**
-	Status code: 404 -> No lobby have been found
 
-**Second Example**	
-- **Request Example**
+**Authorization Bearer token Example:** dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
+
+
+**Success Response Example**
+```json
+	{
+		"class": [
+			"matchmaking"
+		],
+		"properties": {
+			"message": "User on waiting queue",
+			"idType": "mid",
+			"mid": 47
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games/matchmaking"
+			}
+		],
+		"entities": [],
+		"actions": [
+			{
+				"name": "leave-matchmaking",
+				"href": "/api/games/matchmaking/47/exit",
+				"method": "DELETE",
+				"type": "application/json",
+				"fields": [],
+				"requireAuth": [
+					true
+				]
+			}
+		],
+		"requireAuth": [
+			true
+		]
+    }
+```
+**Second Request Example**
 ```json
 {
-	"userId": 7, 
 	"variant": "STANDARD"
 }
 ```
-- **Header location Example**: 
-	/api/games/1
+
+**Authorization Bearer token Example:** zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+
+**Success Response Example**
+```json
+	{
+		"class": [
+			"matchmaking"
+		],
+		"properties": {
+			"message": "Match found",
+			"idType": "gid",
+			"id": 51
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games/51"
+			},
+			{
+				"rel": [
+					"https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
+				],
+				"href": "/api/games/51"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
+	}
+```
 
 **Failures**
 - Invalid User
 - Variant does not exists
-- Match not found
+- User already in matchmaking
+- Authorization token is invalid
 
-### Exit Matchmaking
-Exit a matchmaking.
+#
+# Exit Matchmaking
+	Exit a matchmaking.
 
-**Endpoint:** `/api/games/matchmaking/exit` 
+**Endpoint:** `/api/games/matchmaking/{mid}/exit` 
 **Method:** DEL
 
+**Parameters:**
+- `mid` (integer, path) - The ID of the matchmaking.
+- e.g: {mid} = 48
+
 **Authorization Bearer token Example:**
-		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+	dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
+
+**Success Response Example**
+```json
+	{
+		"class": [
+			"leave-matchmaking"
+		],
+		"properties": {
+			"message": "User world left matchmaking queue"
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				], 
+				"href": "/api/games/matchmaking/48/exit"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
+	}	
+```
 
 **Failures**
 - Invalid User
 - Match not found
+- Authorization token is invalid
 
-### Matchmaking
-Enter on a matchmaking to enter a game.
+#
+# Matchmaking Status
+	Get the status of a matchmaking.
 
-**Endpoint:** `/api/games/matchmaking` 
-**Method:** POST
+**Endpoint:** `/api/games/matchmaking/{mid}/status` 
+
+**Method:** GET
+
+**Parameters:**
+-   `mid` (integer, path) - The ID of the matchmaking.
+-   e.g: {mid} = 48
 
 **Authorization Bearer token Example:**
 		zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
+
 **Response Example**
 ```json 
 	{
-	
-		"status": "MATCHED"
-	
+		"class": [
+			"matchmaking-status"
+		],
+		"properties": {
+			"mid": 47,
+			"uid": 133,
+			"gid": 51,
+			"state": "MATCHED",
+			"variant": "STANDARD",
+			"created": "2023-12-09T23:10:55Z",
+			"pollingTimOut": 3000
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games/matchmaking/47/status"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
 	}
 ```
 
 **Failures**
 - Invalid User
 - Match not found
+- Authorization token is invalid
 
+#
+# Get All Variants
+	Get all the variants of the game.
 
+**Endpoint:** `/api/games/variants`
 
+**Method:** GET
 
-	
+**Success Response Example**
+```json
+	{
+		"class": [
+			"variant-list"
+		],
+		"properties": {
+			"variants": [
+				{
+					"name": "STANDARD",
+					"boardDim": 15,
+					"playRule": "STANDARD",
+					"openingRule": "STANDARD",
+					"points": 110
+				},
+				{
+					"name": "SWAP",
+					"boardDim": 15,
+					"playRule": "STANDARD",
+					"openingRule": "SWAP",
+					"points": 140
+				},
+				{
+					"name": "RENJU",
+					"boardDim": 15,
+					"playRule": "THREE_AND_THREE",
+					"openingRule": "STANDARD",
+					"points": 150
+				},
+				{
+					"name": "CARO",
+					"boardDim": 15,
+					"playRule": "STANDARD",
+					"openingRule": "STANDARD",
+					"points": 120
+				},
+				{
+					"name": "PENTE",
+					"boardDim": 19,
+					"playRule": "STANDARD",
+					"openingRule": "STANDARD",
+					"points": 130
+				},
+				{
+					"name": "OMOK",
+					"boardDim": 19,
+					"playRule": "THREE_AND_THREE",
+					"openingRule": "STANDARD",
+					"points": 170
+				},
+				{
+					"name": "NINUKI_RENJU",
+					"boardDim": 15,
+					"playRule": "THREE_AND_THREE",
+					"openingRule": "STANDARD",
+					"points": 160
+				}
+			]
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/games/variants"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
+	}
+```
 
-
+**Failures**
+- Variants not found
+- Authorization token is invalid

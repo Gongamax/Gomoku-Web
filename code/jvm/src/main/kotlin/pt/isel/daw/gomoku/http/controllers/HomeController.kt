@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriTemplate
 import pt.isel.daw.gomoku.http.media.siren.siren
-import pt.isel.daw.gomoku.http.model.*
+import pt.isel.daw.gomoku.http.model.HomeOutputModel
+import pt.isel.daw.gomoku.http.model.SystemInfoOutputModel
 import pt.isel.daw.gomoku.http.util.Rels
 import pt.isel.daw.gomoku.http.util.Uris
 import java.net.URI
@@ -32,7 +33,7 @@ class HomeController {
             link(Uris.home(), Rels.SELF)
             link(Uris.home(), Rels.HOME)
             link(Uris.systemInfo(), Rels.SYSTEM_INFO)
-            link(URI(Uris.Users.RANKING_INFO + "?page=0" ), Rels.RANKING_INFO)
+            link(URI(Uris.Users.RANKING_INFO + "?page=1" ), Rels.RANKING_INFO)
             link(URI(Uris.Users.AUTH_HOME), Rels.AUTH_HOME)
             link(URI(Uris.Games.MATCHMAKING), Rels.MATCHMAKING)
             link(UriTemplate(Uris.Games.GET_MATCHMAKING_STATUS).expand("{mid}"), Rels.MATCHMAKING_STATUS)

@@ -1,7 +1,6 @@
 package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
-import kotlinx.datetime.Clock
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -152,7 +151,7 @@ class UsersController(
                     HttpMethod.POST,
                     "application/x-www-form-urlencoded"
                 ) {
-                    hiddenField("userId", authenticatedUser.user.id.value.toString())
+                    hiddenField("uid", authenticatedUser.user.id.value.toString())
                     textField("variant")
                     requireAuth(true)
                 }
@@ -169,14 +168,14 @@ class UsersController(
         )
 
     @GetMapping(Uris.Users.RANKING_INFO)
-    fun getRankingInfo(@RequestParam page: String): ResponseEntity<*> =
-        when (val res = userService.getRanking(PositiveValue(page.toInt()))) {
+    fun getRankingInfo(@RequestParam(name = "page", defaultValue = "1") page: Int): ResponseEntity<*> =
+        when (val res = userService.getRanking(PositiveValue(page))) {
             is Success -> ResponseEntity.ok()
                 .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                 .body(
                     siren(
                         RankingInfoOutputModel(
-                            page.toInt(),
+                            page,
                             res.value.pageSize
                         )
                     ) {
@@ -219,8 +218,8 @@ class UsersController(
         }
 
     @GetMapping(Uris.Users.GET_STATS_BY_USERNAME)
-    fun getStatsByUsername(@RequestParam username: String): ResponseEntity<*> =
-        when (val stats = userService.getUserStatsByUsername(username)) {
+    fun getStatsByUsername(@PathVariable name: String): ResponseEntity<*> =
+        when (val stats = userService.getUserStatsByUsername(name)) {
             is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     UserStatsOutputModel(
@@ -234,7 +233,7 @@ class UsersController(
                     )
                 ) {
                     clazz("user-statistics")
-                    link(URI(Uris.Users.GET_STATS_BY_USERNAME + "?username=" + username), Rels.SELF)
+                    link(Uris.Users.getStatsByUsername(name), Rels.SELF)
                     link(Uris.Games.getAllGamesByUser(stats.value.user.id.value), Rels.GET_ALL_GAMES_BY_USER)
                     requireAuth(false)
                 }
@@ -243,20 +242,20 @@ class UsersController(
             is Failure ->
                 when (stats.value) {
                     UserStatsError.UserDoesNotExist -> Problem.userDoesNotExists(
-                        URI(Uris.Users.GET_STATS_BY_USERNAME + "?username=" + username),
-                        username
+                        Uris.Users.getStatsByUsername(name),
+                        name
                     )
 
                     UserStatsError.UserStatsDoesNotExist -> Problem.statsNotFound(
-                        URI(Uris.Users.GET_STATS_BY_USERNAME + "?username=" + username),
-                        username
+                        Uris.Users.getStatsByUsername(name),
+                        name
                     )
                 }
         }
 
 
     @GetMapping(Uris.Users.GET_STATS_BY_ID)
-    fun getStatsById(@PathVariable uid: Int, authenticatedUser: AuthenticatedUser): ResponseEntity<*> =
+    fun getStatsById(@PathVariable uid: Int): ResponseEntity<*> =
         when (val stats = userService.getUserStatsById(uid)) {
             is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(

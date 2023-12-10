@@ -1,17 +1,9 @@
 package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
-import kotlinx.datetime.Instant
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import pt.isel.daw.gomoku.domain.users.AuthenticatedUser
 import pt.isel.daw.gomoku.http.media.Problem
 import pt.isel.daw.gomoku.http.media.siren.SirenModel
@@ -23,6 +15,7 @@ import pt.isel.daw.gomoku.services.games.*
 import pt.isel.daw.gomoku.utils.Failure
 import pt.isel.daw.gomoku.utils.PositiveValue
 import pt.isel.daw.gomoku.utils.Success
+import java.net.URI
 
 @RestController
 class GameController(
@@ -49,7 +42,7 @@ class GameController(
                             ),
                             game.value.created.toString()
                         ),
-                        Instant.fromEpochMilliseconds(3000)
+                        3000
                     )
                 ) {
                     clazz("game")
@@ -220,7 +213,7 @@ class GameController(
                         res.value.status.toString(),
                         res.value.variant,
                         res.value.created.toString(),
-                        5000
+                        3000
                     )
                 ) {
                     clazz("matchmaking-status")
@@ -248,7 +241,7 @@ class GameController(
         return when (val res = gameService.exitMatchmakingQueue(mid, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
-                    "User left matchmaking queue"
+                    ExitMatchmakingOrLeaveGameOutputModel("User ${authenticatedUser.user.username} left matchmaking queue")
                 ) {
                     clazz("leave-matchmaking")
                     link(Uris.Games.exitMatchmakingQueue(mid), Rels.SELF)
@@ -271,8 +264,8 @@ class GameController(
     }
 
     @GetMapping(Uris.Games.GET_ALL_GAMES)
-    fun getAllGames(@RequestParam page: String): ResponseEntity<*> =
-        when (val games = gameService.getAll(PositiveValue(page.toInt()))) {
+    fun getAllGames(@RequestParam(name = "page", defaultValue = "1") page: Int): ResponseEntity<*> =
+        when (val games = gameService.getAll(PositiveValue(page))) {
             is Failure ->
                 Problem(
                     typeUri = Problem.gamesNotFound,
@@ -286,12 +279,12 @@ class GameController(
                 ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                     siren(
                         GameGetAllOutputModel(
-                            page.toInt(),
+                            page,
                             games.value.pageSize
                         )
                     ) {
                         clazz("game-list")
-                        link(Uris.Games.getAllGames(), Rels.SELF)
+                        link(URI(Uris.Games.getAllGames().toASCIIString() + "?page=" + page), Rels.SELF)
                         games.value.content.forEach { game ->
                             entity(
                                 GameOutputModel(
@@ -307,7 +300,7 @@ class GameController(
                                         game.variant.openingRule.toString(),
                                         game.variant.points
                                     ),
-                                    game.created.toString(),
+                                    game.created.toString()
                                 ),
                                 Rels.GAME
                             ) {
@@ -316,6 +309,16 @@ class GameController(
                                 requireAuth(true)
                             }
                         }
+                        if (games.value.firstPage != null)
+                            link(URI(Uris.Games.GET_ALL_GAMES + "?page=" + games.value.firstPage), Rels.FIRST)
+
+                        if (games.value.previousPage != null)
+                            link(URI(Uris.Games.GET_ALL_GAMES + "?page=" + games.value.previousPage), Rels.PREVIOUS)
+
+                        if (games.value.nextPage != null)
+                            link(URI(Uris.Games.GET_ALL_GAMES + "?page=" + games.value.nextPage), Rels.NEXT)
+
+                        link(URI(Uris.Games.GET_ALL_GAMES + "?page=" + games.value.lastPage), Rels.LAST)
                         requireAuth(true)
                     }
                 )
@@ -327,7 +330,7 @@ class GameController(
         return when (val res = gameService.leaveGame(gid, authenticatedUser.user.id.value)) {
             is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
-                    "User can leave the game"
+                    ExitMatchmakingOrLeaveGameOutputModel("User ${authenticatedUser.user.username} left the game")
                 ) {
                     clazz("leave-game")
                     link(Uris.Games.leave(gid), Rels.SELF)
@@ -354,23 +357,22 @@ class GameController(
     fun getAllGamesByUser(
         authenticatedUser: AuthenticatedUser,
         @PathVariable uid: String?,
-        @RequestParam page: String
+        @RequestParam(name = "page", defaultValue = "1") page: Int
     ): ResponseEntity<*> {
+        val id = uid?.toInt() ?: authenticatedUser.user.id.value
         return when (
-            val games = gameService.getGamesOfUser(
-                uid?.toInt() ?: authenticatedUser.user.id.value, PositiveValue(page.toInt())
-            )
+            val games = gameService.getGamesOfUser(id, PositiveValue(page))
         ) {
             is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     GameGetAllByUserOutputModel(
-                        uid?.toInt() ?: authenticatedUser.user.id.value,
-                        page.toInt(),
+                        id,
+                        page,
                         games.value.pageSize
                     )
                 ) {
                     clazz("game-list-of-user")
-                    link(Uris.Games.getAllGamesByUser(uid?.toInt() ?: authenticatedUser.user.id.value), Rels.SELF)
+                    link(URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + page), Rels.SELF)
                     games.value.content.forEach { game ->
                         entity(
                             GameOutputModel(
@@ -386,7 +388,7 @@ class GameController(
                                     game.variant.openingRule.toString(),
                                     game.variant.points
                                 ),
-                                game.created.toString(),
+                                game.created.toString()
                             ),
                             Rels.GAME
                         ) {
@@ -395,22 +397,28 @@ class GameController(
                             requireAuth(true)
                         }
                     }
+                    if (games.value.firstPage != null)
+                        link(URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + games.value.firstPage), Rels.FIRST)
+
+                    if (games.value.previousPage != null)
+                        link(URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + games.value.previousPage), Rels.PREVIOUS)
+
+                    if (games.value.nextPage != null)
+                        link(URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + games.value.nextPage), Rels.NEXT)
+
+                    link(URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + games.value.lastPage), Rels.LAST)
                     requireAuth(true)
                 }
             )
 
             is Failure -> when (games.value) {
                 GameListError.UserDoesNotExist -> Problem.userDoesNotExists(
-                    instance = Uris.Games.getAllGamesByUser(
-                        uid?.toInt() ?: authenticatedUser.user.id.value
-                    ),
-                    uid = uid?.toInt() ?: authenticatedUser.user.id.value
+                    instance = Uris.Games.getAllGamesByUser(id),
+                    uid = id
                 )
 
                 GameListError.GamesNotFound -> Problem.gamesNotFound(
-                    instance = Uris.Games.getAllGamesByUser(
-                        uid?.toInt() ?: authenticatedUser.user.id.value
-                    )
+                    instance = Uris.Games.getAllGamesByUser(id)
                 )
             }
         }
