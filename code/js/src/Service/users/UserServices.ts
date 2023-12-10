@@ -6,51 +6,75 @@ import { LoginOutput } from './models/LoginOutput';
 import { LogoutOutput } from './models/LogoutOutput';
 import { RegisterOutput } from './models/RegisterOutput';
 import { GetStatsOutput } from './models/GetStatsOutput';
+import {linkRecipe} from "../../index";
+import { HomeRecipeRelations } from '../home/HomeRecipeRelations';
 
 const httpService = new HTTPService();
 
 export async function register(username: string, email: string, password: string): Promise<RegisterOutput> {
-  return await httpService.post<RegisterOutput>(
-    '/api/users',
-    JSON.stringify({
-      username,
-      email,
-      password,
-    }),
-  );
+    const path: string = (await linkRecipe)
+        .find((recipe) => recipe.rel === HomeRecipeRelations.REGISTER).href;
+    return await httpService.post<RegisterOutput>(
+        path,
+        JSON.stringify({
+            username,
+            email,
+            password,
+        }),
+    );
 }
 
 export async function login(username: string, password: string): Promise<LoginOutput> {
-  return await httpService.post<LoginOutput>(
-    '/api/users/token',
-    JSON.stringify({
-      username,
-      password,
-    }),
-  );
+    const path: string = (await linkRecipe)
+            .find((recipe) => recipe.rel === HomeRecipeRelations.LOGIN).href;
+    return await httpService.post<LoginOutput>(
+        path,
+        JSON.stringify({
+            username,
+            password,
+        }),
+    );
 }
 
 export async function logout(): Promise<LogoutOutput> {
-  return await httpService.post<LogoutOutput>('/api/logout');
+    const path: string = (await linkRecipe)
+        .find((recipe) => recipe.rel === HomeRecipeRelations.LOGOUT).href;
+    return await httpService.post<LogoutOutput>(path);
 }
 
 export async function getUser(id: number): Promise<GetUserOutput> {
-  return await httpService.get<GetUserOutput>(`/api/users/${id}`);
+  const path: string = (await linkRecipe)
+      .find((recipe) => recipe.rel === HomeRecipeRelations.USER).href
+      .replace('{uid}', id.toString());
+  return await httpService.get<GetUserOutput>(path);
 }
 
 export async function getUserHome(): Promise<GetUserHomeOutput> {
-  return await httpService.get<GetUserHomeOutput>(`/api/me`);
+    const path: string = (await linkRecipe)
+        .find((recipe) => recipe.rel === HomeRecipeRelations.AUTH_HOME).href;
+    return await httpService.get<GetUserHomeOutput>(path);
 }
 
 export async function getRanking(page?: number): Promise<GetRankingOutput> {
-  return await httpService.get<GetRankingOutput>(`/api/ranking?page=${page}`);
+    let path: string = (await linkRecipe)
+        .find((recipe) => recipe.rel === HomeRecipeRelations.RANKING_INFO).href;
+    if (page) {
+        path = path.replace('1', page.toString());
+    }
+    return await httpService.get<GetRankingOutput>(path);
 }
 
 export async function getStatsByUsername(username: string): Promise<GetStatsOutput> {
-  return await httpService.get<GetStatsOutput>(`/api/stats/username/${username}`)
+    const path: string = (await linkRecipe)
+        .find((recipe) => recipe.rel === HomeRecipeRelations.USER_STATS_BY_USERNAME).href
+        .replace('{name}', username);
+    return await httpService.get<GetStatsOutput>(path)
 }
 
 export async function getStatsById(id: number): Promise<GetStatsOutput> {
-  return await httpService.get<GetStatsOutput>(`/api/stats/${id}`);
+    const path: string = (await linkRecipe)
+        .find((recipe) => recipe.rel === HomeRecipeRelations.USER_STATS).href
+        .replace('{uid}', id.toString());
+  return await httpService.get<GetStatsOutput>(path);
 }
 

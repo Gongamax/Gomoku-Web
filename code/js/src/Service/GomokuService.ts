@@ -11,5 +11,5 @@ type HomeOutput = SirenModel<HomeOutputModel>;
     @return {Promise<HomeOutput>} The home page request
 */
 export async function getHome(): Promise<HomeOutput> {
-    return await httpService.get<HomeOutput>('/');
+    return await httpService.get<HomeOutput>('/api');
 }

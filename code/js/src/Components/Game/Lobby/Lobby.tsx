@@ -29,7 +29,7 @@ type State =
 
 type Action =
   | { type: 'loadSuccess'; username: string; points: number; variants: string[] }
-  | { type: 'selectVariant'; selectedVariant: string }
+  | { type: 'selectVariant'; selectedVariant: string, username: string, points: number }
   | { type: 'initiateMatchmaking'; response: { id: number; idType: string } }
   | { type: 'loadError'; message: string };
 
@@ -71,8 +71,8 @@ const reduce = (state: State, action: Action): State => {
           tag: 'edit',
           selectedVariant: action.selectedVariant,
           variants: state.variants,
-          username: '', // Add username with a default value
-          points: 0, // Add points with a default value
+          username: action.username, // Add username with a default value
+          points: action.points, // Add points with a default value
         };
       } else if (action.type === 'initiateMatchmaking') {
         return { tag: 'redirect', id: action.response.id, idType: action.response.idType };
@@ -111,9 +111,9 @@ export function LobbyPage() {
     });
   }, [currentUser]);
 
-  const handleVariantSelect = (selectedVariant: string) => {
+  const handleVariantSelect = (selectedVariant: string, username:string, points:number) => {
     setSelectedVariant(selectedVariant);
-    dispatch({ type: 'selectVariant', selectedVariant });
+    dispatch({ type: 'selectVariant', selectedVariant, username: username, points: points });
   };
 
   async function handleMatchmaking() {
@@ -130,13 +130,15 @@ export function LobbyPage() {
       return <div>Loading...</div>;
 
     case 'present':
+      dispatch({ type: 'selectVariant', selectedVariant, username: state.username, points: state.points })
       return (
         <div>
           <h1>Lobby</h1>
           <p>Username: {state.username}</p>
           <p>Points: {state.points}</p>
           <p>Choose a Game Variant:</p>
-          {state.variants.map((variant, index) => (
+          {
+          state.variants.map((variant, index) => (
             <div key={index}>
               <input
                 type="radio"
@@ -144,7 +146,7 @@ export function LobbyPage() {
                 name="variants"
                 value={variant}
                 checked={selectedVariant === variant}
-                onChange={() => handleVariantSelect(variant)}
+                onChange={() => handleVariantSelect(variant, state.username, state.points)}
               />
               <label htmlFor={`radio-${index}`}>{variant}</label>
             </div>
@@ -168,7 +170,7 @@ export function LobbyPage() {
                 name="variants"
                 value={variant}
                 checked={selectedVariant === variant}
-                onChange={() => handleVariantSelect(variant)}
+                onChange={() => handleVariantSelect(variant, state.username, state.points)}
               />
               <label htmlFor={`radio-${index}`}>{variant}</label>
             </div>

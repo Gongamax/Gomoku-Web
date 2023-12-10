@@ -1,4 +1,4 @@
-enum HomeRecipeRelations {
+export enum HomeRecipeRelations {
   HOME = 'home',
   SYSTEM_INFO = 'system-info',
   REGISTER = 'create-a-user',
@@ -8,6 +8,7 @@ enum HomeRecipeRelations {
   AUTH_HOME = 'auth-home',
   RANKING_INFO = 'ranking-info',
   USER_STATS = 'get-user-stats',
+  USER_STATS_BY_USERNAME = 'get-user-stats-by-username',
   UPDATE_USER = 'update-user',
   GAME = 'get-game-by-id',
   PLAY = 'play',
