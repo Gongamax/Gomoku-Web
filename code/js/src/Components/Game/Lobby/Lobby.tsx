@@ -175,14 +175,24 @@ export function LobbyPage() {
       );
 
     case 'redirect':
-      // Redirect logic based on state.gameId and state.idType
+      if (state.idType === 'gid')
+        return (
+          <div>
+            <p>Redirecting...</p>
+            {/* Navigate to game page*/}
+            <Navigate to={`/game/${state.id}`} replace={true} />
+          </div>
+        );
+      else if (state.idType === 'mid')
       return (
         <div>
           <p>Redirecting...</p>
-          {/* Navigate to matchmaking page for now*/}
+          {/* Navigate to matchmaking page*/}
           <Navigate to={`/matchmaking/${state.id}`} replace={true} />
         </div>
       );
+      else
+        return <div>Unexpected idType</div>;
 
     default:
       return <div>Unexpected state</div>;

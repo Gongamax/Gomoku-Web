@@ -42,11 +42,15 @@ export async function getUserHome(): Promise<GetUserHomeOutput> {
   return await httpService.get<GetUserHomeOutput>(`/api/me`);
 }
 
-export async function getRanking(page:number): Promise<GetRankingOutput> {
-  return await httpService.get<GetRankingOutput>(`/api/users/ranking?page=${page}`);
+export async function getRanking(page?: number): Promise<GetRankingOutput> {
+  return await httpService.get<GetRankingOutput>(`/api/ranking?page=${page}`);
 }
 
 export async function getStatsByUsername(username: string): Promise<GetStatsOutput> {
-  return await httpService.get<GetStatsOutput>(`/api/stats/username?username=${username}`); //CHANGE THIS ON API TO PATH PARAM
+  return await httpService.get<GetStatsOutput>(`/api/stats/username/${username}`)
+}
+
+export async function getStatsById(id: number): Promise<GetStatsOutput> {
+  return await httpService.get<GetStatsOutput>(`/api/stats/${id}`);
 }
 

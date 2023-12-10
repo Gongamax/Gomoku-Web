@@ -131,7 +131,7 @@ class GameServiceTests {
     }
 
     @Test
-    fun `create a game and play a round then leave a game`() {
+    fun `create a game and play a round then leave a game and check if user games was updated`() {
         //given: a game service and a user service to create users
         val testClock = TestClock()
         val gamesService = createGamesService(testClock)
@@ -191,12 +191,20 @@ class GameServiceTests {
         // then: check the winner
         assertTrue { gameByIdAfterLeave.state == Game.State.PLAYER_WHITE_WON }
 
-        //then: check if points were added
+        //then: check if points were added and games played were updated
         val whiteStats = when(val whiteStats = usersService.getUserStatsById(game.playerWHITE.id.value)) {
             is Either.Left -> fail("Failed to get user stats for $whiteStats")
             is Either.Right -> whiteStats.value
         }
         assertTrue { whiteStats.points > 0 }
+        assertTrue { whiteStats.gamesPlayed > 0 }
+
+        //then: check if games of user were updated
+        val gamesOfUser = when(val gamesOfUser = gamesService.getGamesOfUser(game.playerWHITE.id.value, PositiveValue(1))) {
+            is Either.Left -> fail("Failed to get games of user for $gamesOfUser")
+            is Either.Right -> gamesOfUser.value
+        }
+        assertTrue { gamesOfUser.content.isNotEmpty() }
     }
 
     @Test

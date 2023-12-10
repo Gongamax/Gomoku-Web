@@ -1,3 +1,5 @@
+import { problemMediaType } from './media/Problem';
+
 /**
  * HTTPService is a class that provides methods to make HTTP requests.
  * It includes methods for GET, POST, PUT, and DELETE requests.
@@ -30,7 +32,7 @@ export class HTTPService {
 
     if (!response.ok) {
       // Check if response is a Problem, not definitive solution
-      if (response.headers.get('Content-Type')?.includes('application/problem+json')) {
+      if (response.headers.get('Content-Type')?.includes(problemMediaType)) {
         const problem = await response.json();
         throw new Error(problem.detail);
       } else throw new Error(`HTTP error! Status: ${response.status}`);

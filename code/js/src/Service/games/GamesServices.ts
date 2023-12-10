@@ -34,8 +34,8 @@ const httpService = new HTTPService();
     return await httpService.put<SurrenderGameOutput>(`/api/games/${gid}/leave`);
   }
 
-  export async function getAllGamesByUser(uid: number): Promise<GetAllGamesByUserOutput> {
-    return await httpService.get<GetAllGamesByUserOutput>(`/api/games/user/${uid}`);
+  export async function getAllGamesByUser(uid: number, page? : number): Promise<GetAllGamesByUserOutput> {
+    return await httpService.get<GetAllGamesByUserOutput>(`/api/games/user/${uid}?page=${page}`);
   }
 
   export async function getVariantList(): Promise<GetVariantsOutput> {

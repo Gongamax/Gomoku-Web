@@ -50,6 +50,7 @@ export function Login() {
   console.log('Login');
   const [state, dispatch] = React.useReducer(reduce, { tag: 'editing', inputs: { username: '', password: '' } });
   const setUser = useSetUser();
+  // const [showPassword, setShowPassword] = React.useState(false);
   const location = useLocation();
   if (state.tag === 'redirect') {
     return <Navigate to={location.state?.source?.pathname || '/me'} replace={true} />;

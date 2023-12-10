@@ -12,7 +12,8 @@ import { RequireAuthn } from './Components/Authentication/RequireAuthn';
 import { Me } from './Components/Home/Me';
 import { NavBarWrapper } from './Layout/NavBar';
 import { AuthnContainer } from './Components/Authentication/Authn';
-import {GamePage} from "./Components/Game/GamePlay/Game";
+import { GamePage } from './Components/Game/GamePlay/Game';
+import { MatchHistory } from './Components/Profile/MatchHistory';
 
 export function App() {
   return (
@@ -29,25 +30,23 @@ const router = createBrowserRouter([
       {
         'path': '/',
         'element': <HomePage />,
+      },
+      {
+        'path': '/users/:uid',
+        'element': <RequireAuthn><ProfilePage /></RequireAuthn>,
         'children': [
+          // {
+          //   'path': 'edit',
+          //   'element': <p>Edit</p>,
+          // },
           {
-            'path': '/users/:uid',
-            'element': <ProfilePage />,
-            'children': [
-              // {
-              //   'path': 'edit',
-              //   'element': <p>Edit</p>,
-              // },
-              // {
-              //   'path': 'history',
-              //   'element': <p>UserHistory</p>,
-              // },
-              // {
-              //   'path': 'stats',
-              //   'element': <p>UserStats</p>,
-              // },
-            ],
+            'path': 'history',
+            'element': <MatchHistory />,
           },
+          // {
+          //   'path': 'stats',
+          //   'element': <p>UserStats</p>,
+          // },
         ],
       },
       {
@@ -79,8 +78,8 @@ const router = createBrowserRouter([
         'element': <RankingPage />,
       },
       {
-            'path': '/game:gameId',
-            'element': <RequireAuthn><GamePage/></RequireAuthn>,
+        'path': '/game:gameId',
+        'element': <RequireAuthn><GamePage /></RequireAuthn>,
       },
     ],
   },

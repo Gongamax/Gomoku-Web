@@ -1,13 +1,8 @@
 import { SirenModel } from "../../media/siren/SirenModel"
 
 type RankingEntry = {
-    id : number,
-    username: string,
-    gamesPlayed: number,
-    wins: number,
-    losses: number,
-    points: number,
-    rank: number
+    page: number,
+    pageSize: number
 }
 
 interface RankingInfoOutputModel {

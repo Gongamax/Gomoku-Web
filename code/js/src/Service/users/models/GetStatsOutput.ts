@@ -1,7 +1,7 @@
 import { SirenModel } from "../../media/siren/SirenModel"
 
-interface UserStatsOutputModel {
-    id : number;
+export interface UserStatsOutputModel {
+    uid : number;
     username : string;
     gamesPlayed : number;
     wins : number;

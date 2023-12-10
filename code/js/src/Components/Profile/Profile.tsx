@@ -1,22 +1,27 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { getStatsByUsername } from '../../Service/users/UserServices';
+import { Link, Outlet, useParams } from 'react-router-dom';
+import { getStatsById } from '../../Service/users/UserServices';
 
 type UserInfo = {
   username: string;
   wins: number;
   losses: number;
-  //draws: number;
+  draws: number;
   gamesPlayed: number;
-  //matchHistory: { opponent: string; result: string }[];
 };
+
+type Match = {
+  opponent: string;
+  result: string;
+}
 
 type State = { tag: 'loading' } | { tag: 'presenting'; userInfo: UserInfo } | { tag: 'error'; message: string };
 
 type Action =
   | { type: 'startLoading' }
   | { type: 'loadSuccess'; userInfo: UserInfo }
+  | { type: 'loadMatchHistory'; matchHistory: Match[] }
   | { type: 'loadError'; message: string };
 
 const logUnexpectedAction = (state: State, action: Action) => {
@@ -50,11 +55,12 @@ export function ProfilePage() {
     async function fetchData() {
       try {
         dispatch({ type: 'startLoading' });
-        const userResponse = await getStatsByUsername(uid);
+        const userResponse = await getStatsById(Number(uid));
         const userInfo = {
           username: userResponse.properties.username,
           wins: userResponse.properties.wins,
           losses: userResponse.properties.losses,
+          draws: userResponse.properties.gamesPlayed - (userResponse.properties.wins + userResponse.properties.losses),
           gamesPlayed: userResponse.properties.gamesPlayed,
         };
         dispatch({ type: 'loadSuccess', userInfo });
@@ -63,7 +69,7 @@ export function ProfilePage() {
       }
     }
 
-    fetchData().then(r => console.log(r));
+    fetchData();
   }, [uid]);
 
   switch (state.tag) {
@@ -76,17 +82,12 @@ export function ProfilePage() {
           <h1>User Profile: {state.userInfo.username}</h1>
           <p>Wins: {state.userInfo.wins}</p>
           <p>Losses: {state.userInfo.losses}</p>
-          {/*<p>Draws: {state.userInfo.draws}</p>*/}
+          <p>Draws: {state.userInfo.draws}</p>
           <p>Games Played: {state.userInfo.gamesPlayed}</p>
 
-          <h2>Match History</h2>
-          {/*<ul>*/}
-          {/*  {state.userInfo.matchHistory.map((match, index) => (*/}
-          {/*    <li key={index}>*/}
-          {/*      Opponent: {match.opponent}, Result: {match.result}*/}
-          {/*    </li>*/}
-          {/*  ))}*/}
-          {/*</ul>*/}
+          {/* Button to link to match history */}
+          <button><Link to="history">Match History</Link></button>
+          <Outlet />
         </div>
       );
 

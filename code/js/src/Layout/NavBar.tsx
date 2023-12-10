@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useLoggedIn } from '../Components/Authentication/RequireAuthn';
 import { logout } from '../Service/users/UserServices';
+import { useSetUser } from '../Components/Authentication/Authn';
 
 function NavBar() {
   const navStyle = {
@@ -30,7 +31,15 @@ function NavBar() {
     textDecoration: 'none',
   };
 
+  const navigate = useNavigate();
   const loggedIn = useLoggedIn();
+  const setUser = useSetUser();
+
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
+    navigate('/');
+  }
 
   return (
     <nav style={navStyle}>
@@ -41,9 +50,9 @@ function NavBar() {
         {loggedIn ? (
           <>
             <li style={liStyle}><Link to="/lobby" style={linkStyle}>Lobby</Link></li>
-            <li style={liStyle}><Link to="/profile" style={linkStyle}>Profile</Link></li>
+            {/*<li style={liStyle}><Link to="/profile" style={linkStyle}>Profile</Link></li>*/}
             <li style={liStyle}>
-              <button onClick={logout} style={linkStyle}>Logout</button>
+              <button onClick={handleLogout} style={linkStyle}>Logout</button>
             </li>
           </>
         ) : (

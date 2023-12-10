@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSetUser } from './Authn';
 import { register } from '../../Service/users/UserServices';
 
 type State =
@@ -62,11 +61,10 @@ export function Register() {
     tag: 'editing',
     inputs: { username: '', password: '', confirmPassword: '', email: '' },
   });
-  const setUser = useSetUser();
   const location = useLocation();
   if (state.tag === 'redirect') {
     // Redirect to a specific page after successful registration
-    return <Navigate to={location.state?.source?.pathname || '/me'} replace={true} />;
+    return <Navigate to={location.state?.from || '/login'} replace={true} />;
   }
 
   function handleChange(ev: React.FormEvent<HTMLInputElement>) {
@@ -82,11 +80,9 @@ export function Register() {
     dispatch({ type: 'submit' });
     const { username, password, email } = state.inputs;
 
-    register(username, password, email)
+    register(username, email, password)
       .then(res => {
         if (res) {
-          console.log(`setUser(${res})`);
-          setUser(username);
           dispatch({ type: 'success' });
         } else {
           dispatch({ type: 'error', message: 'Registration failed. Please try again.' });

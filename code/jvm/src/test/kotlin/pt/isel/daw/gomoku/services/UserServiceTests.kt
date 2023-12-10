@@ -4,7 +4,6 @@ import org.jdbi.v3.core.Jdbi
 import org.junit.jupiter.api.Test
 import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import pt.isel.daw.gomoku.utils.Environment
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.utils.Sha256TokenEncoder
 import pt.isel.daw.gomoku.domain.users.UsersDomain
@@ -12,9 +11,7 @@ import pt.isel.daw.gomoku.domain.users.UsersDomainConfig
 import pt.isel.daw.gomoku.repository.jdbi.JdbiTransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.users.UsersService
-import pt.isel.daw.gomoku.utils.Either
-import pt.isel.daw.gomoku.utils.Failure
-import pt.isel.daw.gomoku.utils.Success
+import pt.isel.daw.gomoku.utils.*
 import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random

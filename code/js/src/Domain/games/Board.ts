@@ -7,4 +7,5 @@ type Piece = 'BLACK' | 'WHITE' | ' ';
 
 export class Board {
   readonly moves: Move[];
+  readonly winner : string
 }

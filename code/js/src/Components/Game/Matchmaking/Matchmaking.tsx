@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { getMatchmakingStatus } from '../../../Service/games/GamesServices';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { QueueEntry } from '../../../Domain/games/QueueEntry';
 import { useRef } from 'react';
 
@@ -53,11 +53,11 @@ export function MatchmakingPage() {
       const queueEntry = await getMatchmakingStatus(state.queueEntryId);
       pollingTimeout.current = queueEntry.properties.pollingTimOut;
       if (queueEntry.properties.state === 'MATCHED') {
-        dispatch({ type: 'redirect', gameId: queueEntry.properties.gameId! });
+        dispatch({ type: 'redirect', gameId: queueEntry.properties.gid! });
         // leave the interval running
         clearInterval(interval);
       }
-    }, pollingTimeout.current); // Simulating a 1-second delay for the API request
+    }, pollingTimeout.current);
     return () => clearInterval(interval);
   }, [state.queueEntryId]);
 
@@ -65,6 +65,9 @@ export function MatchmakingPage() {
     case 'readingStatus':
       return <div>Searching for a opponent...</div>;
     case 'redirect':
-      return <div>Opponent found! Redirecting to game {state.gameId}...</div>;
+      return <div>
+        <p>Opponent found! Redirecting to game {state.gameId}...</p>
+        <Navigate to={`/game/${state.gameId}`}/>;
+      </div>;
   }
 }

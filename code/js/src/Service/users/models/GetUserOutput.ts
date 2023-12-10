@@ -1,7 +1,7 @@
 import { SirenModel } from "../../media/siren/SirenModel"
 
 interface UserGetByIdOutputModel {
-    id : number;
+    uid : number;
     username : string;
     email : string;
 }
