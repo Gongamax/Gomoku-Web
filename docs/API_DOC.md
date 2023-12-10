@@ -5,6 +5,7 @@
 - The server application runs local on **URL**: http://localhost:8080
 - All the responses have *`application/vnd.siren+json`* as content-type
 	for more information about the Siren format go to: https://github.com/kevinswiber/siren
+- Important reminder: The Content-Type header of the request must be set to *`application/json`* for all the POST and PUT requests.
 
 # Home
 
@@ -765,7 +766,25 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 **Success Response Example:**
 ```json
 	{
-		
+		"class": [
+			"update-user"
+		],
+		"properties": {
+			"message": "User with id 134 updated successfully"
+		},
+		"links": [
+			{
+				"rel": [
+					"self"
+				],
+				"href": "/api/users/update"
+			}
+		],
+		"entities": [],
+		"actions": [],
+		"requireAuth": [
+			true
+		]
 	}
 ```
 
