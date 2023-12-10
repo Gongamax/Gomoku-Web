@@ -127,13 +127,13 @@
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-games"
       ],
-      "href": "/api/games"
+      "href": "/api/games?page=1"
     },
     {
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-games-by-user"
       ],
-      "href": "/api/games/user/{uid}"
+      "href": "/api/games/user/{uid}?page=1"
     },
     {
       "rel": [
@@ -149,9 +149,9 @@
     },
     {
       "rel": [
-        "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
+        "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats-by-username"
       ],
-      "href": "/api/stats/username/{name}?name"
+      "href": "/api/stats/username/{name}"
     },
     {
       "rel": [
@@ -579,7 +579,7 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-games-by-user"
       ],
-      "href": "/api/games/user/7"
+      "href": "/api/games/user/7?page=1"
     }
   ],
   "recipeLinks":[],
@@ -792,7 +792,7 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-all-games-by-user"
       ],
-      "href": "/api/games/user/1"
+      "href": "/api/games/user/1?page=1"
     }
   ],
   "recipeLinks":[],
@@ -1138,10 +1138,6 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
     {
       "rel": ["self"],
       "href": "/api/games/user/13?page=1"
-    },
-    {
-      "rel": ["last"],
-      "href": "/api/games/user/13?page=0"
     }
   ],
   "recipeLinks":[],

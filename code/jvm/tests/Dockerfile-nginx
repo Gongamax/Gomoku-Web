@@ -1,5 +1,5 @@
 FROM nginx
-COPY ./tests/nginx/nginx.conf /etc/nginx
+COPY ./jvm/tests/nginx/nginx.conf /etc/nginx
 
 WORKDIR /js
 COPY ./js/dist/main.js /js
