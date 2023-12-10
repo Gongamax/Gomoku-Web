@@ -1,6 +1,6 @@
-import { EntityModel } from "./EntityModel";
-import { LinkModel } from "./LinkModel";
-import { ActionModel } from "./ActionModel";
+import {EntityModel} from "./EntityModel";
+import {LinkModel} from "./LinkModel";
+import {ActionModel} from "./ActionModel";
 
 /**
  * Siren is a hypermedia specification for representing entities in JSON.
@@ -16,6 +16,7 @@ export class SirenModel<T> {
   public class: string[];
   public properties: T;
   public links: LinkModel[];
+  public recipeLinks: LinkModel[];
   public entities: EntityModel<T>[];
   public actions: ActionModel[];
   public requireAuth: boolean;

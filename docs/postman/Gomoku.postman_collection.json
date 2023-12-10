@@ -1,0 +1,596 @@
+{
+	"info": {
+		"_postman_id": "4b1303b9-d1ba-4ca5-8bea-d7e79d68d588",
+		"name": "Gomoku",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24643438"
+	},
+	"item": [
+		{
+			"name": "Users requests",
+			"item": [
+				{
+					"name": "getUserById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "DY-RFUQ_Esd1pwX5e4nMMlPXco_xBJ6691ZtakFCw1Q="
+							}
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "bK0799ig86b-Lz1OjsMRaICEm1aLmwk-Vjf1-5S9WHo=",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/users/:uid",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								":uid"
+							],
+							"variable": [
+								{
+									"key": "uid",
+									"value": "133"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"hello@gmail.com\",\n\t\"username\": \"world\",\n\t\"password\": \"Helloworld123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/users"
+					},
+					"response": []
+				},
+				{
+					"name": "CreateToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"username\": \"world\",\n\t\"password\": \"Heworld321\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/users/token"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "Gf1Z1IiK_pdqPcGidI052XxRW43zVcAPzPhE6KchRSg="
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": "http://localhost:8080/api/logout"
+					},
+					"response": []
+				},
+				{
+					"name": "HomeUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o="
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/me"
+					},
+					"response": []
+				},
+				{
+					"name": "getStatsById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "DY-RFUQ_Esd1pwX5e4nMMlPXco_xBJ6691ZtakFCw1Q="
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/stats/:uid",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"stats",
+								":uid"
+							],
+							"variable": [
+								{
+									"key": "uid",
+									"value": "133"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRanking",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/ranking?page=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"ranking"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getStatsByUsername",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/stats/username/:name",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"stats",
+								"username",
+								":name"
+							],
+							"variable": [
+								{
+									"key": "name",
+									"value": "backfire"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateUser",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "Gf1Z1IiK_pdqPcGidI052XxRW43zVcAPzPhE6KchRSg="
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"email\": \"hello@gmail.com\",\r\n\t\"username\": \"world\",\r\n\t\"password\": \"Heworld321\"\r\n}"
+						},
+						"url": "http://localhost:8080/api/users/update"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Unauthenticated users Requests",
+			"item": [
+				{
+					"name": "getSystemInfo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/system"
+					},
+					"response": []
+				},
+				{
+					"name": "Home",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api"
+					},
+					"response": []
+				},
+				{
+					"name": "getRanking",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/ranking?page=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"ranking"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Games requests",
+			"item": [
+				{
+					"name": "getGameById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "ylGTenpeE4s2hjtER2ejiiqIEwAhhOVhZA5cfKnduRc="
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/games/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"games",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "51"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Play Round",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "DY-RFUQ_Esd1pwX5e4nMMlPXco_xBJ6691ZtakFCw1Q="
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"column\": 2,\n\t\"row\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/games/:gid/play",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"games",
+								":gid",
+								"play"
+							],
+							"variable": [
+								{
+									"key": "gid",
+									"value": "51"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "matchmaking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "DY-RFUQ_Esd1pwX5e4nMMlPXco_xBJ6691ZtakFCw1Q="
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"variant\": \"STANDARD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/games/matchmaking"
+					},
+					"response": []
+				},
+				{
+					"name": "leave",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "ylGTenpeE4s2hjtER2ejiiqIEwAhhOVhZA5cfKnduRc="
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/games/:gid/leave",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"games",
+								":gid",
+								"leave"
+							],
+							"variable": [
+								{
+									"key": "gid",
+									"value": "52"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllGames",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "DY-RFUQ_Esd1pwX5e4nMMlPXco_xBJ6691ZtakFCw1Q="
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/games"
+					},
+					"response": []
+				},
+				{
+					"name": "getAllGamesByUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "YgOfO9pT4_u434LuJKQvfb7B2eSMyhyXPhk-9khTtdY="
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/games/user/:uid?page=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"games",
+								"user",
+								":uid"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							],
+							"variable": [
+								{
+									"key": "uid",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "exitMatchmaking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "ylGTenpeE4s2hjtER2ejiiqIEwAhhOVhZA5cfKnduRc="
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/games/matchmaking/:mid/exit",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"games",
+								"matchmaking",
+								":mid",
+								"exit"
+							],
+							"variable": [
+								{
+									"key": "mid",
+									"value": "51"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getMatchMakingStatus",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "ylGTenpeE4s2hjtER2ejiiqIEwAhhOVhZA5cfKnduRc="
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/games/matchmaking/:mid/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"games",
+								"matchmaking",
+								":mid",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "mid",
+									"value": "47"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllVariants",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "DY-RFUQ_Esd1pwX5e4nMMlPXco_xBJ6691ZtakFCw1Q="
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/games/variants"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userId",
+			"value": "0"
+		},
+		{
+			"key": "gameId",
+			"value": "0",
+			"type": "string"
+		}
+	]
+}

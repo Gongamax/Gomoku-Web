@@ -2,6 +2,7 @@ package pt.isel.daw.gomoku.http.media.siren
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.http.HttpMethod
+import org.springframework.web.util.UriTemplate
 import java.net.URI
 
 /**
@@ -20,6 +21,7 @@ data class SirenModel<T>(
     val clazz: List<String>,
     val properties: T,
     val links: List<LinkModel>,
+    val recipeLinks: List<LinkModel>,
     val entities: List<EntityModel<*>>,
     val actions: List<ActionModel>,
     val requireAuth: List<Boolean>
@@ -110,6 +112,7 @@ class SirenBuilderScope<T>(
     private val classes = mutableListOf<String>()
     private val actions = mutableListOf<ActionModel>()
     private val requireAuth = mutableListOf<Boolean>()
+    private val recipeLinks = mutableListOf<LinkModel>()
 
     fun clazz(value: String) {
         classes.add(value)
@@ -117,6 +120,10 @@ class SirenBuilderScope<T>(
 
     fun link(href: URI, rel: LinkRelation) {
         links.add(LinkModel(listOf(rel.value), href.toASCIIString()))
+    }
+
+    fun recipeLinks(href: UriTemplate, rel: LinkRelation) {
+        recipeLinks.add(LinkModel(listOf(rel.value), href.toString()))
     }
 
     fun <U> entity(value: U, rel: LinkRelation, block: EntityBuilderScope<U>.() -> Unit) {
@@ -139,6 +146,7 @@ class SirenBuilderScope<T>(
         clazz = classes,
         properties = properties,
         links = links,
+        recipeLinks = recipeLinks,
         entities = entities,
         actions = actions,
         requireAuth = requireAuth

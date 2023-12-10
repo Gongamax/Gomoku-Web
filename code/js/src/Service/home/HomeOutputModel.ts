@@ -1,0 +1,3 @@
+type HomeOutputModel = {
+    message: string;
+}
