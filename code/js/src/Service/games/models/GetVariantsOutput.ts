@@ -2,7 +2,7 @@ import { SirenModel } from '../../media/siren/SirenModel';
 
 export type Variant = {
   name: string;
-  board_dim: number;
+  boardDim: number;
   playRule: string;
   openingRule: string;
   points: number;

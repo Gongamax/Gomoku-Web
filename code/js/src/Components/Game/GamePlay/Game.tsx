@@ -9,14 +9,15 @@ import { getCookie } from '../../Authentication/RequireAuthn';
 
 type State =
   | { tag: 'loading' }
-  | { tag: 'turn'; game: Game; isMyTurn: boolean }
+  | { tag: 'myTurn'; game: Game }
   | { tag: 'loadingPlay'; game: Game; resign: boolean }
+  | { tag: 'opponentTurn'; game: Game }
   | { tag: 'gameOver'; game: Game; winner: User }
   | { tag: 'redirect' }
   | { tag: 'error'; message: string };
 
 type Action =
-  | { type: 'makePlay'; game: Game; isMyTurn: boolean; resign: boolean }
+  | { type: 'makePlay'; game: Game; resign: boolean }
   | { type: 'error'; message: string; game?: Game; isMyTurn?: boolean }
   | { type: 'success'; game: Game; isMyTurn: boolean; isOver: boolean; winner?: User };
 
@@ -28,7 +29,10 @@ function reduce(state: State, action: Action): State {
   switch (state.tag) {
     case 'loading':
       if (action.type === 'success') {
-        return { tag: 'turn', game: action.game, isMyTurn: action.isMyTurn };
+        if (action.isMyTurn)
+          return { tag: 'myTurn', game: action.game };
+        else
+          return { tag: 'opponentTurn', game: action.game };
       } else if (action.type === 'error') {
         return { tag: 'error', message: action.message };
       } else {
@@ -36,15 +40,25 @@ function reduce(state: State, action: Action): State {
         return state;
       }
 
-    case 'turn':
-      if (state.isMyTurn) {
-        if (action.type === 'makePlay') {
-          return { tag: 'loadingPlay', game: action.game, resign: action.resign };
-        } else {
-          logUnexpectedAction(state, action);
-          return state;
-        }
+    case 'myTurn':
+      if (action.type === 'makePlay') {
+        return { tag: 'loadingPlay', game: action.game, resign: action.resign };
       } else {
+        logUnexpectedAction(state, action);
+        return state;
+      }
+
+    case 'opponentTurn':
+      if (action.type === 'success') {
+        if (action.isOver) {
+          return { tag: 'gameOver', game: action.game, winner: action.winner };
+        } else {
+          return { tag: 'myTurn', game: action.game };
+        }
+      } else if (action.type === 'error') {
+        return state;
+      } else {
+        logUnexpectedAction(state, action);
         return state;
       }
 
@@ -53,10 +67,10 @@ function reduce(state: State, action: Action): State {
         if (action.isOver) {
           return { tag: 'gameOver', game: action.game, winner: action.winner };
         } else {
-          return { tag: 'turn', game: action.game, isMyTurn: !action.isMyTurn };
+          return { tag: 'myTurn', game: action.game };
         }
       } else if (action.type === 'error') {
-        return { tag: 'turn', game: action.game, isMyTurn: action.isMyTurn };
+        return { tag: 'myTurn', game: action.game };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -81,51 +95,52 @@ export function GamePage() {
   const { gid } = useParams<{ gid: string }>();
   const gameId = Number(gid);
   const currentUser = getCookie('login');
+  const intervalId = React.useRef<NodeJS.Timeout | null>(null);
+
+  const fetchData = React.useCallback(async () => {
+    const response = (await GameService.getGame(gameId)).properties;
+    const isMyTurn: boolean = checkTurn(currentUser, response.game);
+    dispatch({
+      type: 'success',
+      game: convertToDomainGame(response.game),
+      isMyTurn: isMyTurn,
+      isOver: response.game.state === GameState.PLAYER_BLACK_WON || response.game.state === GameState.PLAYER_WHITE_WON,
+    });
+  }, [gameId, currentUser, dispatch]);
 
   React.useEffect(() => {
-    const fetchData = async () => {
-      if (state.tag === 'loading' || (state.tag === 'turn' && !state.isMyTurn || state.tag === 'loadingPlay')) {
-        const interval = setInterval(async () => {
-            const response = (await GameService.getGame(gameId)).properties;
-            const isMyTurn: boolean = checkTurn(currentUser, response.game);
-            console.log('Game state: ' + response.game.state);
-            dispatch({
-              type: 'success',
-              game: convertToDomainGame(response.game),
-              isMyTurn: isMyTurn,
-              isOver: response.game.state === GameState.PLAYER_BLACK_WON || response.game.state === GameState.PLAYER_WHITE_WON,
-            });
-            if (checkTurn(currentUser, response.game))
-              clearInterval(interval);
-          }
-          , 5000);
+      intervalId.current = setInterval(async () => {
+        try {
+          await fetchData();
+        } catch (error) {
+          console.warn('Failed to fetch game:', error);
+        }
+      }, 5000);
+    return () => {
+      if (intervalId.current) {
+        clearInterval(intervalId.current);
       }
     };
-    fetchData();
-  }, [gameId, currentUser, state]);
+  }, [gameId, currentUser, state, fetchData]);
 
   async function handlePlay(row: number, col: number) {
-    const gameState = state as { tag: 'turn'; game: Game; isMyTurn: boolean };
-    if (gameState.isMyTurn) {
+    if (state.tag === 'myTurn')
       try {
         // Send a request to the server to make a move
-        const updatedGame = await GameService.playGame(gameState.game.id, row, col);
-        console.log('Turn: ' + updatedGame.properties.game.board.turn);
+        const updatedGame = await GameService.playGame(state.game.id, row, col);
         // Update the local game state based on the server's response
         dispatch({
           type: 'makePlay',
           game: convertToDomainGame(updatedGame.properties.game),
-          isMyTurn: checkTurn(currentUser, updatedGame.properties.game),
           resign: false,
         });
       } catch (error) {
         console.error('Failed to make a move:', error);
       }
-    }
   }
 
   async function handleResign(): Promise<void> {
-    const gameState = state as { tag: 'turn'; game: Game; isMyTurn: boolean };
+    const gameState = state as { tag: 'myTurn'; game: Game; isMyTurn: boolean };
     try {
       await GameService.surrenderGame(gameState.game.id);
       dispatch(
@@ -146,14 +161,35 @@ export function GamePage() {
     case 'loading':
       return <div>Loading...</div>;
 
-    case 'turn': {
+    case 'myTurn': {
       const {
         board,
         turn,
       } = deserializeBoard(
         state.game.board.moves,
         state.game.board.turn?.toString() ?? state.game.board.winner.toString(),
-        15,
+        state.game.variant.boardDim,
+      );
+      return (
+        <div>
+          <h1>{state.game.players[0].username} vs {state.game.players[1].username}</h1>
+          <h2>Turn: {turn}</h2>
+          <GameBoard board={board} onPlay={handlePlay} />
+          <button
+            onClick={handleResign}>Surrender
+          </button>
+        </div>
+      );
+    }
+
+    case 'opponentTurn': {
+      const {
+        board,
+        turn,
+      } = deserializeBoard(
+        state.game.board.moves,
+        state.game.board.turn?.toString() ?? state.game.board.winner.toString(),
+        state.game.variant.boardDim,
       );
       return (
         <div>
@@ -188,7 +224,7 @@ export function GamePage() {
       return (
         <div>
           <h3>{state.message}</h3>
-          {/*<button onClick={() => fetchData()}>Retry</button>*/}
+          {<button onClick={() => fetchData()}>Retry</button>}
         </div>
       );
     case 'redirect':

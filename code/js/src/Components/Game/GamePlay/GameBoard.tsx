@@ -12,7 +12,7 @@ export function GameBoard({ board, onPlay }: GameBoardProps) {
       {board.map((row, i) => (
         <tr key={i}>
           {row.map((cell, j) => (
-            <td key={j} onClick={() => onPlay(i, j)}
+            <td key={j} onClick={() => onPlay(i + 1, j)}
                 style={{ width: '30px', height: '30px', border: '1px solid black', textAlign: 'center' }}>
               {cell === 'BLACK' ? '#' : cell === 'WHITE' ? '*' : '-'}
             </td>

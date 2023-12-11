@@ -16,19 +16,12 @@ export function deserializeBoard(moves: { [key: string]: string }, turn: string,
   turn: string
 } {
   const board: string[][] = Array(boardSize).fill(null).map(() => Array(boardSize).fill(''));
-
   // Iterate over the keys of the moves object
   for (const key in moves) {
-    // Split the key into row and column parts
     const [rowPart, colPart] = key.split('');
-    console.log("Row: " + rowPart + " Col: " + colPart);
-    // Convert the row and column parts into indices
     const row = parseInt(rowPart) - 1; // Subtract 1 because array indices are 0-based
-    const col = parseInt(colPart) - 1; // Subtract 1 because array indices are 0-based
-
-    // Place the corresponding piece in the board
+    const col = colPart.charCodeAt(0) - 'A'.charCodeAt(0); // Subtract 'A'.charCodeAt(0) to get a 0-based index
     board[row][col] = moves[key];
-    //console.log("Board: " + JSON.stringify(board));
   }
 
   return { board, turn };

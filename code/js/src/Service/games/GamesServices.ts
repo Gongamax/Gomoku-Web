@@ -19,11 +19,11 @@ const httpService = new HTTPService();
     return await httpService.get<GetGameOutput>(path);
   }
 
-  export async function playGame(gid: number, row: number, col: number): Promise<PlayGameOutput> {
+  export async function playGame(gid: number, row: number, column: number): Promise<PlayGameOutput> {
     const path: string = (await linkRecipe)
         .find((recipe) => recipe.rel === HomeRecipeRelations.PLAY).href
         .replace('{gid}', gid.toString());
-    return await httpService.post<PlayGameOutput>(path, JSON.stringify({ row, col }));
+    return await httpService.post<PlayGameOutput>(path, JSON.stringify({ row, column }));
   }
 
   export async function matchmaking(variant: string): Promise<MatchmakingOutput> {

@@ -25,17 +25,19 @@ data class Cell(val row: Row, val col: Column) {
 }
 
 /**
- * Converts a string in format <Row Number><Column Symbol> to a cell.
+ * Converts a string in format <Row Number> <Column Symbol> to a cell.
  * @return The cell corresponding to the string.
  * @throws IllegalArgumentException if the string is not valid.
  */
 fun String.toCell(): Cell {
-    require(length == 2) { "Cell must have row and column" }
-    return Cell(this[0].digitToInt().toRow(), this[1].toColumn())
+    require(length >= 2) { "Cell must have row and column" }
+    val row = substring(0, length - 1).toInt().toRow()
+    val col = this.last().toColumn()
+    return Cell(row, col)
 }
 
 /**
- * Converts a string in format <Row Number><Column Symbol> to a cell.
+ * Converts a string in format <Row Number> <Column Symbol> to a cell.
  * @return The cell corresponding to the string, or null if the string is not valid.
  */
 fun String.toCellOrNull(): Cell? =

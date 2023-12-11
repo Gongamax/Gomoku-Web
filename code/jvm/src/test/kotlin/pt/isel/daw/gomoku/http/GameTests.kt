@@ -131,8 +131,8 @@ class GameTests {
             .header("Authorization", "Bearer $token2")
             .bodyValue(
                 mapOf(
-                    "row" to 1,
-                    "column" to 1
+                    "row" to 3,
+                    "column" to 11
                 )
             )
             .exchange()

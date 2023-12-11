@@ -98,4 +98,27 @@ class BoardTests {
 
         assertEquals(board, newBoard)
     }
+
+    @Test
+    fun `serialize a play then deserialize`() {
+        //given: a board
+        val board = BoardRun(mapOf(Cell(13, 12) to Piece.BLACK, Cell(10, 4) to Piece.WHITE), Piece.BLACK)
+        val boardString = board.toString()
+        assertEquals(boardString, "Run:BLACK13M:BLACK 10E:WHITE")
+
+        //then: serialize the board
+        val serialized = boardSerializer.serialize(board)
+
+        //assert: the serialized board is the same as the original
+        assertEquals(
+            serialized,
+            "{\"kind\":\"Run\",\"piece\":\"BLACK\",\"moves\":{\"13M\":\"BLACK\",\"10E\":\"WHITE\"}}"
+        )
+
+        //then: deserialize the board
+        val newBoard = boardSerializer.deserialize(serialized)
+
+        //assert: the deserialized board is the same as the original
+        assertEquals(board, newBoard)
+    }
 }

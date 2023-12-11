@@ -69,7 +69,6 @@ export function Login() {
     login(username, password)
       .then(res => {
         if (res) {
-          console.log(`setUser(${res})`);
           dispatch({ type: 'success' });
         } else {
           dispatch({ type: 'error', message: 'Invalid username or password' });

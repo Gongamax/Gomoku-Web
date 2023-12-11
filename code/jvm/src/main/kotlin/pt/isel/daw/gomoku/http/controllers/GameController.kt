@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -451,5 +452,9 @@ class GameController(
                 VariantListError.VariantsNotFound -> Problem.variantsNotFound(instance = Uris.Games.getAllVariants())
             }
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(GameController::class.java)
     }
 }
