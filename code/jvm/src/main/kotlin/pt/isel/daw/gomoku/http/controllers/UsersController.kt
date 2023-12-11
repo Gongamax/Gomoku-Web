@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
+import kotlinx.datetime.Clock
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -53,8 +54,8 @@ class UsersController(
     ): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
             is Success -> {
-                 val cookieMaxAge = res.value.tokenExpiration.epochSeconds
-                 ResponseEntity.status(200)
+                val cookieMaxAge : Long = res.value.tokenExpiration.epochSeconds - Clock.System.now().epochSeconds
+                ResponseEntity.status(200)
                     .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                     .header(
                         "Set-Cookie",
@@ -72,6 +73,7 @@ class UsersController(
                         }
                     )
             }
+
             is Failure -> when (res.value) {
                 TokenCreationError.UserOrPasswordAreInvalid -> Problem.userOrPasswordAreInvalid(Uris.Users.login())
             }
@@ -85,11 +87,11 @@ class UsersController(
                 .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                 .header(
                     "Set-Cookie",
-                    "token=${authenticatedUser.token}; Max-Age=0; HttpOnly; SameSite=Strict"
+                    "token=; Max-Age=0; HttpOnly; SameSite=Strict"
                 )
                 .header(
                     "Set-Cookie",
-                    "username=${authenticatedUser.user.username}; Max-Age=0; SameSite=Strict"
+                    "username=; Max-Age=0; SameSite=Strict"
                 )
                 .body(
                     siren(

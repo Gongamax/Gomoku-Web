@@ -3,21 +3,35 @@ import { Link, useParams } from 'react-router-dom';
 import { getAllGamesByUser } from '../../Service/games/GamesServices';
 import { GameOutputModel } from '../../Service/games/models/GameModelsUtil';
 
-// TEMPORARY
+/**
+ * `calculateResult` is a function that calculates the result of a game for a given user.
+ * It checks the game state and the user's ID to determine whether the user won, lost, or if the game is still in progress.
+ *
+ * @param {GameOutputModel} game - The game to calculate the result for.
+ * @param {number} userId - The ID of the user to calculate the result for.
+ * @returns {string} - The result of the game ('WIN', 'LOSS', 'DRAW', or 'IN PROGRESS').
+ */
 function calculateResult(game: GameOutputModel, userId: number): string {
-  if (game.userWhite.id.value === userId && game.board.winner === 'WHITE') {
-    return 'WIN';
-  } else if (game.userBlack.id.value === userId && game.board.winner === 'BLACK') {
-    return 'WIN';
-  // } else if (game.board.winner === 'DRAW') {
-  //   return 'DRAW';
-  } else if (game.board.winner === undefined) {
-    return 'IN PROGRESS';
-  } else {
-    return 'LOSS';
+  switch (game.state) {
+    case 'PLAYER_WHITE_WON':
+      return game.userWhite.id.value === userId ? 'WIN' : 'LOSS';
+    case 'PLAYER_BLACK_WON':
+      return game.userBlack.id.value === userId ? 'WIN' : 'LOSS';
+    case 'DRAW':
+      return 'DRAW';
+    default:
+      return 'IN PROGRESS';
   }
 }
 
+/**
+ * `MatchHistory` is a React functional component that renders the match history of a user.
+ * It fetches the match history from the server when the component mounts and stores it in state.
+ * The match history is displayed in a table, with each row representing a match.
+ * Each row displays the opponent's username (as a link to their profile) and the result of the match.
+ *
+ * @returns {React.ReactElement} - The rendered match history.
+ */
 export function MatchHistory() {
   const { uid } = useParams<{ uid: string }>();
   const userId = Number(uid);

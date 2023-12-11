@@ -14,12 +14,23 @@ import { NavBarWrapper } from './Layout/NavBar';
 import { GamePage } from './Components/Game/GamePlay/Game';
 import { MatchHistory } from './Components/Profile/MatchHistory';
 
+/**
+ * `App` is the root component of the application.
+ * It sets up the router for the application using the `RouterProvider` component from `react-router-dom`.
+ *
+ * @returns {React.ReactElement} - The root component of the application.
+ */
 export function App() {
   return (
     <RouterProvider router={router} />
   );
 }
 
+/**
+ * `router` is the configuration for the application's router.
+ * It defines the paths for the application and the components that should be rendered for each path.
+ * It uses the `createBrowserRouter` function from `react-router-dom` to create the router.
+ */
 const router = createBrowserRouter([
   {
     'path': '/',
@@ -35,7 +46,7 @@ const router = createBrowserRouter([
         'children': [
           {
             'path': 'history',
-            'element': <MatchHistory />,
+            'element': <RequireAuthn><MatchHistory /></RequireAuthn>,
           },
         ],
       },

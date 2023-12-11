@@ -5,7 +5,7 @@ import * as GameService from '../../../Service/games/GamesServices';
 import { User } from '../../../Domain/users/User';
 import { GameBoard } from './GameBoard';
 import { checkTurn, convertToDomainGame, deserializeBoard, handleWinner } from './GameUtils';
-import { getCookie } from '../../Authentication/RequireAuthn';
+import { getUserName } from '../../Authentication/RequireAuthn';
 
 type State =
   | { tag: 'loading' }
@@ -94,7 +94,7 @@ export function GamePage() {
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
   const { gid } = useParams<{ gid: string }>();
   const gameId = Number(gid);
-  const currentUser = getCookie('login');
+  const currentUser = getUserName();
   const intervalId = React.useRef<NodeJS.Timeout | null>(null);
 
   const fetchData = React.useCallback(async () => {

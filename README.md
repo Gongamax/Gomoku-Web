@@ -25,4 +25,4 @@ The project is organized in 2 phases:
   - [Backend Documentation](../2023-daw-leic51d-02/docs/Gomoku-Backend-Doc.md) - contains the backend documentation of the application;
   - [HTTP API](../2023-daw-leic51d-02/docs/Gomoku-Api-doc) - contains the HTTP API documentation of the application;
 - Phase 2 - Development of the Web User Interface, meaning the frontend of the application;
-  - (UNDER DEVELOPMENT)
+  - [Frontend Documentation](../2023-daw-leic51d-02/code/js/README.md) - contains the frontend documentation of the application;

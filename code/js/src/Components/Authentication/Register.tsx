@@ -4,10 +4,10 @@ import { register } from '../../Service/users/UserServices';
 
 type State =
   | {
-      tag: 'editing';
-      error?: string;
-      inputs: { username: string; password: string; confirmPassword: string; email: string };
-    }
+  tag: 'editing';
+  error?: string;
+  inputs: { username: string; password: string; confirmPassword: string; email: string };
+}
   | { tag: 'submitting'; username: string; email: string }
   | { tag: 'redirect' };
 
@@ -33,7 +33,7 @@ function reduce(state: State, action: Action): State {
       } else if (action.type === 'submit') {
         const { password, confirmPassword } = state.inputs;
         if (password !== confirmPassword) {
-          return { tag: 'editing', error: "Passwords don't match", inputs: state.inputs };
+          return { tag: 'editing', error: 'Passwords don\'t match', inputs: state.inputs };
         } else {
           return { tag: 'submitting', username: state.inputs.username, email: state.inputs.email };
         }
@@ -55,6 +55,14 @@ function reduce(state: State, action: Action): State {
       return state;
   }
 }
+
+/**
+ * `Register` is a React component that renders a registration form.
+ * It uses a reducer to manage its state, which can be in one of three states: 'editing', 'submitting', or 'redirect'.
+ * In the 'editing' state, the user can enter their username, password, confirm password and email.
+ * In the 'submitting' state, the component attempts to register the user.
+ * In the 'redirect' state, the user is redirected to their previous location, or to the '/login' page if no previous location is available.
+ */
 export function Register() {
   console.log('Register');
   const [state, dispatch] = React.useReducer(reduce, {
@@ -67,10 +75,24 @@ export function Register() {
     return <Navigate to={location.state?.from || '/login'} replace={true} />;
   }
 
+  /**
+   * Handles changes to the form inputs.
+   * Dispatches an 'edit' action to the reducer with the input name and new value.
+   *
+   * @param {React.FormEvent<HTMLInputElement>} ev - The form event.
+   */
   function handleChange(ev: React.FormEvent<HTMLInputElement>) {
     dispatch({ type: 'edit', inputName: ev.currentTarget.name, inputValue: ev.currentTarget.value });
   }
 
+  /**
+   * Handles form submission.
+   * Dispatches a 'submit' action to the reducer and attempts to register the user.
+   * If the registration is successful, dispatches a 'success' action.
+   * If the registration fails, dispatches an 'error' action with the error message.
+   *
+   * @param {React.FormEvent<HTMLFormElement>} ev - The form event.
+   */
   function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
     if (state.tag !== 'editing') {

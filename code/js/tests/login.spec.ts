@@ -5,11 +5,11 @@ test('can login', async ({ page }) => {
   await page.goto('http://localhost:8000/');
 
   // then: the page has a link to the 'me' page
-  const meLink = page.getByRole('link', { name: 'Me', exact: true });
-  await expect(meLink).toBeVisible();
+  const playLink = page.getByRole('link', { name: 'Play a Game', exact: true });
+  await expect(playLink).toBeVisible();
 
   // when: navigating to the 'me' page
-  await meLink.click();
+  await playLink.click();
 
   // then: the login form appears
   const usernameInput = page.getByLabel('Username');
@@ -36,10 +36,10 @@ test('can login', async ({ page }) => {
   await expect(passwordInput).toHaveValue('');
 
   // when: providing correct credentials
-  await usernameInput.fill('alice');
-  await passwordInput.fill('1234');
+  await usernameInput.fill('backfire');
+  await passwordInput.fill('Abacate345');
   await loginButton.click();
 
   // then
-  await expect(page.getByText('Hello alice')).toBeVisible();
+  await expect(page.getByText('Hello backfire')).toBeVisible();
 });

@@ -45,6 +45,13 @@ function reduce(state: State, action: Action): State {
   }
 }
 
+/**
+ * `Login` is a React component that renders a login form.
+ * It uses a reducer to manage its state, which can be in one of three states: 'editing', 'submitting', or 'redirect'.
+ * In the 'editing' state, the user can enter their username and password.
+ * In the 'submitting' state, the component attempts to log the user in.
+ * In the 'redirect' state, the user is redirected to their previous location, or to the '/me' page if no previous location is available.
+ */
 export function Login() {
   console.log('Login');
   const [state, dispatch] = React.useReducer(reduce, { tag: 'editing', inputs: { username: '', password: '' } });
@@ -54,10 +61,24 @@ export function Login() {
     return <Navigate to={location.state?.source?.pathname || '/me'} replace={true} />;
   }
 
+  /**
+   * Handles changes to the form inputs.
+   * Dispatches an 'edit' action to the reducer with the input name and new value.
+   *
+   * @param {React.FormEvent<HTMLInputElement>} ev - The form event.
+   */
   function handleChange(ev: React.FormEvent<HTMLInputElement>) {
     dispatch({ type: 'edit', inputName: ev.currentTarget.name, inputValue: ev.currentTarget.value });
   }
 
+  /**
+   * Handles form submission.
+   * Dispatches a 'submit' action to the reducer and attempts to log the user in.
+   * If the login is successful, dispatches a 'success' action.
+   * If the login fails, dispatches an 'error' action with the error message.
+   *
+   * @param {React.FormEvent<HTMLFormElement>} ev - The form event.
+   */
   function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
     if (state.tag !== 'editing') {
@@ -74,8 +95,8 @@ export function Login() {
           dispatch({ type: 'error', message: 'Invalid username or password' });
         }
       })
-      .catch(error => {
-        dispatch({ type: 'error', message: error.message });
+      .catch(() => {
+        dispatch({ type: 'error', message: 'Invalid username or password' });
       });
   }
 

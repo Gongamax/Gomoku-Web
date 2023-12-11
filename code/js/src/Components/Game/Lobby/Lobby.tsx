@@ -3,18 +3,38 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getVariantList, matchmaking } from '../../../Service/games/GamesServices';
 import { getStatsByUsername } from '../../../Service/users/UserServices';
-import { getCookie } from '../../Authentication/RequireAuthn';
+import { getUserName } from '../../Authentication/RequireAuthn';
 
+/**
+ * `fetchPlayerInfo` is an asynchronous function that fetches the player's information.
+ * It calls the `getStatsByUsername` function with the provided username and returns an object containing the username and points.
+ *
+ * @param {string} username - The username of the player.
+ * @returns {Promise<{ username: string, points: number }>} - A promise that resolves to an object containing the username and points.
+ */
 async function fetchPlayerInfo(username: string): Promise<{ username: string, points: number }> {
   const user = await getStatsByUsername(username);
   return { username: user.properties.username, points: user.properties.points };
 }
 
+/**
+ * `fetchGameVariants` is an asynchronous function that fetches the game variants.
+ * It calls the `getVariantList` function and maps the returned variants to their names.
+ *
+ * @returns {Promise<string[]>} - A promise that resolves to an array of variant names.
+ */
 async function fetchGameVariants(): Promise<string[]> {
   const variants = await getVariantList();
   return variants.properties.variants.map((variant: { name: string; }) => variant.name);
 }
 
+/**
+ * `initiateMatchmaking` is an asynchronous function that initiates matchmaking for a given variant.
+ * It calls the `matchmaking` function with the provided variant and returns an object containing the id and idType of the response.
+ *
+ * @param {string} variant - The variant for which to initiate matchmaking.
+ * @returns {Promise<{ id: number; idType: string }>} - A promise that resolves to an object containing the id and idType.
+ */
 async function initiateMatchmaking(variant: string): Promise<{ id: number; idType: string }> {
   console.log(`Initiating matchmaking for variant '${variant}'`);
   const response = await matchmaking(variant);
@@ -93,7 +113,7 @@ const reduce = (state: State, action: Action): State => {
 export function LobbyPage() {
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
   const [selectedVariant, setSelectedVariant] = useState<string>('STANDARD');
-  const currentUser = getCookie('login')
+  const currentUser = getUserName();
 
   useEffect(() => {
     const fetchData = async () => {
