@@ -1,3 +1,36 @@
+# Gomoku Royale API Documentation
+
+- The following documentation describes the HTTP API of the Gomoku Royale game.
+- The API is implemented in Kotlin using the Spring Boot framework, and is a REST API,
+designed to be consumed by a front-end application.
+
+# Table of Contents
+
+- [Server](#server)
+- [Home](#home)
+    - [Get System Info](#get-system-info)
+    - [Get Home Page (Unauthenticated User)](#get-home-page-unauthenticated-user)
+- [Users](#users)
+    - [Create User](#create-user)
+    - [Create Token](#create-token)
+    - [Logout](#logout)
+    - [Get User by ID](#get-user-by-id)
+    - [Get Home Page with User Login](#get-home-page-with-user-login)
+    - [Get Stats Page of User by Id](#get-stats-page-of-user-by-id)
+    - [Get Ranking Info Page of all Users](#get-ranking-info-page-of-all-users)
+    - [Update User](#update-user)
+    - [Get User Stats by Username](#get-user-stats-by-username)
+- [Game](#game)
+    - [Get Game Info by Id](#get-game-info-by-id)
+    - [Play a Round](#play-a-round)
+    - [Get All Games By User Page](#get-all-games-by-user-page)
+    - [Get All Games](#get-all-games)
+    - [Leave Game](#leave-game)
+    - [Matchmaking](#matchmaking)
+    - [Exit Matchmaking](#exit-matchmaking)
+    - [Matchmaking Status](#matchmaking-status)
+    - [Get All Variants](#get-all-variants)
+
 # Server
 
 **Description** :
@@ -5,11 +38,15 @@
 - The server application runs local on **URL**: http://localhost:8080
 - All the responses have _`application/vnd.siren+json`_ as content-type
   for more information about the Siren format go to: https://github.com/kevinswiber/siren
-- Important reminder: The Content-Type header of the request must be set to _`application/json`_ for all the POST and PUT requests.
+- All the problematic responses have _`application/problem+json`_ as content-type
+  for more information about the Problem Details for HTTP APIs go to: https://datatracker.ietf.org/doc/html/rfc7807
+- Important reminder: The Content-Type header of the request must be set to _`application/json`_ for all the POST and
+  PUT requests.
 
 # Home
 
-**Description**: HTTP API requests for all types of users, authenticated or not, to retrieve system information and statistic information.
+**Description**: HTTP API requests for all types of users, authenticated or not, to retrieve system information and
+statistic information.
 
 #
 
@@ -25,7 +62,9 @@
 
 ```json
 {
-  "class": ["system-info"],
+  "class": [
+    "system-info"
+  ],
   "properties": {
     "systemInfo": "Gomoku Royale",
     "systemAuthors": "Gonçalo Frutuoso and Daniel Carvalho",
@@ -33,7 +72,9 @@
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/system"
     },
     {
@@ -49,10 +90,12 @@
       "href": "/api/me"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [false]
+  "requireAuth": [
+    false
+  ]
 }
 ```
 
@@ -71,14 +114,18 @@
 
 ```json
 {
-  "class": ["home"],
+  "class": [
+    "home"
+  ],
   "properties": {
     "message": "Welcome to Gomoku Royale! Please log in to play."
   },
   "links": [],
   "recipeLinks": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api"
     },
     {
@@ -226,7 +273,9 @@
           "value": null
         }
       ],
-      "requireAuth": [false]
+      "requireAuth": [
+        false
+      ]
     },
     {
       "name": "login",
@@ -245,10 +294,14 @@
           "value": null
         }
       ],
-      "requireAuth": [false]
+      "requireAuth": [
+        false
+      ]
     }
   ],
-  "requireAuth": [false]
+  "requireAuth": [
+    false
+  ]
 }
 ```
 
@@ -256,7 +309,8 @@
 
 # Users
 
-**Description**: HTTP API requests to create authenticated users and perform others functionalities for the same type of users
+**Description**: HTTP API requests to create authenticated users and perform others functionalities for the same type of
+users
 
 #
 
@@ -282,20 +336,26 @@
 
 ```json
 {
-  "class": ["register"],
+  "class": [
+    "register"
+  ],
   "properties": {
     "uid": 133
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/users"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [false]
+  "requireAuth": [
+    false
+  ]
 }
 ```
 
@@ -332,20 +392,26 @@
 
 ```json
 {
-  "class": ["login"],
+  "class": [
+    "login"
+  ],
   "properties": {
     "token": "dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o="
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/users/token"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [false]
+  "requireAuth": [
+    false
+  ]
 }
 ```
 
@@ -369,20 +435,26 @@
 
 ```json
 {
-  "class": ["logout"],
+  "class": [
+    "logout"
+  ],
   "properties": {
     "message": "Token dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o= revoked. Logout succeeded"
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/logout"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -410,7 +482,9 @@
 
 ```json
 {
-  "class": ["user"],
+  "class": [
+    "user"
+  ],
   "properties": {
     "id": 1,
     "username": "alice",
@@ -418,11 +492,13 @@
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/users/1"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [
     {
@@ -449,7 +525,9 @@
       ]
     }
   ],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -475,7 +553,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 ```json
 {
-  "class": ["user-home"],
+  "class": [
+    "user-home"
+  ],
   "properties": {
     "id": 133,
     "username": "backfire",
@@ -483,7 +563,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/me"
     },
     {
@@ -499,7 +581,7 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       "href": "/api/ranking?page=0"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [
     {
@@ -519,7 +601,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
           "value": null
         }
       ],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     },
     {
       "name": "logout",
@@ -527,10 +611,14 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       "method": "POST",
       "type": "application/json",
       "fields": [],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     }
   ],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -560,7 +648,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 ```json
 {
-  "class": ["user-statistics"],
+  "class": [
+    "user-statistics"
+  ],
   "properties": {
     "id": 7,
     "username": "user-1412827057457771723",
@@ -572,7 +662,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/stats/7"
     },
     {
@@ -582,10 +674,12 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       "href": "/api/games/user/7?page=1"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [false]
+  "requireAuth": [
+    false
+  ]
 }
 ```
 
@@ -608,25 +702,33 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 ```json
 {
-  "class": ["ranking-info"],
+  "class": [
+    "ranking-info"
+  ],
   "properties": {
     "page": 0,
     "pageSize": 20
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/ranking?page=0"
     },
     {
-      "rel": ["last"],
+      "rel": [
+        "last"
+      ],
       "href": "/api/ranking?page=0"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [
     {
-      "clazz": ["user-statistics"],
+      "clazz": [
+        "user-statistics"
+      ],
       "properties": {
         "id": 13,
         "username": "user-1489691534341247057",
@@ -638,17 +740,23 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       },
       "links": [
         {
-          "rel": ["self"],
+          "rel": [
+            "self"
+          ],
           "href": "/api/stats/13"
         }
       ],
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
       ],
-      "requireAuth": [false]
+      "requireAuth": [
+        false
+      ]
     },
     {
-      "clazz": ["user-statistics"],
+      "clazz": [
+        "user-statistics"
+      ],
       "properties": {
         "id": 1,
         "username": "alice",
@@ -660,17 +768,23 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       },
       "links": [
         {
-          "rel": ["self"],
+          "rel": [
+            "self"
+          ],
           "href": "/api/stats/1"
         }
       ],
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
       ],
-      "requireAuth": [false]
+      "requireAuth": [
+        false
+      ]
     },
     {
-      "clazz": ["user-statistics"],
+      "clazz": [
+        "user-statistics"
+      ],
       "properties": {
         "id": 2,
         "username": "bob",
@@ -682,19 +796,25 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       },
       "links": [
         {
-          "rel": ["self"],
+          "rel": [
+            "self"
+          ],
           "href": "/api/stats/2"
         }
       ],
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-user-stats"
       ],
-      "requireAuth": [false]
+      "requireAuth": [
+        false
+      ]
     },
     "..."
   ],
   "actions": [],
-  "requireAuth": [false]
+  "requireAuth": [
+    false
+  ]
 }
 ```
 
@@ -730,20 +850,26 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 ```json
 {
-  "class": ["update-user"],
+  "class": [
+    "update-user"
+  ],
   "properties": {
     "message": "User with id 134 updated successfully"
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/users/update"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -773,7 +899,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 ```json
 {
-  "class": ["user-statistics"],
+  "class": [
+    "user-statistics"
+  ],
   "properties": {
     "uid": 1,
     "username": "alice",
@@ -785,7 +913,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/stats/username/alice"
     },
     {
@@ -795,10 +925,12 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       "href": "/api/games/user/1?page=1"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [false]
+  "requireAuth": [
+    false
+  ]
 }
 ```
 
@@ -832,7 +964,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 ```json
 {
-  "class": ["game"],
+  "class": [
+    "game"
+  ],
   "properties": {
     "game": {
       "id": 2,
@@ -878,11 +1012,13 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/2"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [
     {
@@ -902,7 +1038,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
           "value": null
         }
       ],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     },
     {
       "name": "leave-game",
@@ -910,10 +1048,14 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       "method": "PUT",
       "type": "application/json",
       "fields": [],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     }
   ],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -952,7 +1094,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 ```json
 {
-  "class": ["play"],
+  "class": [
+    "play"
+  ],
   "properties": {
     "game": {
       "id": 51,
@@ -1000,7 +1144,9 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/51/play"
     },
     {
@@ -1010,10 +1156,12 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
       "href": "/api/games/51"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1033,7 +1181,9 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 ```json
 {
-  "class": ["play"],
+  "class": [
+    "play"
+  ],
   "properties": {
     "game": {
       "id": 51,
@@ -1082,7 +1232,9 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/51/play"
     },
     {
@@ -1092,10 +1244,12 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
       "href": "/api/games/51"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1128,7 +1282,9 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 ```json
 {
-  "class": ["game-list-of-user"],
+  "class": [
+    "game-list-of-user"
+  ],
   "properties": {
     "uid": 13,
     "page": 1,
@@ -1136,14 +1292,18 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/user/13?page=1"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [
     {
-      "clazz": ["game"],
+      "clazz": [
+        "game"
+      ],
       "properties": {
         "id": 4,
         "board": {
@@ -1197,11 +1357,15 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
       ],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     }
   ],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1221,35 +1385,49 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 **Method:** GET
 
+**Parameters:**
+
+- `page` (integer, query, optional) - The page number to retrieve. Defaults to 1 if not provided.
+
 **Authorization Bearer token Example:** zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 **SuccessResponse example**
 
 ```json
 {
-  "class": ["game-list"],
+  "class": [
+    "game-list"
+  ],
   "properties": {
     "page": 1,
     "pageSize": 20
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games?page=1"
     },
     {
-      "rel": ["next"],
+      "rel": [
+        "next"
+      ],
       "href": "/api/games?page=2"
     },
     {
-      "rel": ["last"],
+      "rel": [
+        "last"
+      ],
       "href": "/api/games?page=2"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [
     {
-      "clazz": ["game"],
+      "clazz": [
+        "game"
+      ],
       "properties": {
         "id": 50,
         "board": {
@@ -1303,10 +1481,14 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
       ],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     },
     {
-      "clazz": ["game"],
+      "clazz": [
+        "game"
+      ],
       "properties": {
         "id": 49,
         "board": {
@@ -1360,10 +1542,14 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
       ],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     },
     {
-      "clazz": ["game"],
+      "clazz": [
+        "game"
+      ],
       "properties": {
         "id": 48,
         "board": {
@@ -1417,12 +1603,16 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
       "rel": [
         "https://github.com/isel-leic-daw/2023-daw-leic51d-02/tree/main/docs/rels/get-game-by-id"
       ],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     },
     "..."
   ],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1453,20 +1643,26 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 ```json
 {
-  "class": ["leave-game"],
+  "class": [
+    "leave-game"
+  ],
   "properties": {
     "message": "User world left the game"
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/52/leave"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1501,7 +1697,9 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 ```json
 {
-  "class": ["matchmaking"],
+  "class": [
+    "matchmaking"
+  ],
   "properties": {
     "message": "User on waiting queue",
     "idType": "mid",
@@ -1509,11 +1707,13 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/matchmaking"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [
     {
@@ -1522,10 +1722,14 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
       "method": "DELETE",
       "type": "application/json",
       "fields": [],
-      "requireAuth": [true]
+      "requireAuth": [
+        true
+      ]
     }
   ],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1543,7 +1747,9 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 ```json
 {
-  "class": ["matchmaking"],
+  "class": [
+    "matchmaking"
+  ],
   "properties": {
     "message": "Match found",
     "idType": "gid",
@@ -1551,7 +1757,9 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/51"
     },
     {
@@ -1561,10 +1769,12 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
       "href": "/api/games/51"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1596,20 +1806,26 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 ```json
 {
-  "class": ["leave-matchmaking"],
+  "class": [
+    "leave-matchmaking"
+  ],
   "properties": {
     "message": "User world left matchmaking queue"
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/matchmaking/48/exit"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1641,7 +1857,9 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 ```json
 {
-  "class": ["matchmaking-status"],
+  "class": [
+    "matchmaking-status"
+  ],
   "properties": {
     "mid": 47,
     "uid": 133,
@@ -1653,14 +1871,18 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/matchmaking/47/status"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
@@ -1684,7 +1906,9 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
 
 ```json
 {
-  "class": ["variant-list"],
+  "class": [
+    "variant-list"
+  ],
   "properties": {
     "variants": [
       {
@@ -1740,14 +1964,18 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
   },
   "links": [
     {
-      "rel": ["self"],
+      "rel": [
+        "self"
+      ],
       "href": "/api/games/variants"
     }
   ],
-  "recipeLinks":[],
+  "recipeLinks": [],
   "entities": [],
   "actions": [],
-  "requireAuth": [true]
+  "requireAuth": [
+    true
+  ]
 }
 ```
 
