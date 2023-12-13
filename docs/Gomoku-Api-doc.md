@@ -16,12 +16,12 @@ designed to be consumed by a front-end application.
     - [Logout](#logout)
     - [Get User by ID](#get-user-by-id)
     - [Get Home Page with User Login](#get-home-page-with-user-login)
-    - [Get Stats Page of User by Id](#get-stats-page-of-user-by-id)
+    - [Get Stats Page of User by id](#get-stats-page-of-user-by-id)
     - [Get Ranking Info Page of all Users](#get-ranking-info-page-of-all-users)
     - [Update User](#update-user)
     - [Get User Stats by Username](#get-user-stats-by-username)
 - [Game](#game)
-    - [Get Game Info by Id](#get-game-info-by-id)
+    - [Get Game Info by id](#get-game-info-by-id)
     - [Play a Round](#play-a-round)
     - [Get All Games By User Page](#get-all-games-by-user-page)
     - [Get All Games](#get-all-games)
@@ -628,7 +628,7 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 #
 
-### Get Stats Page of User by Id
+### Get Stats Page of User by id
 
     Retrieve the stats page of a user by his Id.
 
@@ -945,7 +945,7 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 **Description**: HTTP API requests to create games, enter matchmaking ,play rounds and get information about the games.
 
-### Get Game Info by Id
+### Get Game Info by id
 
     Retrieve information about a specific Gomoku game by its ID.
 
@@ -1130,7 +1130,7 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
           "validationInfo": "$2a$10$hnwigk1HMn5fGcqUGRaEr.UHrIDpBa2IVZX863L.ZBbPsqWLJ0r3a"
         }
       },
-      "state": "NEXT_PLAYER_BLACK",
+      "state": "NEXT_PLAYER_WHITE",
       "variant": {
         "name": "STANDARD",
         "boardDim": 15,
@@ -1139,8 +1139,7 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
         "points": 110
       },
       "created": "2023-12-09T23:13:06Z"
-    },
-    "state": "NEXT_PLAYER_BLACK"
+    }
   },
   "links": [
     {
@@ -1227,8 +1226,7 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
         "points": 110
       },
       "created": "2023-12-09T23:13:06Z"
-    },
-    "state": "NEXT_PLAYER_BLACK"
+    }
   },
   "links": [
     {
@@ -1867,7 +1865,7 @@ zLNjh8mfRHzqCYsw0S8EXkTVmdLrczsNKvO6qnYoe8s=
     "state": "MATCHED",
     "variant": "STANDARD",
     "created": "2023-12-09T23:10:55Z",
-    "pollingTimOut": 3000
+    "pollingTimeOut": 3000
   },
   "links": [
     {

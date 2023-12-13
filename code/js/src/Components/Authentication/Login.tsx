@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { login } from '../../Service/users/UserServices';
+import {Navigate, useLocation} from 'react-router-dom';
+import {login} from '../../Service/users/UserServices';
 
 type State =
   | { tag: 'editing'; error?: string; inputs: { username: string; password: string } }
@@ -53,7 +53,6 @@ function reduce(state: State, action: Action): State {
  * In the 'redirect' state, the user is redirected to their previous location, or to the '/me' page if no previous location is available.
  */
 export function Login() {
-  console.log('Login');
   const [state, dispatch] = React.useReducer(reduce, { tag: 'editing', inputs: { username: '', password: '' } });
   // const [showPassword, setShowPassword] = React.useState(false);
   const location = useLocation();

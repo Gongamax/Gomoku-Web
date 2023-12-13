@@ -1,9 +1,9 @@
 package pt.isel.daw.gomoku.domain.games
 
-import pt.isel.daw.gomoku.domain.users.User
 import kotlinx.datetime.Instant
 import pt.isel.daw.gomoku.domain.games.board.Board
 import pt.isel.daw.gomoku.domain.games.variants.Variants
+import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.utils.Id
 
 /**
@@ -37,12 +37,6 @@ data class Game(
         DRAW;
         val isEnded: Boolean
             get() = this == PLAYER_BLACK_WON || this == PLAYER_WHITE_WON || this == DRAW
-
-        fun other() = when (this) {
-            NEXT_PLAYER_BLACK -> NEXT_PLAYER_WHITE
-            NEXT_PLAYER_WHITE -> NEXT_PLAYER_BLACK
-            else -> throw IllegalStateException("Game is ended")
-        }
 
         override fun toString(): String {
             return when (this) {

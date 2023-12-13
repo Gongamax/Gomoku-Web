@@ -101,8 +101,7 @@ class GameController(
                                 res.value.variant.points
                             ),
                             res.value.created.toString()
-                        ),
-                        res.value.state.toString()
+                        )
                     )
                 ) {
                     clazz("play")

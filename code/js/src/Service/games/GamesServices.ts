@@ -1,14 +1,14 @@
-import { HTTPService } from '../HttpService';
-import { CancelMatchmakingOutput } from './models/CancelMatchmakingOutput';
-import { GetGameOutput } from './models/GetGameOutput';
-import { GetMatchmakingStatusOutput } from './models/GetMatchmakingStatusOutput';
-import { GetAllGamesByUserOutput } from './models/GetUserGamesOutput';
-import { GetVariantsOutput } from './models/GetVariantsOutput';
-import { MatchmakingOutput } from './models/MatchmakingOutput';
-import { PlayGameOutput } from './models/PlayGameOutput';
-import { SurrenderGameOutput } from './models/SurrenderGameOutput';
-import { linkRecipe } from '../../index';
-import { HomeRecipeRelations } from '../home/HomeRecipeRelations';
+import {HTTPService} from '../HttpService';
+import {CancelMatchmakingOutput} from './models/CancelMatchmakingOutput';
+import {GetGameOutput} from './models/GetGameOutput';
+import {GetMatchmakingStatusOutput} from './models/GetMatchmakingStatusOutput';
+import {GetAllGamesByUserOutput} from './models/GetUserGamesOutput';
+import {GetVariantsOutput} from './models/GetVariantsOutput';
+import {MatchmakingOutput} from './models/MatchmakingOutput';
+import {PlayGameOutput} from './models/PlayGameOutput';
+import {SurrenderGameOutput} from './models/SurrenderGameOutput';
+import {linkRecipe} from '../../index';
+import {HomeRecipeRelations} from '../home/HomeRecipeRelations';
 
 const httpService = new HTTPService();
 
@@ -49,6 +49,7 @@ export async function playGame(gid: number, row: number, column: number): Promis
 export async function matchmaking(variant: string): Promise<MatchmakingOutput> {
   const path: string = (await linkRecipe)
     .find((recipe) => recipe.rel === HomeRecipeRelations.MATCHMAKING).href;
+  console.log(`path: ${path}`);
   return await httpService.post<MatchmakingOutput>(path, JSON.stringify({ variant }));
 }
 

@@ -23,6 +23,9 @@ import java.net.URI
 class UsersController(
     private val userService: UsersService
 ) {
+
+    private val expireCookie = -1
+
     @PostMapping(Uris.Users.REGISTER)
     fun create(@RequestBody @Valid input: UserCreateInputModel): ResponseEntity<*> {
         return when (val res = userService.createUser(input.username, input.email, input.password)) {
@@ -59,11 +62,11 @@ class UsersController(
                     .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                     .header(
                         "Set-Cookie",
-                        "token=${res.value.tokenValue}; Max-Age=${cookieMaxAge}; HttpOnly; SameSite=Strict; Path=/"
+                        "token=${res.value.tokenValue}; Max-Age=$cookieMaxAge; HttpOnly; SameSite=Strict; Path=/"
                     )
                     .header(
                         "Set-Cookie",
-                        "login=${input.username}; Max-Age=${cookieMaxAge}; SameSite=Strict; Path=/"
+                        "login=${input.username}; Max-Age=$cookieMaxAge; SameSite=Strict; Path=/"
                     )
                     .body(
                         siren(UserTokenCreateOutputModel(res.value.tokenValue)) {
@@ -87,11 +90,11 @@ class UsersController(
                 .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                 .header(
                     "Set-Cookie",
-                    "token=; Max-Age=0; HttpOnly; SameSite=Strict"
+                    "token=${authenticatedUser.token}; Max-Age=0; HttpOnly; SameSite=Strict; Path=/"
                 )
                 .header(
                     "Set-Cookie",
-                    "username=; Max-Age=0; SameSite=Strict"
+                    "login=${authenticatedUser.user.username}; Max-Age=0; SameSite=Strict; Path=/"
                 )
                 .body(
                     siren(

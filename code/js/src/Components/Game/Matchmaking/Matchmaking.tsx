@@ -1,15 +1,17 @@
 import * as React from 'react';
-import { getMatchmakingStatus } from '../../../Service/games/GamesServices';
-import { Navigate, useParams } from 'react-router-dom';
-import { QueueEntry } from '../../../Domain/games/QueueEntry';
-import { useRef } from 'react';
+import {useRef} from 'react';
+import {cancelMatchmaking, getMatchmakingStatus} from '../../../Service/games/GamesServices';
+import {Navigate, useParams} from 'react-router-dom';
+import {QueueEntry} from '../../../Domain/games/QueueEntry';
 
-type State = { tag: 'readingStatus'; queueEntryId: number } | { tag: 'redirect'; gameId: number; queueEntryId: number };
+type State =
+    | { tag: 'readingStatus'; queueEntryId: number }
+    | { tag: 'redirect'; gameId: number; queueEntryId: number; cancel: boolean };
 
 type Action =
   | { type: 'readingStatus'; queueEntryId: number }
   | { type: 'readSuccess'; queueEntry: QueueEntry }
-  | { type: 'redirect'; gameId: number }
+  | { type: 'redirect'; gameId: number, cancel: boolean }
   | { type: 'readError'; message: string };
 
 const logUnexpectedAction = (state: State, action: Action) => {
@@ -23,7 +25,7 @@ function reduce(state: State, action: Action): State {
         if (action.queueEntry.status === 'PENDING') {
           return state;
         } else if (action.queueEntry.status === 'MATCHED') {
-          return { tag: 'redirect', gameId: action.queueEntry.gameId!, queueEntryId: state.queueEntryId };
+          return { tag: 'redirect', gameId: action.queueEntry.gameId!, queueEntryId: state.queueEntryId, cancel: false };
         } else {
           return state;
         }
@@ -31,7 +33,7 @@ function reduce(state: State, action: Action): State {
         return state;
       } else if (action.type === 'redirect') {
         // Handle 'redirect' action in 'readingStatus' state
-        return { tag: 'redirect', gameId: action.gameId, queueEntryId: state.queueEntryId };
+        return { tag: 'redirect', gameId: action.gameId, queueEntryId: state.queueEntryId, cancel: action.cancel };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -53,7 +55,7 @@ export function MatchmakingPage() {
       const queueEntry = await getMatchmakingStatus(state.queueEntryId);
       pollingTimeout.current = queueEntry.properties.pollingTimOut;
       if (queueEntry.properties.state === 'MATCHED') {
-        dispatch({ type: 'redirect', gameId: queueEntry.properties.gid! });
+        dispatch({ type: 'redirect', gameId: queueEntry.properties.gid!, cancel: false });
         // leave the interval running
         clearInterval(interval);
       }
@@ -61,13 +63,24 @@ export function MatchmakingPage() {
     return () => clearInterval(interval);
   }, [state.queueEntryId]);
 
+  async function handleCancel() {
+    clearInterval(pollingTimeout.current);
+    await cancelMatchmaking(state.queueEntryId);
+    dispatch({ type: 'redirect', gameId: undefined, cancel: true });
+  }
+
   switch (state.tag) {
     case 'readingStatus':
-      return <div>Searching for a opponent...</div>;
+      return(
+          <div>
+               <h3>Searching for a opponent...</h3>
+                <button onClick={handleCancel}>Cancel</button>
+          </div>
+      );
     case 'redirect':
       return <div>
         <p>Opponent found! Redirecting to game {state.gameId}...</p>
-        <Navigate to={`/game/${state.gameId}`}/>;
+        <Navigate to={ state.cancel ? '/lobby' : `/game/${state.gameId}`}/>;
       </div>;
   }
 }

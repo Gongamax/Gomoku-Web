@@ -1,25 +1,28 @@
 import * as React from 'react';
-import { Navigate, useParams } from 'react-router-dom';
-import { Game, GameState } from '../../../Domain/games/Game';
+import {Navigate, useParams} from 'react-router-dom';
+import {Game} from '../../../Domain/games/Game';
 import * as GameService from '../../../Service/games/GamesServices';
-import { User } from '../../../Domain/users/User';
-import { GameBoard } from './GameBoard';
-import { checkTurn, convertToDomainGame, deserializeBoard, handleWinner } from './GameUtils';
-import { getUserName } from '../../Authentication/RequireAuthn';
+import {User} from '../../../Domain/users/User';
+import {PresentGame, ResultPresentation} from './GamePresentation';
+import {checkTurn, convertToDomainGame, handleWinner, isDraw, isWin} from './GameUtils';
+import {getUserName} from '../../Authentication/RequireAuthn';
+
+let pollingTimeOut: number = 0;
 
 type State =
   | { tag: 'loading' }
   | { tag: 'myTurn'; game: Game }
-  | { tag: 'loadingPlay'; game: Game; resign: boolean }
+  | { tag: 'loadingPlay'; game: Game; }
   | { tag: 'opponentTurn'; game: Game }
   | { tag: 'gameOver'; game: Game; winner: User }
   | { tag: 'redirect' }
-  | { tag: 'error'; message: string };
+  | { tag: 'error'; game?: Game, message: string};
 
 type Action =
-  | { type: 'makePlay'; game: Game; resign: boolean }
-  | { type: 'error'; message: string; game?: Game; isMyTurn?: boolean }
-  | { type: 'success'; game: Game; isMyTurn: boolean; isOver: boolean; winner?: User };
+  | { type: 'makePlay'; game: Game; hasPlayed: boolean}
+  | { type: 'error'; message: string; game: Game }
+  | { type: 'waiting'; game:Game}
+  | { type: 'gameOver'; game: Game; winner: User };
 
 function logUnexpectedAction(state: State, action: Action) {
   console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
@@ -28,13 +31,13 @@ function logUnexpectedAction(state: State, action: Action) {
 function reduce(state: State, action: Action): State {
   switch (state.tag) {
     case 'loading':
-      if (action.type === 'success') {
-        if (action.isMyTurn)
-          return { tag: 'myTurn', game: action.game };
-        else
+      if (action.type === 'waiting') {
           return { tag: 'opponentTurn', game: action.game };
-      } else if (action.type === 'error') {
-        return { tag: 'error', message: action.message };
+      }else if( action.type == 'makePlay'){
+          return { tag: 'myTurn', game: action.game };
+      }
+      else if (action.type === 'error') {
+        return { tag: 'error', game: action.game ,message: action.message };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -42,43 +45,65 @@ function reduce(state: State, action: Action): State {
 
     case 'myTurn':
       if (action.type === 'makePlay') {
-        return { tag: 'loadingPlay', game: action.game, resign: action.resign };
-      } else {
+        if (action.hasPlayed)
+          return { tag: 'loadingPlay', game: action.game };
+        else
+          return state;
+      }
+      else if (action.type === 'waiting') {
+        return { tag: 'opponentTurn', game: action.game };
+      }
+      else if (action.type === 'gameOver') {
+        return {tag: 'gameOver', game: action.game, winner: action.winner};
+      }
+      else if (action.type == 'error'){
+        return { tag: 'error', game: action.game, message: action.message }
+      }
+      else {
         logUnexpectedAction(state, action);
         return state;
       }
 
     case 'opponentTurn':
-      if (action.type === 'success') {
-        if (action.isOver) {
-          return { tag: 'gameOver', game: action.game, winner: action.winner };
-        } else {
-          return { tag: 'myTurn', game: action.game };
-        }
-      } else if (action.type === 'error') {
-        return state;
-      } else {
+      if (action.type === 'waiting') {
+          return state;
+      }
+      else if (action.type === 'gameOver'){
+        return {tag: 'gameOver', game: action.game, winner: action.winner}
+      }
+      else if(action.type === 'makePlay') {
+        return { tag: 'myTurn', game: action.game };
+      }
+      else if (action.type == 'error'){
+        return { tag: 'error', game: action.game, message: action.message }
+      }
+      else {
         logUnexpectedAction(state, action);
         return state;
       }
 
     case 'loadingPlay':
-      if (action.type === 'success') {
-        if (action.isOver) {
-          return { tag: 'gameOver', game: action.game, winner: action.winner };
-        } else {
-          return { tag: 'myTurn', game: action.game };
-        }
-      } else if (action.type === 'error') {
-        return { tag: 'myTurn', game: action.game };
-      } else {
+      if (action.type === 'gameOver') {
+        return {tag: 'gameOver', game: action.game, winner: action.winner};
+      }
+      else if (action.type == 'waiting'){
+          return { tag: 'opponentTurn', game: action.game };
+      }
+      else if (action.type == 'error'){
+        return { tag: 'error', game: action.game, message: action.message }
+      }
+      else {
         logUnexpectedAction(state, action);
         return state;
       }
     case 'gameOver':
-      if (action.type === 'success') {
+      if (action.type === 'gameOver') {
         return { tag: 'redirect' };
-      } else {
+      }
+      else if (action.type == 'error'){
+        return { tag: 'error', game: action.game, message: action.message }
+      }
+      else {
         logUnexpectedAction(state, action);
         return state;
       }
@@ -95,110 +120,124 @@ export function GamePage() {
   const { gid } = useParams<{ gid: string }>();
   const gameId = Number(gid);
   const currentUser = getUserName();
-  const intervalId = React.useRef<NodeJS.Timeout | null>(null);
 
-  const fetchData = React.useCallback(async () => {
-    const response = (await GameService.getGame(gameId)).properties;
-    const isMyTurn: boolean = checkTurn(currentUser, response.game);
-    dispatch({
-      type: 'success',
-      game: convertToDomainGame(response.game),
-      isMyTurn: isMyTurn,
-      isOver: response.game.state === GameState.PLAYER_BLACK_WON || response.game.state === GameState.PLAYER_WHITE_WON,
-    });
-  }, [gameId, currentUser, dispatch]);
+  const fetchData = async () => {
+      const response = (await GameService.getGame(gameId)).properties;
+      pollingTimeOut = response.pollingTimeOut;
+      const game = convertToDomainGame(response.game)
+      if (isWin(game)){
+        clearInterval(pollingTimeOut);
+        dispatch({
+          type: 'gameOver',
+          game: game,
+          winner: handleWinner(game)
+        })
+      }
+      else if (isDraw(game)){
+        clearInterval(pollingTimeOut);
+        dispatch({
+          type: 'gameOver',
+          game: game,
+          winner: undefined
+        })
+      }
+      else {
+        if (checkTurn(currentUser, response.game)){
+          clearInterval(pollingTimeOut);
+          dispatch({
+            type: 'makePlay',
+            game: game,
+            hasPlayed: false
+          });
+        }else{
+          dispatch({
+            type: 'waiting',
+            game: game
+          });
+        }
+      }
+  };
 
   React.useEffect(() => {
-      intervalId.current = setInterval(async () => {
-        try {
-          await fetchData();
-        } catch (error) {
-          console.warn('Failed to fetch game:', error);
-        }
-      }, 5000);
-    return () => {
-      if (intervalId.current) {
-        clearInterval(intervalId.current);
-      }
-    };
-  }, [gameId, currentUser, state, fetchData]);
+    try {
+      console.log(`state: ${state.tag}`)
+      fetchData().catch(error => handleErrors(undefined, error.message))
+    } catch (error) {
+      handleErrors(undefined, error.message)
+    }
+  });
 
   async function handlePlay(row: number, col: number) {
     if (state.tag === 'myTurn')
       try {
         // Send a request to the server to make a move
-        const updatedGame = await GameService.playGame(state.game.id, row, col);
+        await GameService.playGame(state.game.id, row, col);
         // Update the local game state based on the server's response
-        dispatch({
-          type: 'makePlay',
-          game: convertToDomainGame(updatedGame.properties.game),
-          resign: false,
-        });
+        fetchData().catch(error => handleErrors(state.game, error.message))
       } catch (error) {
-        console.error('Failed to make a move:', error);
+        handleErrors(state.game, error.message)
       }
   }
 
+  async function handleWaiting(pollingTimeOut: number){
+      setInterval(()=> { fetchData() }, pollingTimeOut)
+  }
+
   async function handleResign(): Promise<void> {
-    const gameState = state as { tag: 'myTurn'; game: Game; isMyTurn: boolean };
-    try {
-      await GameService.surrenderGame(gameState.game.id);
-      dispatch(
-        {
-          type: 'success',
-          game: gameState.game,
-          isMyTurn: gameState.isMyTurn,
-          isOver: true,
-          winner: handleWinner(gameState.game),
-        },
-      );
-    } catch (error) {
-      console.error('Failed to resign:', error);
+    if (state.tag === 'myTurn' || state.tag === 'opponentTurn') {
+      try {
+        await GameService.surrenderGame(state.game.id);
+        fetchData().catch(error => handleErrors(state.game, error.message))
+      } catch (error) {
+        console.error('Failed to resign:', error);
+      }
     }
+  }
+
+  function handleExit(){
+   if (state.tag === 'gameOver') {
+     dispatch({
+       type: 'gameOver',
+       game: state.game,
+       winner: handleWinner(state.game),
+     })
+   }
+  }
+
+  function handleErrors(game: Game, error: string){
+    dispatch({
+      type:'error',
+      game: game,
+      message: error
+    })
   }
 
   switch (state.tag) {
     case 'loading':
-      return <div>Loading...</div>;
+      return (
+          <div>
+            <h3>Loading...</h3>
+          </div>
+      );
 
     case 'myTurn': {
-      const {
-        board,
-        turn,
-      } = deserializeBoard(
-        state.game.board.moves,
-        state.game.board.turn?.toString() ?? state.game.board.winner.toString(),
-        state.game.variant.boardDim,
-      );
       return (
         <div>
-          <h1>{state.game.players[0].username} vs {state.game.players[1].username}</h1>
-          <h2>Turn: {turn}</h2>
-          <GameBoard board={board} onPlay={handlePlay} />
-          <button
-            onClick={handleResign}>Surrender
-          </button>
+          <PresentGame game={state.game} onPlay={ handlePlay } onResign={ handleResign }/>
         </div>
       );
     }
 
     case 'opponentTurn': {
-      const {
-        board,
-        turn,
-      } = deserializeBoard(
-        state.game.board.moves,
-        state.game.board.turn?.toString() ?? state.game.board.winner.toString(),
-        state.game.variant.boardDim,
-      );
+      handleWaiting(pollingTimeOut).catch(error => dispatch({
+        type: 'error',
+        game: state.game,
+        message: error.toString()
+      }))
       return (
         <div>
-          <h1>{state.game.players[0].username} vs {state.game.players[1].username}</h1>
-          <h2>Turn: {turn}</h2>
-          <GameBoard board={board} onPlay={handlePlay} />
-          <button
-            onClick={handleResign}>Surrender
-          </button>
+          <PresentGame game={state.game} onPlay={ () => { } } onResign={ handleResign }/>
+          <h3>Waiting for opponent to play...</h3>
         </div>
       );
     }
@@ -206,30 +245,32 @@ export function GamePage() {
     case 'loadingPlay':
       return <div>
         <div>
-          <h1>{state.game.players[0].username} vs {state.game.players[1].username}</h1>
-          <h2>loading...</h2>
+          <PresentGame game={state.game} onPlay={ () => { } } onResign={ () => { } }/>
+          <h3>loading Play...</h3>
         </div>
       </div>;
 
     case 'gameOver':
       return (
         <div>
-          <h1>Game Over</h1>
-          <h2>{state.winner.username} won!</h2>
-          <h2>Points: +{state.game.variant.points}</h2>
-          <Navigate to="/" />
+          <PresentGame game={state.game} onPlay={ () => { } } onResign={ () => { } }/>
+          <ResultPresentation
+              me={currentUser}
+              winner={state.winner.username}
+              points={state.game.variant.points}
+              onExit={handleExit}
+          />
         </div>
       );
     case 'error':
       return (
         <div>
+          <PresentGame game={state.game} onPlay={ () => { } } onResign={ () => { } }/>
           <h3>{state.message}</h3>
-          {<button onClick={() => fetchData()}>Retry</button>}
+          <button onClick={() => fetchData()}>Retry</button>
         </div>
       );
     case 'redirect':
-      return <Navigate to="/" />;
+      return <Navigate to="/me" />;
   }
 }
-
-

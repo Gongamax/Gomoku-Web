@@ -1,18 +1,17 @@
 import * as React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Register } from './Components/Authentication/Register';
-import { AboutPage } from './Components/About/About';
-import { HomePage } from './Components/Home/Home';
-import { Login } from './Components/Authentication/Login';
-import { RankingPage } from './Components/Ranking/Ranking';
-import { LobbyPage } from './Components/Game/Lobby/Lobby';
-import { ProfilePage } from './Components/Profile/Profile';
-import { MatchmakingPage } from './Components/Game/Matchmaking/Matchmaking';
-import { RequireAuthn } from './Components/Authentication/RequireAuthn';
-import { Me } from './Components/Home/Me';
-import { NavBarWrapper } from './Layout/NavBar';
-import { GamePage } from './Components/Game/GamePlay/Game';
-import { MatchHistory } from './Components/Profile/MatchHistory';
+import {createBrowserRouter, RouterProvider} from 'react-router-dom';
+import {Register} from './Components/Authentication/Register';
+import {AboutPage} from './Components/About/About';
+import {HomePage} from './Components/Home/Home';
+import {Login} from './Components/Authentication/Login';
+import {RankingPage} from './Components/Ranking/Ranking';
+import {LobbyPage} from './Components/Game/Lobby/Lobby';
+import {ProfilePage} from './Components/Profile/Profile';
+import {MatchmakingPage} from './Components/Game/Matchmaking/Matchmaking';
+import {RequireAuthn} from './Components/Authentication/RequireAuthn';
+import {Me} from './Components/Home/Me';
+import {NavBarWrapper} from './Layout/NavBar';
+import {GamePage} from './Components/Game/GamePlay/Game';
 
 /**
  * `App` is the root component of the application.
@@ -43,12 +42,6 @@ const router = createBrowserRouter([
       {
         'path': '/users/:uid',
         'element': <RequireAuthn><ProfilePage /></RequireAuthn>,
-        'children': [
-          {
-            'path': 'history',
-            'element': <RequireAuthn><MatchHistory /></RequireAuthn>,
-          },
-        ],
       },
       {
         'path': '/about',

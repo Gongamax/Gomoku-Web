@@ -7,11 +7,10 @@
     2. [File Structure](#file-structure)
     3. [Components](#components)
     4. [Services](#services)
-    5. [State Management](#state-management)
-    6. [Routing](#routing)
-    7. [Authentication](#authentication)
-    8. [Testing](#testing)
-    9. [Conclusion](#conclusion)
+    5. [Routing](#routing)
+    6. [Authentication](#authentication)
+    7. [Testing](#testing)
+    8. [Conclusion](#conclusion)
 
 ## Introduction
 
@@ -46,7 +45,7 @@ Each component is designed with the principles of React in mind. They are modula
 state and logic. The state of a component is managed using React's useState hook, which allows the component to maintain
 and update its own state in response to user actions or other events. 
 
-For example, a GameBoard component might maintain
+For example, a GamePresentation component might maintain
 a state representing the current state of the game board. This state would be updated in response to user actions, such
 as making a move. The component would also define a set of actions that can be performed on its state, such as makeMove
 or resetBoard. The components also make use of React's useEffect hook to perform side effects, such as fetching data

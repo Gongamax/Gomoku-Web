@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import org.postgresql.ds.PGSimpleDataSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import pt.isel.daw.gomoku.utils.Environment
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
 import pt.isel.daw.gomoku.domain.games.board.Cell
@@ -19,6 +18,7 @@ import pt.isel.daw.gomoku.repository.jdbi.configureWithAppRequirements
 import pt.isel.daw.gomoku.services.games.GamesService
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
+import pt.isel.daw.gomoku.utils.Environment
 import pt.isel.daw.gomoku.utils.PositiveValue
 import kotlin.math.abs
 import kotlin.random.Random
@@ -117,7 +117,7 @@ class GameServiceTests {
         }
 
         // when: getting all games
-        val allGames = gamesService.getAll(PositiveValue(0))
+        val allGames = gamesService.getAll(PositiveValue(1))
 
         //then: the game is found
         assertNotNull(allGames)

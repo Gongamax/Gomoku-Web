@@ -1,24 +1,24 @@
 import * as React from 'react';
-import { useEffect } from 'react';
-import { Link, Outlet, useParams } from 'react-router-dom';
-import { getStatsById } from '../../Service/users/UserServices';
-import { UserInfo } from '../../Domain/users/UserInfo';
+import {useEffect} from 'react';
+import {getStatsById} from '../../Service/users/UserServices';
+import {UserInfo} from '../../Domain/users/UserInfo';
+import {getAllGamesByUser} from "../../Service/games/GamesServices";
+import {convertToDomainMatchHistory, convertToDomainUser} from "./ProfileUtil";
+import {useParams} from "react-router-dom";
 
 /**
  * `Match` is a type that represents a match.
  * It includes properties for `opponent` and `result`.
  */
-type Match = {
-  opponent: string;
-  result: string;
-}
 
-type State = { tag: 'loading' } | { tag: 'presenting'; userInfo: UserInfo } | { tag: 'error'; message: string };
+type State =
+    | { tag: 'loading' }
+    | { tag: 'presentOnlyInfo'; userInfo: UserInfo}
+    | { tag: 'presentEverything'; userInfo: UserInfo }
+    | { tag: 'error'; message: string };
 
 type Action =
-  | { type: 'startLoading' }
-  | { type: 'loadSuccess'; userInfo: UserInfo }
-  | { type: 'loadMatchHistory'; matchHistory: Match[] }
+  | { type: 'loadSuccess'; userInfo: UserInfo, presentHistory: boolean}
   | { type: 'loadError'; message: string };
 
 /**
@@ -44,7 +44,7 @@ const reduce = (state: State, action: Action): State => {
   switch (state.tag) {
     case 'loading':
       if (action.type === 'loadSuccess') {
-        return { tag: 'presenting', userInfo: action.userInfo };
+        return { tag: 'presentOnlyInfo', userInfo: action.userInfo };
       } else if (action.type === 'loadError') {
         return { tag: 'error', message: action.message };
       } else {
@@ -52,7 +52,22 @@ const reduce = (state: State, action: Action): State => {
         return state;
       }
 
-    case 'presenting':
+    case 'presentOnlyInfo':
+      if(action.type === 'loadSuccess'){
+          if (action.presentHistory){
+             return  { tag: "presentEverything", userInfo: action.userInfo }
+          }
+          else  return state
+      }
+      else if(action.type === 'loadError'){
+        return { tag: 'error', message: action.message };
+      }
+      else  logUnexpectedAction(state, action);
+      return state;
+
+    case "presentEverything":
+      return state;
+
     case 'error':
       logUnexpectedAction(state, action);
       return state;
@@ -69,33 +84,34 @@ const reduce = (state: State, action: Action): State => {
 export function ProfilePage() {
   const { uid } = useParams<{ uid: string }>();
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
+  const [matchHistory, setMatchHistory] = React.useState([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        dispatch({ type: 'startLoading' });
         const userResponse = await getStatsById(Number(uid));
-        const userInfo = {
-          username: userResponse.properties.username,
-          wins: userResponse.properties.wins,
-          losses: userResponse.properties.losses,
-          draws: userResponse.properties.gamesPlayed - (userResponse.properties.wins + userResponse.properties.losses),
-          gamesPlayed: userResponse.properties.gamesPlayed,
-        };
-        dispatch({ type: 'loadSuccess', userInfo });
+        const historyResponse = await getAllGamesByUser(Number(uid));
+        const userInfo = convertToDomainUser(userResponse);
+        const history = convertToDomainMatchHistory(historyResponse, Number(uid))
+        setMatchHistory(history);
+        dispatch({ type: 'loadSuccess', userInfo: userInfo, presentHistory: false });
       } catch (error) {
         dispatch({ type: 'loadError', message: error.message });
       }
     }
-
     fetchData();
   }, [uid]);
+
+  async function handleHistoryRequest(){
+    const userState = state as { tag: 'presentOnlyInfo'; userInfo: UserInfo}
+    dispatch({ type: 'loadSuccess', userInfo: userState.userInfo, presentHistory: true });
+  }
 
   switch (state.tag) {
     case 'loading':
       return <div>Loading...</div>;
 
-    case 'presenting':
+    case 'presentOnlyInfo':
       return (
         <div>
           <h1>User Profile: {state.userInfo.username}</h1>
@@ -103,11 +119,37 @@ export function ProfilePage() {
           <p>Losses: {state.userInfo.losses}</p>
           <p>Draws: {state.userInfo.draws}</p>
           <p>Games Played: {state.userInfo.gamesPlayed}</p>
-
-          {/* Button to link to match history */}
-          <button><Link to="history">Match History</Link></button>
-          <Outlet />
+          <button onClick={handleHistoryRequest}>Match History</button>
         </div>
+      );
+
+    case 'presentEverything':
+      return (
+          <div>
+            <h1>User Profile: {state.userInfo.username}</h1>
+            <p>Wins: {state.userInfo.wins}</p>
+            <p>Losses: {state.userInfo.losses}</p>
+            <p>Draws: {state.userInfo.draws}</p>
+            <p>Games Played: {state.userInfo.gamesPlayed}</p>
+            <h2>Match History</h2>
+            <table style={{width: '100%', borderCollapse: 'collapse'}}>
+              <thead>
+              <tr style={{borderBottom: '1px solid #ccc'}}>
+                <th style={{padding: '10px', textAlign: 'left'}}>Opponent</th>
+                <th style={{padding: '10px', textAlign: 'left'}}>Result</th>
+              </tr>
+              </thead>
+              <tbody>
+              {matchHistory.map((match, index) => (
+                  <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                    <td style={{padding: '10px'}}><a
+                        href={`/users/${match.opponent.id.value}`}>{match.opponent.username}</a></td>
+                    <td style={{padding: '10px'}}>{match.result}</td>
+                  </tr>
+              ))}
+              </tbody>
+            </table>
+          </div>
       );
 
     case 'error':

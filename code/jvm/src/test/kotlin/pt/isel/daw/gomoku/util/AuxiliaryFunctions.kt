@@ -45,7 +45,7 @@ object AuxiliaryFunctions {
             .returnResult()
             .responseBody!!
             .properties
-        return (properties as LinkedHashMap<*,*>)["id"].toString().toInt()
+        return (properties as LinkedHashMap<*,*>)["uid"].toString().toInt()
     }
 
 }

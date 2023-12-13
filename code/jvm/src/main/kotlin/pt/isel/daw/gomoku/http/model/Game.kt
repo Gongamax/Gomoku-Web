@@ -7,7 +7,7 @@ import pt.isel.daw.gomoku.domain.users.User
 
 data class GamePlayInputModel(val row: Int, val column: Int)
 
-data class GameRoundOutputModel(val game: GameOutputModel, val state: String)
+data class GameRoundOutputModel(val game: GameOutputModel)
 
 data class GameOutputModel(
     val id: Int,
@@ -20,7 +20,7 @@ data class GameOutputModel(
 )
 
 
-data class GameGetByIdOutputModel(val game: GameOutputModel, val pollingTimOut: Int)
+data class GameGetByIdOutputModel(val game: GameOutputModel, val pollingTimeOut: Int)
 
 data class GameMatchmakingInputModel(@field:NotBlank val variant: String)
 
@@ -35,7 +35,7 @@ data class GameMatchmakingStatusOutputModel(
     val state: String,
     val variant: String,
     val created: String,
-    val pollingTimOut: Int
+    val pollingTimeOut: Int
 )
 
 data class GameGetAllOutputModel(
