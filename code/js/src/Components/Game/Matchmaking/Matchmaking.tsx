@@ -47,24 +47,25 @@ function reduce(state: State, action: Action): State {
 export function MatchmakingPage() {
   const { mid } = useParams<{ mid: string }>();
   const [state, dispatch] = React.useReducer(reduce, { tag: 'readingStatus', queueEntryId: Number(mid) });
-  const pollingTimeout = useRef(4000);
+  const pollingTimeout = useRef(1000);
+  const intervalId = useRef<NodeJS.Timeout>();
 
   React.useEffect(() => {
-    const interval = setInterval(async () => {
+    intervalId.current = setInterval(async () => {
       console.log('Polling for matchmaking status... on id ' + state.queueEntryId);
       const queueEntry = await getMatchmakingStatus(state.queueEntryId);
       pollingTimeout.current = queueEntry.properties.pollingTimOut;
       if (queueEntry.properties.state === 'MATCHED') {
         dispatch({ type: 'redirect', gameId: queueEntry.properties.gid!, cancel: false });
         // leave the interval running
-        clearInterval(interval);
+        clearInterval(intervalId.current);
       }
     }, pollingTimeout.current);
-    return () => clearInterval(interval);
+    return () => clearInterval(intervalId.current);
   }, [state.queueEntryId]);
 
   async function handleCancel() {
-    clearInterval(pollingTimeout.current);
+    clearInterval(intervalId.current);
     await cancelMatchmaking(state.queueEntryId);
     dispatch({ type: 'redirect', gameId: undefined, cancel: true });
   }

@@ -22,6 +22,8 @@ import java.net.URI
 class GameController(
     private val gameService: GamesService
 ) {
+    private val pollingTimeout = 3000
+
     @GetMapping(Uris.Games.GET_GAME_BY_ID)
     fun getGameById(@PathVariable gid: Int, user: AuthenticatedUser): ResponseEntity<*> {
         return when (val game = gameService.getGameById(gid)) {
@@ -43,7 +45,7 @@ class GameController(
                             ),
                             game.value.created.toString()
                         ),
-                        3000
+                        pollingTimeout
                     )
                 ) {
                     clazz("game")
@@ -213,7 +215,7 @@ class GameController(
                         res.value.status.toString(),
                         res.value.variant,
                         res.value.created.toString(),
-                        3000
+                        pollingTimeout
                     )
                 ) {
                     clazz("matchmaking-status")

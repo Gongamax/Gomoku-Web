@@ -1,15 +1,15 @@
 package pt.isel.daw.gomoku.domain
 
-import kotlin.test.Test
-import pt.isel.daw.gomoku.domain.games.board.BoardRun
 import pt.isel.daw.gomoku.domain.games.Piece
 import pt.isel.daw.gomoku.domain.games.board.BoardDraw
+import pt.isel.daw.gomoku.domain.games.board.BoardRun
 import pt.isel.daw.gomoku.domain.games.board.Cell
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.utils.Id
 import pt.isel.daw.gomoku.repository.jdbi.BoardSerializer
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class BoardTests {
@@ -41,7 +41,6 @@ class BoardTests {
     fun `serialize and deserialize a board with moves`() {
 
         val board = BoardRun(mapOf(Cell(1, 2) to Piece.BLACK, Cell(3, 4) to Piece.WHITE), Piece.BLACK)
-        println(board)
         val boardString = board.toString()
         assertEquals(boardString, "Run:BLACK2C:BLACK 4E:WHITE")
 

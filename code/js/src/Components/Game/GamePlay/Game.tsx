@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useRef} from 'react';
 import {Navigate, useParams} from 'react-router-dom';
 import {Game} from '../../../Domain/games/Game';
 import * as GameService from '../../../Service/games/GamesServices';
@@ -7,13 +8,11 @@ import {PresentGame, ResultPresentation} from './GamePresentation';
 import {checkTurn, convertToDomainGame, handleWinner, isDraw, isWin} from './GameUtils';
 import {getUserName} from '../../Authentication/RequireAuthn';
 
-let pollingTimeOut: number = 3000;
-
 type State =
   | { tag: 'loading' }
   | { tag: 'myTurn'; game: Game }
   | { tag: 'loadingPlay'; game: Game; }
-  | { tag: 'opponentTurn'; game: Game }
+  | { tag: 'opponentTurn'; game: Game, pollingTimeOut: number }
   | { tag: 'gameOver'; game: Game; winner: User }
   | { tag: 'redirect' }
   | { tag: 'error'; game?: Game, message: string};
@@ -21,8 +20,9 @@ type State =
 type Action =
   | { type: 'makePlay'; game: Game; hasPlayed: boolean}
   | { type: 'error'; message: string; game: Game }
-  | { type: 'waiting'; game:Game}
-  | { type: 'gameOver'; game: Game; winner: User };
+  | { type: 'waiting'; game:Game, pollingTimeOut: number }
+  | { type: 'gameOver'; game: Game; winner: User, redirect: boolean }
+  | { type: 'retry' };
 
 function logUnexpectedAction(state: State, action: Action) {
   console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
@@ -32,7 +32,7 @@ function reduce(state: State, action: Action): State {
   switch (state.tag) {
     case 'loading':
       if (action.type === 'waiting') {
-          return { tag: 'opponentTurn', game: action.game };
+          return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
       }else if( action.type == 'makePlay'){
           return { tag: 'myTurn', game: action.game };
       }
@@ -51,7 +51,7 @@ function reduce(state: State, action: Action): State {
           return state;
       }
       else if (action.type === 'waiting') {
-        return { tag: 'opponentTurn', game: action.game };
+        return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
       }
       else if (action.type === 'gameOver') {
         return {tag: 'gameOver', game: action.game, winner: action.winner};
@@ -87,7 +87,7 @@ function reduce(state: State, action: Action): State {
         return {tag: 'gameOver', game: action.game, winner: action.winner};
       }
       else if (action.type == 'waiting'){
-          return { tag: 'opponentTurn', game: action.game };
+          return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
       }
       else if (action.type == 'error'){
         return { tag: 'error', game: action.game, message: action.message }
@@ -98,7 +98,12 @@ function reduce(state: State, action: Action): State {
       }
     case 'gameOver':
       if (action.type === 'gameOver') {
-        return { tag: 'redirect' };
+        if (action.redirect){
+          return {tag: 'redirect'}
+        }
+        else{
+          return state;
+        }
       }
       else if (action.type == 'error'){
         return { tag: 'error', game: action.game, message: action.message }
@@ -108,7 +113,11 @@ function reduce(state: State, action: Action): State {
         return state;
       }
     case 'error':
-      return state;
+      if (action.type === 'retry') {
+        return {tag: 'loading'}
+      }
+      else
+        return state;
     case 'redirect':
       logUnexpectedAction(state, action);
       return state;
@@ -120,30 +129,32 @@ export function GamePage() {
   const { gid } = useParams<{ gid: string }>();
   const gameId = Number(gid);
   const currentUser = getUserName();
+  const intervalId = useRef<NodeJS.Timeout>();
 
   const fetchData = async () => {
       const response = (await GameService.getGame(gameId)).properties;
-      pollingTimeOut = response.pollingTimeOut;
       const game = convertToDomainGame(response.game)
       if (isWin(game)){
-        clearInterval(pollingTimeOut);
+        clearInterval(intervalId.current);
         dispatch({
           type: 'gameOver',
           game: game,
-          winner: handleWinner(game)
+          winner: handleWinner(game),
+          redirect: false
         })
       }
       else if (isDraw(game)){
-        clearInterval(pollingTimeOut);
+        clearInterval(intervalId.current);
         dispatch({
           type: 'gameOver',
           game: game,
-          winner: undefined
+          winner: undefined,
+          redirect: false
         })
       }
       else {
         if (checkTurn(currentUser, response.game)){
-          clearInterval(pollingTimeOut);
+          clearInterval(intervalId.current);
           dispatch({
             type: 'makePlay',
             game: game,
@@ -152,7 +163,8 @@ export function GamePage() {
         }else{
           dispatch({
             type: 'waiting',
-            game: game
+            game: game,
+            pollingTimeOut: response.pollingTimeOut
           });
         }
       }
@@ -165,10 +177,12 @@ export function GamePage() {
     } catch (error) {
       handleErrors(undefined, error.message)
     }
+    return () => clearInterval(intervalId.current);
   });
 
   async function handlePlay(row: number, col: number) {
-    if (state.tag === 'myTurn')
+    if (state.tag === 'myTurn') {
+      clearInterval(intervalId.current);
       try {
         // Send a request to the server to make a move
         await GameService.playGame(state.game.id, row, col);
@@ -177,10 +191,11 @@ export function GamePage() {
       } catch (error) {
         handleErrors(state.game, error.message)
       }
+    }
   }
 
   async function handleWaiting(pollingTimeOut: number){
-      setInterval(()=> { fetchData() }, pollingTimeOut)
+     intervalId.current = setInterval(()=> { fetchData() }, pollingTimeOut);
   }
 
   async function handleResign(): Promise<void> {
@@ -200,15 +215,25 @@ export function GamePage() {
        type: 'gameOver',
        game: state.game,
        winner: handleWinner(state.game),
+       redirect: true
      })
    }
   }
 
   function handleErrors(game: Game, error: string){
+    clearInterval(intervalId.current)
     dispatch({
       type:'error',
       game: game,
       message: error
+    })
+  }
+
+  function handleRetry(){
+    clearInterval(intervalId.current)
+    if (state.tag === 'error')
+    dispatch({
+        type:'retry'
     })
   }
 
@@ -229,7 +254,7 @@ export function GamePage() {
     }
 
     case 'opponentTurn': {
-      handleWaiting(pollingTimeOut).catch(error => dispatch({
+      handleWaiting(state.pollingTimeOut).catch(error => dispatch({
         type: 'error',
         game: state.game,
         message: error.toString()
@@ -267,10 +292,11 @@ export function GamePage() {
         <div>
           <PresentGame game={state.game} onPlay={ () => { } } onResign={ () => { } }/>
           <h3>{state.message}</h3>
-          <button onClick={() => fetchData()}>Retry</button>
+          <button onClick={handleRetry}>Retry</button>
         </div>
       );
     case 'redirect':
+      clearInterval(intervalId.current)
       return <Navigate to="/me" />;
   }
 }

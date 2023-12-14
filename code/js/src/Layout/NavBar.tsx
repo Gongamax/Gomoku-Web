@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { useLoggedIn } from '../Components/Authentication/RequireAuthn';
-import { logout } from '../Service/users/UserServices';
+import {Link, Outlet, useNavigate} from 'react-router-dom';
+import {useLoggedIn} from '../Components/Authentication/RequireAuthn';
+import {logout} from '../Service/users/UserServices';
 
 /**
  * `NavBar` is a React functional component that renders a navigation bar.
@@ -40,6 +40,11 @@ function NavBar() {
     textDecoration: 'none',
   };
 
+  const bStyle = {
+    color: 'black',
+    textDecoration: 'none',
+  };
+
   const navigate = useNavigate();
   const loggedIn = useLoggedIn();
 
@@ -59,7 +64,7 @@ function NavBar() {
             <li style={liStyle}><Link to="/lobby" style={linkStyle}>Lobby</Link></li>
             <li style={liStyle}><Link to="/me" style={linkStyle}>Profile</Link></li>
             <li style={liStyle}>
-              <button onClick={handleLogout} style={linkStyle}>Logout</button>
+              <button onClick={handleLogout} style={bStyle}>Logout</button>
             </li>
           </>
         ) : (

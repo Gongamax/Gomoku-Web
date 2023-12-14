@@ -1,6 +1,6 @@
 package pt.isel.daw.gomoku.domain.games.variants
 
-import pt.isel.daw.gomoku.domain.games.*
+import pt.isel.daw.gomoku.domain.games.Piece
 import pt.isel.daw.gomoku.domain.games.board.*
 
 interface Variant {
@@ -49,7 +49,6 @@ interface Variant {
                 (board.moves.filter { it.value == board.turn }.keys + cell).run {
                     any { winningCell ->
                         directions.any { (forwardDir, backwardDir) ->
-                            println(board.moves)
                             val forwardCells = countCellsForIsWin(this.toList(), winningCell, forwardDir)
                             val backwardCells = countCellsForIsWin(this.toList() ,winningCell, backwardDir)
                             val consecutiveCells = backwardCells + listOf(winningCell).size + forwardCells

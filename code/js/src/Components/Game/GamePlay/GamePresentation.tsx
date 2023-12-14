@@ -41,9 +41,9 @@ function BoardPresentation({ board, onPlay }: GameBoardProps) {
       {board.map((row, i) => (
         <tr key={i}>
           {row.map((cell, j) => (
-            <td key={j} onClick={() => onPlay(i + 1, j)}
+            <td key={j} onClick={() => onPlay(i, j)}
                 style={{ width: '30px', height: '30px', border: '1px solid black', textAlign: 'center' }}>
-              {cell === 'BLACK' ? '#' : cell === 'WHITE' ? '*' : '-'}
+              {cell === 'BLACK' ? 'B' : cell === 'WHITE' ? 'W' : ' '}
             </td>
           ))}
         </tr>
@@ -74,7 +74,7 @@ export function ResultPresentation({ me, winner, points, onExit }: GameResultPro
         return (
             <div>
                 <h1>Game Over</h1>
-                <h2>You Draw!</h2>
+                <h2>Player {winner} Won!</h2>
                 <h2>You { me === winner ? 'received' : 'lost' } {points} points</h2>
                 <button onClick={onExit}>Exit</button>
             </div>
