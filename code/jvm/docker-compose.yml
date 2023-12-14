@@ -30,9 +30,7 @@ services:
       context: ..
       dockerfile: ./jvm/tests/Dockerfile-nginx
     ports:
-      - 8080:8080
-    depends_on:
-      - spring-service
+      - 8088:8088
 
   # Just a machine running ubuntu, with 'dig' installed so that we can observe the docker compose environment.
   ubuntu:

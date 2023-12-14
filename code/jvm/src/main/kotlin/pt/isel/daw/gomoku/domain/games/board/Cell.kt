@@ -6,7 +6,12 @@ package pt.isel.daw.gomoku.domain.games.board
  * @property row the row of the cell
  * @property col the column of the cell
  */
-data class Cell(val row: Row, val col: Column) {
+class Cell private constructor(val row: Row, val col: Column) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Cell) return false
+        return row == other.row && col == other.col
+    }
     override fun toString(): String = "${row.number}${col.symbol}"
     operator fun rangeTo(cell: Cell): List<Cell> {
         val cells = mutableListOf<Cell>()
@@ -18,9 +23,17 @@ data class Cell(val row: Row, val col: Column) {
         return cells
     }
 
+    override fun hashCode(): Int {
+        var result = row.hashCode()
+        result = 31 * result + col.hashCode()
+        return result
+    }
+
     companion object {
         operator fun invoke(rowIndex: Int, colIndex: Int) =
-            Cell(Row(rowIndex), Column(colIndex))
+            Cell(Row(rowIndex + 1), Column(colIndex))
+        operator fun invoke(row: Row, col: Column) =
+            Cell(row.index, col.index)
     }
 }
 
@@ -72,4 +85,11 @@ fun cellsInDirection(from: Cell, dir: Direction, boardDim: Int) = buildList {
     var cell = from
     val range = Cell(0, 0)..Cell(boardDim, boardDim)
     while ((cell + dir).also { cell = it } in range) add(cell)
+}
+
+fun countCellsForIsWin(cells : List<Cell>, from: Cell, dir: Direction): Int {
+    var cell = from
+    var count = 0
+    while ((cell + dir).also { cell = it } in cells) count++
+    return count
 }

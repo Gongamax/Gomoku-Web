@@ -6,7 +6,7 @@ import java.net.URI
 object Uris {
 
     private const val PREFIX = "/api"
-    const val HOME = PREFIX
+    const val HOME = "$PREFIX/"
     const val SYSTEM_INFO = "$PREFIX/system"
     fun home(): URI = URI(HOME)
     fun systemInfo(): URI = URI(SYSTEM_INFO)

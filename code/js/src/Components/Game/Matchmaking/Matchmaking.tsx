@@ -47,7 +47,7 @@ function reduce(state: State, action: Action): State {
 export function MatchmakingPage() {
   const { mid } = useParams<{ mid: string }>();
   const [state, dispatch] = React.useReducer(reduce, { tag: 'readingStatus', queueEntryId: Number(mid) });
-  const pollingTimeout = useRef(1000);
+  const pollingTimeout = useRef(4000);
 
   React.useEffect(() => {
     const interval = setInterval(async () => {

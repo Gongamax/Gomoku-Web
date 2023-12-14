@@ -4,7 +4,7 @@
   "description": "",
   "main": "add.js",
   "scripts": {
-    "build": "webpack build",
+    "build": "webpack",
     "start": "webpack serve",
     "test": "npx playwright test"
   },

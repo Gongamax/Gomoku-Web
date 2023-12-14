@@ -43,7 +43,7 @@ class BoardTests {
         val board = BoardRun(mapOf(Cell(1, 2) to Piece.BLACK, Cell(3, 4) to Piece.WHITE), Piece.BLACK)
         println(board)
         val boardString = board.toString()
-        assertEquals(boardString, "Run:BLACK1C:BLACK 3E:WHITE")
+        assertEquals(boardString, "Run:BLACK2C:BLACK 4E:WHITE")
 
         val serialized = boardSerializer.serialize(board)
 
@@ -89,7 +89,7 @@ class BoardTests {
         val boardString = board.toString()
         assertEquals(
             boardString,
-            "Draw:-1B:BLACK 1C:WHITE 1D:BLACK 1E:WHITE 1F:BLACK 2B:WHITE 2C:BLACK 2D:WHITE 2E:BLACK 2F:WHITE 3B:BLACK 3C:WHITE 3D:BLACK 3E:WHITE 3F:BLACK 4B:WHITE 4C:BLACK 4D:WHITE 4E:BLACK 4F:WHITE 5B:BLACK 5C:WHITE 5D:BLACK 5E:WHITE 5F:BLACK"
+            "Draw:-2B:BLACK 2C:WHITE 2D:BLACK 2E:WHITE 2F:BLACK 3B:WHITE 3C:BLACK 3D:WHITE 3E:BLACK 3F:WHITE 4B:BLACK 4C:WHITE 4D:BLACK 4E:WHITE 4F:BLACK 5B:WHITE 5C:BLACK 5D:WHITE 5E:BLACK 5F:WHITE 6B:BLACK 6C:WHITE 6D:BLACK 6E:WHITE 6F:BLACK"
         )
 
         val serialized = boardSerializer.serialize(board)
@@ -104,7 +104,7 @@ class BoardTests {
         //given: a board
         val board = BoardRun(mapOf(Cell(13, 12) to Piece.BLACK, Cell(10, 4) to Piece.WHITE), Piece.BLACK)
         val boardString = board.toString()
-        assertEquals(boardString, "Run:BLACK13M:BLACK 10E:WHITE")
+        assertEquals(boardString, "Run:BLACK14M:BLACK 11E:WHITE")
 
         //then: serialize the board
         val serialized = boardSerializer.serialize(board)
@@ -112,7 +112,7 @@ class BoardTests {
         //assert: the serialized board is the same as the original
         assertEquals(
             serialized,
-            "{\"kind\":\"Run\",\"piece\":\"BLACK\",\"moves\":{\"13M\":\"BLACK\",\"10E\":\"WHITE\"}}"
+            "{\"kind\":\"Run\",\"piece\":\"BLACK\",\"moves\":{\"14M\":\"BLACK\",\"11E\":\"WHITE\"}}"
         )
 
         //then: deserialize the board

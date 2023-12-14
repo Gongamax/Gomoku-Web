@@ -6,13 +6,14 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import pt.isel.daw.gomoku.TestClock
 import pt.isel.daw.gomoku.domain.games.*
-import pt.isel.daw.gomoku.domain.games.board.Board
-import pt.isel.daw.gomoku.domain.games.board.Cell
+import pt.isel.daw.gomoku.domain.games.board.*
+import pt.isel.daw.gomoku.domain.games.variants.Variant
 import pt.isel.daw.gomoku.domain.games.variants.Variants
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.PasswordValidationInfo
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.utils.Id
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -115,6 +116,67 @@ class GameDomainTests {
             is RoundResult.YouWon -> assertEquals(Game.State.PLAYER_BLACK_WON, result.game.state)
             else -> fail("Unexpected round result $result")
         }
+    }
+
+    @Test
+    fun `alice vertical win`(){
+        // given: a game and a list of rounds
+        val game = createTestGame()
+
+        val rounds = listOf(
+            Round(Cell(Row(5), Column('H')), Player(alice.id, Piece.BLACK)),
+            Round(Cell(Row(5), Column('G')), Player(bob.id, Piece.WHITE)),
+            Round(Cell(Row(6), Column('H')), Player(alice.id, Piece.BLACK)),
+            Round(Cell(Row(6), Column('G')), Player(bob.id, Piece.WHITE)),
+            Round(Cell(Row(7), Column('H')), Player(alice.id, Piece.BLACK)),
+            Round(Cell(Row(7), Column('G')), Player(bob.id, Piece.WHITE)),
+            Round(Cell(Row(8), Column('H')), Player(alice.id, Piece.BLACK)),
+            Round(Cell(Row(8), Column('G')), Player(bob.id, Piece.WHITE)),
+            Round(Cell(Row(9), Column('H')), Player(alice.id, Piece.BLACK)),
+        )
+
+        // when: the rounds are applied
+        // then: bob wins
+        when (val result = play(game, rounds)) {
+            is RoundResult.YouWon -> assertEquals(Game.State.PLAYER_BLACK_WON, result.game.state)
+            else -> fail("Unexpected round result $result")
+        }
+    }
+
+    @Test
+    fun testIsWin() {
+        // Create a BoardRun instance with specific moves
+        val moves2 = mapOf(
+            Cell(0, 0) to Piece.BLACK,
+            Cell(1, 1) to Piece.WHITE,
+            Cell(0, 1) to Piece.BLACK,
+            Cell(1, 3) to Piece.WHITE,
+            Cell(0, 2) to Piece.BLACK,
+            Cell(1, 5) to Piece.WHITE,
+            Cell(0, 3) to Piece.BLACK,
+            Cell(1, 7) to Piece.WHITE,
+            Cell(0, 4) to Piece.BLACK,
+        )
+        val moves = mapOf(
+            Cell(Row(0), Column('A')) to Piece.BLACK,
+            Cell(Row(1), Column('B')) to Piece.WHITE,
+            Cell(Row(0), Column('B')) to Piece.BLACK,
+            Cell(Row(1), Column('D')) to Piece.WHITE,
+            Cell(Row(0), Column('C')) to Piece.BLACK,
+            Cell(Row(1), Column('F')) to Piece.WHITE,
+            Cell(Row(0), Column('D')) to Piece.BLACK,
+            Cell(Row(1), Column('H')) to Piece.WHITE,
+            Cell(Row(0), Column('E')) to Piece.BLACK,
+        )
+
+        val board = BoardRun(moves, Piece.BLACK)
+
+        // Create a Variant instance
+        val variant = object : Variant {}
+
+        // Call isWin and check the result
+        val result = variant.isWin(board, Cell(0, 4))
+        assertTrue(result, "Expected isWin to return true, but it returned false")
     }
 
     @Test

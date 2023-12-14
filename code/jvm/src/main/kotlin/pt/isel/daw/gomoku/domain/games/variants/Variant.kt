@@ -23,39 +23,37 @@ interface Variant {
                 val moves = board.moves + (cell to board.turn)
                 when {
                     board.isWin(cell, variant) -> return BoardWin(moves, winner = board.turn)
-                    board.isDraw(variant) ->  return BoardDraw(moves)
+                    board.isDraw(variant) -> return BoardDraw(moves)
                     else -> return BoardRun(moves, nextPiece)
                 }
             }
+
             is BoardWin, is BoardDraw -> error("Game over")
         }
     }
+
     fun playOpening(board: BoardOpen, cell: Cell, nextPiece: Piece, variant: Variants): Board =
         when (variant.openingRule) {
             OpeningRule.STANDARD -> BoardRun(board.moves + (cell to board.turn), nextPiece)
             OpeningRule.SWAP -> BoardOpen(board.moves + (cell to board.turn), nextPiece)
         }
+
     fun validPlay(board: Board, cell: Cell, variant: Variants): Boolean =
         when (variant.playingRule) {
             PlayingRule.STANDARD -> cell !in board.moves
             PlayingRule.THREE_AND_THREE -> isValidOnThreeAndThreeRule(board, cell)
         }
 
-
-
     fun isWin(board: BoardRun, cell: Cell): Boolean =
         board.moves.size >= winLength * 2 - 2 &&
                 (board.moves.filter { it.value == board.turn }.keys + cell).run {
                     any { winningCell ->
                         directions.any { (forwardDir, backwardDir) ->
-                            val forwardCells = cellsInDirection(winningCell, forwardDir, size)
-                                .takeWhile { it in this }
-                            val backwardCells = cellsInDirection(winningCell, backwardDir, size)
-                                .takeWhile { it in this }
-
-                            val consecutiveCells = (backwardCells + listOf(winningCell) + forwardCells)
-
-                            consecutiveCells.size >= winLength
+                            println(board.moves)
+                            val forwardCells = countCellsForIsWin(this.toList(), winningCell, forwardDir)
+                            val backwardCells = countCellsForIsWin(this.toList() ,winningCell, backwardDir)
+                            val consecutiveCells = backwardCells + listOf(winningCell).size + forwardCells
+                            consecutiveCells >= winLength
                         }
                     }
                 }

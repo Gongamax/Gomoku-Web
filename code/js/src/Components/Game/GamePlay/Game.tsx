@@ -7,7 +7,7 @@ import {PresentGame, ResultPresentation} from './GamePresentation';
 import {checkTurn, convertToDomainGame, handleWinner, isDraw, isWin} from './GameUtils';
 import {getUserName} from '../../Authentication/RequireAuthn';
 
-let pollingTimeOut: number = 0;
+let pollingTimeOut: number = 3000;
 
 type State =
   | { tag: 'loading' }
