@@ -1,7 +1,7 @@
 import { SirenModel } from "../../media/siren/SirenModel"
 import { GameOutputModel } from "./GameModelsUtil"
 
-interface GamesOfUser {
+export interface GamesOfUser {
     games : GameOutputModel[];
 }
 

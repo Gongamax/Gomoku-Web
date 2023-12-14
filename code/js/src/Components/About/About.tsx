@@ -11,7 +11,7 @@ export function AboutPage() {
       <p>Gomoku Royale is an engaging game, this client application was developed using the power of React and
         TypeScript.</p>
       <p>
-        The source code is available on <a href="https://github.com/isel-leic-daw/2023-daw-leic51d-02">GitHub</a>. It is
+        The source code is available on <a href="https://github.com/isel-leic-daw/2023-daw-leic51d-02">GitHub</a>.
       </p>
       <p>Authors: Gonçalo Frutuoso and Daniel Carvalho</p>
     </div>

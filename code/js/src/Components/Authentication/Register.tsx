@@ -4,10 +4,10 @@ import { register } from '../../Service/users/UserServices';
 
 type State =
   | {
-  tag: 'editing';
-  error?: string;
-  inputs: { username: string; password: string; confirmPassword: string; email: string };
-}
+      tag: 'editing';
+      error?: string;
+      inputs: { username: string; password: string; confirmPassword: string; email: string };
+    }
   | { tag: 'submitting'; username: string; email: string }
   | { tag: 'redirect' };
 
@@ -33,7 +33,7 @@ function reduce(state: State, action: Action): State {
       } else if (action.type === 'submit') {
         const { password, confirmPassword } = state.inputs;
         if (password !== confirmPassword) {
-          return { tag: 'editing', error: 'Passwords don\'t match', inputs: state.inputs };
+          return { tag: 'editing', error: "Passwords don't match", inputs: state.inputs };
         } else {
           return { tag: 'submitting', username: state.inputs.username, email: state.inputs.email };
         }
@@ -124,6 +124,10 @@ export function Register() {
     <form onSubmit={handleSubmit}>
       <fieldset disabled={state.tag !== 'editing'}>
         <div>
+          <label htmlFor="email">Email</label>
+          <input id="email" type="email" name="email" value={email} onChange={handleChange} />
+        </div>
+        <div>
           <label htmlFor="username">Username</label>
           <input id="username" type="text" name="username" value={username} onChange={handleChange} />
         </div>
@@ -140,10 +144,6 @@ export function Register() {
             value={confirmPassword}
             onChange={handleChange}
           />
-        </div>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" name="email" value={email} onChange={handleChange} />
         </div>
         <div>
           <button type="submit">Register</button>

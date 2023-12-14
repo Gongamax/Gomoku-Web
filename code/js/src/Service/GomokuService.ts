@@ -1,9 +1,10 @@
-import {HTTPService} from "./HttpService";
+//import {HTTPService} from "./HttpService";
+import httpServiceInit from "./HttpService";
 import {SirenModel} from "./media/siren/SirenModel";
 import {HomeOutputModel} from './home/HomeOutputModel';
 
 
-const httpService: HTTPService = new HTTPService();
+const httpService = httpServiceInit();
 type HomeOutput = SirenModel<HomeOutputModel>;
 
 /**

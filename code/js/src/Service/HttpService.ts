@@ -1,19 +1,18 @@
 import { problemMediaType } from './media/Problem';
 
 /**
- * HTTPService is a class that provides methods to make HTTP requests.
+ * A service for making HTTP requests to the API.
  * It includes methods for GET, POST, PUT, and DELETE requests.
  */
-export class HTTPService {
-  /**
-   * Makes an API request and returns the response.
-   * @param {string} path - The path of the API endpoint.
-   * @param {string} method - The HTTP method to use for the request.
-   * @param {string} [body] - The body of the request, if applicable.
-   * @returns {Promise<T>} - The response from the API request.
-   * @throws Will throw an error if the response is not ok.
-   */
-  private async makeAPIRequest<T>(path: string, method: string, body?: string): Promise<T> {
+export default function httpService() {
+  return {
+    get: get,
+    post: post,
+    put: put,
+    del: del,
+  };
+
+  async function makeAPIRequest<T>(path: string, method: string, body?: string): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -24,9 +23,6 @@ export class HTTPService {
       headers,
       body: body,
     };
-
-    console.log(`Making ${method} request to ${path}`);
-    console.log(`Body: ${body}`);
 
     const response = await fetch(path, config);
 
@@ -41,42 +37,20 @@ export class HTTPService {
     return (await response.json()) as T;
   }
 
-  /**
-   * Makes a GET request to the specified path.
-   * @param {string} path - The path of the API endpoint.
-   * @returns {Promise<T>} - The response from the API request.
-   */
-  public async get<T>(path: string): Promise<T> {
-    return this.makeAPIRequest<T>(path, 'GET', undefined);
+  async function get<T>(path: string): Promise<T> {
+    return makeAPIRequest<T>(path, 'GET', undefined);
   }
 
-  /**
-   * Makes a POST request to the specified path with the provided body.
-   * @param {string} path - The path of the API endpoint.
-   * @param {string} [body] - The body of the request.
-   * @returns {Promise<T>} - The response from the API request.
-   */
-  public async post<T>(path: string, body?: string): Promise<T> {
-    return this.makeAPIRequest<T>(path, 'POST', body);
+  async function post<T>(path: string, body?: string): Promise<T> {
+    return makeAPIRequest<T>(path, 'POST', body);
   }
 
-  /**
-   * Makes a PUT request to the specified path with the provided body.
-   * @param {string} path - The path of the API endpoint.
-   * @param {string} [body] - The body of the request.
-   * @returns {Promise<T>} - The response from the API request.
-   */
-  public async put<T>(path: string, body?: string): Promise<T> {
-    return this.makeAPIRequest<T>(path, 'PUT', body);
+  async function put<T>(path: string, body?: string): Promise<T> {
+    return makeAPIRequest<T>(path, 'PUT', body);
   }
 
-  /**
-   * Makes a DELETE request to the specified path with the provided body.
-   * @param {string} path - The path of the API endpoint.
-   * @param {string} [body] - The body of the request.
-   * @returns {Promise<T>} - The response from the API request.
-   */
-  public async delete<T>(path: string, body?: string): Promise<T> {
-    return this.makeAPIRequest<T>(path, 'DELETE', body);
+  async function del<T>(path: string, body?: string): Promise<T> {
+    return makeAPIRequest<T>(path, 'DELETE', body);
   }
 }
+

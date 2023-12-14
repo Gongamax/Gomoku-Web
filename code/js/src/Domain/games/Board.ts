@@ -4,7 +4,7 @@ interface Moves {
   [key: string]: Piece;
 }
 
-class Board {
+export class Board {
   readonly moves: Moves;
   readonly winner?: Piece;
   readonly turn?: Piece;

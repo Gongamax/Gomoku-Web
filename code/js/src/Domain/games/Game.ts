@@ -1,5 +1,6 @@
 import { User } from '../users/User';
 import { Variant } from './Variant';
+import { Board } from './Board';
 
 export type Game = {
   id: number;

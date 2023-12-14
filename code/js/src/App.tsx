@@ -11,7 +11,7 @@ import {MatchmakingPage} from './Components/Game/Matchmaking/Matchmaking';
 import {RequireAuthn} from './Components/Authentication/RequireAuthn';
 import {Me} from './Components/Home/Me';
 import {NavBarWrapper} from './Layout/NavBar';
-import {GamePage} from './Components/Game/GamePlay/Game';
+import {GamePage} from './Components/Game/Gameplay/Game';
 
 /**
  * `App` is the root component of the application.

@@ -19,22 +19,6 @@ export function isDraw(game: Game): boolean{
     return game.state === GameState.DRAW
 }
 
-export function deserializeBoard(moves: { [key: string]: string }, turn: string, boardSize: number): {
-  board: string[][],
-  turn: string
-} {
-  const board: string[][] = Array(boardSize).fill(null).map(() => Array(boardSize).fill(''));
-  // Iterate over the keys of the moves object
-  for (const key in moves) {
-    const [rowPart, colPart] = key.split('');
-    const row = parseInt(rowPart) - 1; // Subtract 1 because array indices are 0-based
-    const col = colPart.charCodeAt(0) - 'A'.charCodeAt(0); // Subtract 'A'.charCodeAt(0) to get a 0-based index
-    board[row][col] = moves[key];
-  }
-
-  return { board, turn };
-}
-
 /*check who is the winner*/
 export function handleWinner(game: Game): User {
   switch (game.state){

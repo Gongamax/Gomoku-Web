@@ -1,4 +1,3 @@
-import { HTTPService } from '../HttpService';
 import { GetRankingOutput } from './models/GetRankingOutput';
 import { GetUserHomeOutput } from './models/GetUserHomeOutput';
 import { GetUserOutput } from './models/GetUserOutput';
@@ -8,8 +7,8 @@ import { RegisterOutput } from './models/RegisterOutput';
 import { GetStatsOutput } from './models/GetStatsOutput';
 import {linkRecipe} from "../../index";
 import { HomeRecipeRelations } from '../home/HomeRecipeRelations';
-
-const httpService = new HTTPService();
+import httpServiceInit from '../HttpService';
+const httpService = httpServiceInit();
 
 /**
  * Sends a request to the server to register a new user.

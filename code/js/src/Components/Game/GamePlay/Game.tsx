@@ -1,27 +1,27 @@
 import * as React from 'react';
-import {useRef} from 'react';
-import {Navigate, useParams} from 'react-router-dom';
-import {Game} from '../../../Domain/games/Game';
+import { useRef } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
+import { Game } from '../../../Domain/games/Game';
 import * as GameService from '../../../Service/games/GamesServices';
-import {User} from '../../../Domain/users/User';
-import {PresentGame, ResultPresentation} from './GamePresentation';
-import {checkTurn, convertToDomainGame, handleWinner, isDraw, isWin} from './GameUtils';
-import {getUserName} from '../../Authentication/RequireAuthn';
+import { User } from '../../../Domain/users/User';
+import { PresentGame, ResultPresentation } from './GamePresentation';
+import { checkTurn, convertToDomainGame, handleWinner, isDraw, isWin } from './GameUtils';
+import { getUserName } from '../../Authentication/RequireAuthn';
 
 type State =
   | { tag: 'loading' }
   | { tag: 'myTurn'; game: Game }
-  | { tag: 'loadingPlay'; game: Game; }
-  | { tag: 'opponentTurn'; game: Game, pollingTimeOut: number }
+  | { tag: 'loadingPlay'; game: Game }
+  | { tag: 'opponentTurn'; game: Game; pollingTimeOut: number }
   | { tag: 'gameOver'; game: Game; winner: User }
   | { tag: 'redirect' }
-  | { tag: 'error'; game?: Game, message: string};
+  | { tag: 'error'; game?: Game; message: string };
 
 type Action =
-  | { type: 'makePlay'; game: Game; hasPlayed: boolean}
+  | { type: 'makePlay'; game: Game; hasPlayed: boolean }
   | { type: 'error'; message: string; game: Game }
-  | { type: 'waiting'; game:Game, pollingTimeOut: number }
-  | { type: 'gameOver'; game: Game; winner: User, redirect: boolean }
+  | { type: 'waiting'; game: Game; pollingTimeOut: number }
+  | { type: 'gameOver'; game: Game; winner: User; redirect: boolean }
   | { type: 'retry' };
 
 function logUnexpectedAction(state: State, action: Action) {
@@ -32,12 +32,14 @@ function reduce(state: State, action: Action): State {
   switch (state.tag) {
     case 'loading':
       if (action.type === 'waiting') {
-          return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
-      }else if( action.type == 'makePlay'){
-          return { tag: 'myTurn', game: action.game };
-      }
-      else if (action.type === 'error') {
-        return { tag: 'error', game: action.game ,message: action.message };
+        return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
+      } else if (action.type == 'makePlay') {
+        return { tag: 'myTurn', game: action.game };
+      }  
+      else if (action.type === 'gameOver') {
+        return { tag: 'gameOver', game: action.game, winner: action.winner }; 
+      } else if (action.type === 'error') {
+        return { tag: 'error', game: action.game, message: action.message };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -45,79 +47,61 @@ function reduce(state: State, action: Action): State {
 
     case 'myTurn':
       if (action.type === 'makePlay') {
-        if (action.hasPlayed)
-          return { tag: 'loadingPlay', game: action.game };
-        else
-          return state;
-      }
-      else if (action.type === 'waiting') {
+        if (action.hasPlayed) return { tag: 'loadingPlay', game: action.game };
+        else return state;
+      } else if (action.type === 'waiting') {
         return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
-      }
-      else if (action.type === 'gameOver') {
-        return {tag: 'gameOver', game: action.game, winner: action.winner};
-      }
-      else if (action.type == 'error'){
-        return { tag: 'error', game: action.game, message: action.message }
-      }
-      else {
+      } else if (action.type === 'gameOver') {
+        return { tag: 'gameOver', game: action.game, winner: action.winner };
+      } else if (action.type == 'error') {
+        return { tag: 'error', game: action.game, message: action.message };
+      } else {
         logUnexpectedAction(state, action);
         return state;
       }
 
     case 'opponentTurn':
       if (action.type === 'waiting') {
-          return state;
-      }
-      else if (action.type === 'gameOver'){
-        return {tag: 'gameOver', game: action.game, winner: action.winner}
-      }
-      else if(action.type === 'makePlay') {
+        return state;
+      } else if (action.type === 'gameOver') {
+        return { tag: 'gameOver', game: action.game, winner: action.winner };
+      } else if (action.type === 'makePlay') {
         return { tag: 'myTurn', game: action.game };
-      }
-      else if (action.type == 'error'){
-        return { tag: 'error', game: action.game, message: action.message }
-      }
-      else {
+      } else if (action.type == 'error') {
+        return { tag: 'error', game: action.game, message: action.message };
+      } else {
         logUnexpectedAction(state, action);
         return state;
       }
 
     case 'loadingPlay':
       if (action.type === 'gameOver') {
-        return {tag: 'gameOver', game: action.game, winner: action.winner};
-      }
-      else if (action.type == 'waiting'){
-          return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
-      }
-      else if (action.type == 'error'){
-        return { tag: 'error', game: action.game, message: action.message }
-      }
-      else {
+        return { tag: 'gameOver', game: action.game, winner: action.winner };
+      } else if (action.type == 'waiting') {
+        return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
+      } else if (action.type == 'error') {
+        return { tag: 'error', game: action.game, message: action.message };
+      } else {
         logUnexpectedAction(state, action);
         return state;
       }
     case 'gameOver':
       if (action.type === 'gameOver') {
-        if (action.redirect){
-          return {tag: 'redirect'}
-        }
-        else{
+        if (action.redirect) {
+          return { tag: 'redirect' };
+        } else {
           return state;
         }
-      }
-      else if (action.type == 'error'){
-        return { tag: 'error', game: action.game, message: action.message }
-      }
-      else {
+      } else if (action.type == 'error') {
+        return { tag: 'error', game: action.game, message: action.message };
+      } else {
         logUnexpectedAction(state, action);
         return state;
       }
     case 'error':
       if (action.type === 'retry') {
-        return {tag: 'loading'}
-      }
-      else
-        return state;
+        return { tag: 'loading' };
+      } else return state;
     case 'redirect':
       logUnexpectedAction(state, action);
       return state;
@@ -132,53 +116,55 @@ export function GamePage() {
   const intervalId = useRef<NodeJS.Timeout>();
 
   const fetchData = async () => {
-      const response = (await GameService.getGame(gameId)).properties;
-      const game = convertToDomainGame(response.game)
-      if (isWin(game)){
+    // Clear the interval before setting a new one
+    if (intervalId.current) {
+      clearInterval(intervalId.current);
+    }
+    const response = (await GameService.getGame(gameId)).properties;
+    const game = convertToDomainGame(response.game);
+    if (isWin(game)) {
+      clearInterval(intervalId.current);
+      dispatch({
+        type: 'gameOver',
+        game: game,
+        winner: handleWinner(game),
+        redirect: false,
+      });
+    } else if (isDraw(game)) {
+      clearInterval(intervalId.current);
+      dispatch({
+        type: 'gameOver',
+        game: game,
+        winner: undefined,
+        redirect: false,
+      });
+    } else {
+      if (checkTurn(currentUser, response.game)) {
         clearInterval(intervalId.current);
         dispatch({
-          type: 'gameOver',
+          type: 'makePlay',
           game: game,
-          winner: handleWinner(game),
-          redirect: false
-        })
-      }
-      else if (isDraw(game)){
-        clearInterval(intervalId.current);
+          hasPlayed: false,
+        });
+      } else {
         dispatch({
-          type: 'gameOver',
+          type: 'waiting',
           game: game,
-          winner: undefined,
-          redirect: false
-        })
+          pollingTimeOut: response.pollingTimeOut,
+        });
       }
-      else {
-        if (checkTurn(currentUser, response.game)){
-          clearInterval(intervalId.current);
-          dispatch({
-            type: 'makePlay',
-            game: game,
-            hasPlayed: false
-          });
-        }else{
-          dispatch({
-            type: 'waiting',
-            game: game,
-            pollingTimeOut: response.pollingTimeOut
-          });
-        }
-      }
+    }
   };
 
-  React.useEffect(() => {
+  async function handleLoading() {
     try {
-      console.log(`state: ${state.tag}`)
-      fetchData().catch(error => handleErrors(undefined, error.message))
+      console.log(`state: ${state.tag}`);
+      await fetchData();
     } catch (error) {
-      handleErrors(undefined, error.message)
+      handleErrors(undefined, error.message);
     }
     return () => clearInterval(intervalId.current);
-  });
+  }
 
   async function handlePlay(row: number, col: number) {
     if (state.tag === 'myTurn') {
@@ -187,116 +173,124 @@ export function GamePage() {
         // Send a request to the server to make a move
         await GameService.playGame(state.game.id, row, col);
         // Update the local game state based on the server's response
-        fetchData().catch(error => handleErrors(state.game, error.message))
+        fetchData().catch(error => handleErrors(state.game, error.message));
       } catch (error) {
-        handleErrors(state.game, error.message)
+        handleErrors(state.game, error.message);
       }
     }
   }
 
-  async function handleWaiting(pollingTimeOut: number){
-     intervalId.current = setInterval(()=> { fetchData() }, pollingTimeOut);
+  async function handleWaiting(pollingTimeOut: number) {
+    intervalId.current = setInterval(() => {
+      fetchData();
+    }, pollingTimeOut);
   }
 
   async function handleResign(): Promise<void> {
     if (state.tag === 'myTurn' || state.tag === 'opponentTurn') {
       try {
         await GameService.surrenderGame(state.game.id);
-        fetchData().catch(error => handleErrors(state.game, error.message))
+        fetchData().catch(error => handleErrors(state.game, error.message));
       } catch (error) {
         console.error('Failed to resign:', error);
       }
     }
   }
 
-  function handleExit(){
-   if (state.tag === 'gameOver') {
-     dispatch({
-       type: 'gameOver',
-       game: state.game,
-       winner: handleWinner(state.game),
-       redirect: true
-     })
-   }
+  function handleExit() {
+    if (state.tag === 'gameOver') {
+      dispatch({
+        type: 'gameOver',
+        game: state.game,
+        winner: handleWinner(state.game),
+        redirect: true,
+      });
+    }
   }
 
-  function handleErrors(game: Game, error: string){
-    clearInterval(intervalId.current)
+  function handleErrors(game: Game, error: string) {
+    clearInterval(intervalId.current);
     dispatch({
-      type:'error',
+      type: 'error',
       game: game,
-      message: error
-    })
+      message: error,
+    });
   }
 
-  function handleRetry(){
-    clearInterval(intervalId.current)
+  function handleRetry() {
+    clearInterval(intervalId.current);
     if (state.tag === 'error')
-    dispatch({
-        type:'retry'
-    })
+      dispatch({
+        type: 'retry',
+      });
   }
 
   switch (state.tag) {
-    case 'loading':
+    case 'loading': {
+      handleLoading().catch(error => console.log(`Error while loading game: ${error.message}`));
       return (
-          <div>
-            <h3>Loading...</h3>
-          </div>
+        <div>
+          <h3>Loading...</h3>
+        </div>
       );
+    }
 
     case 'myTurn': {
       return (
         <div>
-          <PresentGame game={state.game} onPlay={ handlePlay } onResign={ handleResign }/>
+          <PresentGame game={state.game} onPlay={handlePlay} onResign={handleResign} />
         </div>
       );
     }
 
     case 'opponentTurn': {
-      handleWaiting(state.pollingTimeOut).catch(error => dispatch({
-        type: 'error',
-        game: state.game,
-        message: error.toString()
-      }))
+      handleWaiting(state.pollingTimeOut).catch(error =>
+        dispatch({
+          type: 'error',
+          game: state.game,
+          message: error.toString(),
+        })
+      );
       return (
         <div>
-          <PresentGame game={state.game} onPlay={ () => { } } onResign={ handleResign }/>
+          <PresentGame game={state.game} onPlay={() => {}} onResign={handleResign} />
           <h3>Waiting for opponent to play...</h3>
         </div>
       );
     }
 
     case 'loadingPlay':
-      return <div>
+      return (
         <div>
-          <PresentGame game={state.game} onPlay={ () => { } } onResign={ () => { } }/>
-          <h3>loading Play...</h3>
+          <div>
+            <PresentGame game={state.game} onPlay={() => {}} onResign={() => {}} />
+            <h3>loading Play...</h3>
+          </div>
         </div>
-      </div>;
+      );
 
     case 'gameOver':
       return (
         <div>
-          <PresentGame game={state.game} onPlay={ () => { } } onResign={ () => { } }/>
+          <PresentGame game={state.game} onPlay={() => {}} onResign={() => {}} />
           <ResultPresentation
-              me={currentUser}
-              winner={state.winner.username}
-              points={state.game.variant.points}
-              onExit={handleExit}
+            me={currentUser}
+            winner={state.winner.username}
+            points={state.game.variant.points}
+            onExit={handleExit}
           />
         </div>
       );
     case 'error':
       return (
         <div>
-          <PresentGame game={state.game} onPlay={ () => { } } onResign={ () => { } }/>
+          <PresentGame game={state.game} onPlay={() => {}} onResign={() => {}} />
           <h3>{state.message}</h3>
           <button onClick={handleRetry}>Retry</button>
         </div>
       );
     case 'redirect':
-      clearInterval(intervalId.current)
+      clearInterval(intervalId.current);
       return <Navigate to="/me" />;
   }
 }
