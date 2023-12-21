@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { useRef } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
-import { Game } from '../../../Domain/games/Game';
+import {useRef} from 'react';
+import {Navigate, useParams} from 'react-router-dom';
+import {Game} from '../../../Domain/games/Game';
 import * as GameService from '../../../Service/games/GamesServices';
-import { User } from '../../../Domain/users/User';
-import { PresentGame, ResultPresentation } from './GamePresentation';
-import { checkTurn, convertToDomainGame, handleWinner, isDraw, isWin } from './GameUtils';
-import { getUserName } from '../../Authentication/RequireAuthn';
+import {User} from '../../../Domain/users/User';
+import {PresentGame, ResultPresentation} from './GamePresentation';
+import {checkTurn, convertToDomainGame, handleWinner, isDraw, isWin} from './GameUtils';
+import {getUserName} from '../../Authentication/RequireAuthn';
 
 type State =
   | { tag: 'loading' }
@@ -253,7 +253,7 @@ export function GamePage() {
       );
       return (
         <div>
-          <PresentGame game={state.game} onPlay={() => {}} onResign={handleResign} />
+          <PresentGame game={state.game} onPlay={() => {}} onResign={() => {}} />
           <h3>Waiting for opponent to play...</h3>
         </div>
       );
