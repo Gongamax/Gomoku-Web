@@ -2,8 +2,7 @@ package pt.isel.daw.gomoku.services.games
 
 import pt.isel.daw.gomoku.domain.games.Game
 import pt.isel.daw.gomoku.domain.games.variants.GameVariant
-import pt.isel.daw.gomoku.domain.games.variants.Variants
-import pt.isel.daw.gomoku.http.util.PageResult
+import pt.isel.daw.gomoku.services.utils.PageResult
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingEntry
 import pt.isel.daw.gomoku.utils.Either
 

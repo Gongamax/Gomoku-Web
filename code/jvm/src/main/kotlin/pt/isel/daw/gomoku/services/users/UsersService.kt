@@ -6,7 +6,7 @@ import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.utils.Token
-import pt.isel.daw.gomoku.http.util.PageResult.Companion.toPage
+import pt.isel.daw.gomoku.services.utils.PageResult.Companion.toPage
 import pt.isel.daw.gomoku.repository.util.TransactionManager
 import pt.isel.daw.gomoku.services.others.RankingError
 import pt.isel.daw.gomoku.services.others.RankingResult

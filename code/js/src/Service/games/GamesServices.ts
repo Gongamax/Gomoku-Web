@@ -9,6 +9,7 @@ import { SurrenderGameOutput } from './models/SurrenderGameOutput';
 import { linkRecipe } from '../../index';
 import { HomeRecipeRelations } from '../home/HomeRecipeRelations';
 import httpServiceInit from '../HttpService';
+
 const httpService = httpServiceInit();
 
 /**
@@ -47,7 +48,6 @@ export async function playGame(gid: number, row: number, column: number): Promis
  */
 export async function matchmaking(variant: string): Promise<MatchmakingOutput> {
   const path: string = (await linkRecipe).find(recipe => recipe.rel === HomeRecipeRelations.MATCHMAKING).href;
-  console.log(`path: ${path}`);
   return await httpService.post<MatchmakingOutput>(path, JSON.stringify({ variant }));
 }
 

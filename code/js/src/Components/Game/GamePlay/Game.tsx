@@ -1,12 +1,12 @@
 import * as React from 'react';
-import {useRef} from 'react';
-import {Navigate, useParams} from 'react-router-dom';
-import {Game} from '../../../Domain/games/Game';
+import { Navigate, useParams } from 'react-router-dom';
+import { Game } from '../../../Domain/games/Game';
 import * as GameService from '../../../Service/games/GamesServices';
-import {User} from '../../../Domain/users/User';
-import {PresentGame, ResultPresentation} from './GamePresentation';
-import {checkTurn, convertToDomainGame, handleWinner, isDraw, isWin} from './GameUtils';
-import {getUserName} from '../../Authentication/RequireAuthn';
+import { User } from '../../../Domain/users/User';
+import { PresentGame, ResultPresentation } from './GamePresentation';
+import { checkTurn, convertToDomainGame, handleWinner, isDraw, isWin } from './GameUtils';
+import { getUserName } from '../../Authentication/RequireAuthn';
+import { isProblem } from '../../../Service/media/Problem';
 
 type State =
   | { tag: 'loading' }
@@ -35,9 +35,8 @@ function reduce(state: State, action: Action): State {
         return { tag: 'opponentTurn', game: action.game, pollingTimeOut: action.pollingTimeOut };
       } else if (action.type == 'makePlay') {
         return { tag: 'myTurn', game: action.game };
-      }  
-      else if (action.type === 'gameOver') {
-        return { tag: 'gameOver', game: action.game, winner: action.winner }; 
+      } else if (action.type === 'gameOver') {
+        return { tag: 'gameOver', game: action.game, winner: action.winner };
       } else if (action.type === 'error') {
         return { tag: 'error', game: action.game, message: action.message };
       } else {
@@ -113,7 +112,7 @@ export function GamePage() {
   const { gid } = useParams<{ gid: string }>();
   const gameId = Number(gid);
   const currentUser = getUserName();
-  const intervalId = useRef<NodeJS.Timeout>();
+  const intervalId = React.useRef<NodeJS.Timeout>();
 
   const fetchData = async () => {
     // Clear the interval before setting a new one
@@ -174,8 +173,8 @@ export function GamePage() {
         await GameService.playGame(state.game.id, row, col);
         // Update the local game state based on the server's response
         fetchData().catch(error => handleErrors(state.game, error.message));
-      } catch (error) {
-        handleErrors(state.game, error.message);
+      } catch (e) {
+        handleErrors(state.game, isProblem(e) ? e.detail : e.message);
       }
     }
   }
@@ -249,11 +248,13 @@ export function GamePage() {
           type: 'error',
           game: state.game,
           message: error.toString(),
-        })
+        }),
       );
       return (
         <div>
-          <PresentGame game={state.game} onPlay={() => {}} onResign={() => {}} />
+          <PresentGame game={state.game} onPlay={() => {
+          }} onResign={() => {
+          }} />
           <h3>Waiting for opponent to play...</h3>
         </div>
       );
@@ -263,7 +264,9 @@ export function GamePage() {
       return (
         <div>
           <div>
-            <PresentGame game={state.game} onPlay={() => {}} onResign={() => {}} />
+            <PresentGame game={state.game} onPlay={() => {
+            }} onResign={() => {
+            }} />
             <h3>loading Play...</h3>
           </div>
         </div>
@@ -272,7 +275,9 @@ export function GamePage() {
     case 'gameOver':
       return (
         <div>
-          <PresentGame game={state.game} onPlay={() => {}} onResign={() => {}} />
+          <PresentGame game={state.game} onPlay={() => {
+          }} onResign={() => {
+          }} />
           <ResultPresentation
             me={currentUser}
             winner={state.winner.username}
@@ -284,13 +289,15 @@ export function GamePage() {
     case 'error':
       return (
         <div>
-          <PresentGame game={state.game} onPlay={() => {}} onResign={() => {}} />
+          <PresentGame game={state.game} onPlay={() => {
+          }} onResign={() => {
+          }} />
           <h3>{state.message}</h3>
           <button onClick={handleRetry}>Retry</button>
         </div>
       );
     case 'redirect':
       clearInterval(intervalId.current);
-      return <Navigate to="/me" />;
+      return <Navigate to='/me' />;
   }
 }

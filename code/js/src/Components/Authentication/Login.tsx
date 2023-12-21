@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Navigate, useLocation} from 'react-router-dom';
 import {login} from '../../Service/users/UserServices';
+import { isProblem } from '../../Service/media/Problem';
 
 type State =
   | { tag: 'editing'; error?: string; inputs: { username: string; password: string } }
@@ -94,8 +95,8 @@ export function Login() {
           dispatch({ type: 'error', message: 'Invalid username or password' });
         }
       })
-      .catch(() => {
-        dispatch({ type: 'error', message: 'Invalid username or password' });
+      .catch((e) => {
+        dispatch({ type: 'error', message: isProblem(e) ? e.detail : e.message });
       });
   }
 

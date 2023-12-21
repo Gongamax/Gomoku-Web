@@ -4,6 +4,24 @@ import { Navigate } from 'react-router-dom';
 import { getVariantList, matchmaking } from '../../../Service/games/GamesServices';
 import { getStatsByUsername } from '../../../Service/users/UserServices';
 import { getUserName } from '../../Authentication/RequireAuthn';
+import { isProblem } from '../../../Service/media/Problem';
+
+type State =
+  | { tag: 'loading' }
+  | { tag: 'present'; username: string; points: number; variants: string[] }
+  | { tag: 'edit'; selectedVariant: string; variants: string[]; username: string; points: number }
+  | { tag: 'redirect'; id: number; idType: string }
+  | { tag: 'error'; message: string };
+
+type Action =
+  | { type: 'loadSuccess'; username: string; points: number; variants: string[] }
+  | { type: 'selectVariant'; selectedVariant: string, username: string, points: number }
+  | { type: 'initiateMatchmaking'; response: { id: number; idType: string } }
+  | { type: 'loadError'; message: string };
+
+const logUnexpectedAction = (state: State, action: Action) => {
+  console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
+};
 
 /**
  * `fetchPlayerInfo` is an asynchronous function that fetches the player's information.
@@ -36,26 +54,9 @@ async function fetchGameVariants(): Promise<string[]> {
  * @returns {Promise<{ id: number; idType: string }>} - A promise that resolves to an object containing the id and idType.
  */
 async function initiateMatchmaking(variant: string): Promise<{ id: number; idType: string }> {
-  console.log(`Initiating matchmaking for variant '${variant}'`);
   const response = await matchmaking(variant);
   return { id: response.properties.id, idType: response.properties.idType };
 }
-
-type State =
-  | { tag: 'loading' }
-  | { tag: 'present'; username: string; points: number; variants: string[] }
-  | { tag: 'edit'; selectedVariant: string; variants: string[]; username: string; points: number }
-  | { tag: 'redirect'; id: number; idType: string };
-
-type Action =
-  | { type: 'loadSuccess'; username: string; points: number; variants: string[] }
-  | { type: 'selectVariant'; selectedVariant: string, username: string, points: number }
-  | { type: 'initiateMatchmaking'; response: { id: number; idType: string } }
-  | { type: 'loadError'; message: string };
-
-const logUnexpectedAction = (state: State, action: Action) => {
-  console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
-};
 
 const reduce = (state: State, action: Action): State => {
   switch (state.tag) {
@@ -63,7 +64,7 @@ const reduce = (state: State, action: Action): State => {
       if (action.type === 'loadSuccess') {
         return { tag: 'present', username: action.username, points: action.points, variants: action.variants };
       } else if (action.type === 'loadError') {
-        return { tag: 'edit', selectedVariant: 'Standard', variants: [], username: 'Test', points: 1000 }; // Default to Standard variant in case of error
+        return { tag: 'error', message: action.message };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -121,8 +122,8 @@ export function LobbyPage() {
         const [playerInfo, gameVariants] =
           await Promise.all([fetchPlayerInfo(currentUser), fetchGameVariants()]);
         dispatch({ type: 'loadSuccess', ...playerInfo, variants: gameVariants });
-      } catch (error) {
-        dispatch({ type: 'loadError', message: error.message });
+      } catch (e) {
+        dispatch({ type: 'loadError', message: isProblem(e) ? e.detail : e.message });
       }
     };
 
@@ -131,7 +132,7 @@ export function LobbyPage() {
     });
   }, [currentUser]);
 
-  const handleVariantSelect = (selectedVariant: string, username:string, points:number) => {
+  const handleVariantSelect = (selectedVariant: string, username: string, points: number) => {
     setSelectedVariant(selectedVariant);
     dispatch({ type: 'selectVariant', selectedVariant, username: username, points: points });
   };
@@ -150,7 +151,7 @@ export function LobbyPage() {
       return <div>Loading...</div>;
 
     case 'present':
-      dispatch({ type: 'selectVariant', selectedVariant, username: state.username, points: state.points })
+      dispatch({ type: 'selectVariant', selectedVariant, username: state.username, points: state.points });
       return (
         <div>
           <h1>Lobby</h1>
@@ -158,19 +159,19 @@ export function LobbyPage() {
           <p>Points: {state.points}</p>
           <p>Choose a Game Variant:</p>
           {
-          state.variants.map((variant, index) => (
-            <div key={index}>
-              <input
-                type="radio"
-                id={`radio-${index}`}
-                name="variants"
-                value={variant}
-                checked={selectedVariant === variant}
-                onChange={() => handleVariantSelect(variant, state.username, state.points)}
-              />
-              <label htmlFor={`radio-${index}`}>{variant}</label>
-            </div>
-          ))}
+            state.variants.map((variant, index) => (
+              <div key={index}>
+                <input
+                  type='radio'
+                  id={`radio-${index}`}
+                  name='variants'
+                  value={variant}
+                  checked={selectedVariant === variant}
+                  onChange={() => handleVariantSelect(variant, state.username, state.points)}
+                />
+                <label htmlFor={`radio-${index}`}>{variant}</label>
+              </div>
+            ))}
           <button onClick={handleMatchmaking}>Find Game</button>
         </div>
       );
@@ -185,9 +186,9 @@ export function LobbyPage() {
           {state.variants.map((variant, index) => (
             <div key={index}>
               <input
-                type="radio"
+                type='radio'
                 id={`radio-${index}`}
-                name="variants"
+                name='variants'
                 value={variant}
                 checked={selectedVariant === variant}
                 onChange={() => handleVariantSelect(variant, state.username, state.points)}
@@ -218,6 +219,21 @@ export function LobbyPage() {
         );
       else
         return <div>Unexpected idType</div>;
+
+    case 'error':
+      return (
+        <div style={{
+          padding: '20px',
+          backgroundColor: '#f8d7da',
+          color: '#721c24',
+          borderRadius: '5px',
+          marginTop: '20px',
+        }}>
+          <h2>Oops!</h2>
+          <p>Something went wrong. Please try again later.</p>
+          <p><small>Error details: {state.message}</small></p>
+        </div>
+      );
 
     default:
       return <div>Unexpected state</div>;

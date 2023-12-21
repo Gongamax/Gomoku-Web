@@ -7,7 +7,7 @@ import pt.isel.daw.gomoku.domain.games.board.BoardWin
 import pt.isel.daw.gomoku.domain.games.board.Cell
 import pt.isel.daw.gomoku.domain.games.variants.Variants
 import pt.isel.daw.gomoku.domain.games.variants.toVariant
-import pt.isel.daw.gomoku.http.util.PageResult.Companion.toPage
+import pt.isel.daw.gomoku.services.utils.PageResult.Companion.toPage
 import pt.isel.daw.gomoku.repository.util.TransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
 import pt.isel.daw.gomoku.utils.PositiveValue

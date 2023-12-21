@@ -1,12 +1,13 @@
 import * as React from 'react';
-import {useRef} from 'react';
-import {cancelMatchmaking, getMatchmakingStatus} from '../../../Service/games/GamesServices';
-import {Navigate, useParams} from 'react-router-dom';
-import {QueueEntry} from '../../../Domain/games/QueueEntry';
+import { cancelMatchmaking, getMatchmakingStatus } from '../../../Service/games/GamesServices';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { QueueEntry } from '../../../Domain/games/QueueEntry';
+import { isProblem } from '../../../Service/media/Problem';
 
 type State =
-    | { tag: 'readingStatus'; queueEntryId: number }
-    | { tag: 'redirect'; gameId: number; queueEntryId: number; cancel: boolean };
+  | { tag: 'readingStatus'; queueEntryId: number }
+  | { tag: 'redirect'; gameId: number; queueEntryId: number; cancel: boolean }
+  | { tag: 'error'; message: string ; queueEntryId: number};
 
 type Action =
   | { type: 'readingStatus'; queueEntryId: number }
@@ -18,6 +19,8 @@ const logUnexpectedAction = (state: State, action: Action) => {
   console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
 };
 
+const defaultPollingTimeout = 4000;
+
 function reduce(state: State, action: Action): State {
   switch (state.tag) {
     case 'readingStatus':
@@ -25,12 +28,17 @@ function reduce(state: State, action: Action): State {
         if (action.queueEntry.status === 'PENDING') {
           return state;
         } else if (action.queueEntry.status === 'MATCHED') {
-          return { tag: 'redirect', gameId: action.queueEntry.gameId!, queueEntryId: state.queueEntryId, cancel: false };
+          return {
+            tag: 'redirect',
+            gameId: action.queueEntry.gameId!,
+            queueEntryId: state.queueEntryId,
+            cancel: false,
+          };
         } else {
           return state;
         }
       } else if (action.type === 'readError') {
-        return state;
+        return { tag: 'error', message: action.message, queueEntryId: state.queueEntryId };
       } else if (action.type === 'redirect') {
         // Handle 'redirect' action in 'readingStatus' state
         return { tag: 'redirect', gameId: action.gameId, queueEntryId: state.queueEntryId, cancel: action.cancel };
@@ -46,42 +54,67 @@ function reduce(state: State, action: Action): State {
 
 export function MatchmakingPage() {
   const { mid } = useParams<{ mid: string }>();
-  const [state, dispatch] = React.useReducer(reduce, { tag: 'readingStatus', queueEntryId: Number(mid) });
-  const pollingTimeout = useRef(1000);
-  const intervalId = useRef<NodeJS.Timeout>();
+  const matchId = Number(mid);
+  const [state, dispatch] = React.useReducer(reduce, { tag: 'readingStatus', queueEntryId: matchId });
 
   React.useEffect(() => {
-    intervalId.current = setInterval(async () => {
-      console.log('Polling for matchmaking status... on id ' + state.queueEntryId);
-      const queueEntry = await getMatchmakingStatus(state.queueEntryId);
-      pollingTimeout.current = queueEntry.properties.pollingTimOut;
-      if (queueEntry.properties.state === 'MATCHED') {
-        dispatch({ type: 'redirect', gameId: queueEntry.properties.gid!, cancel: false });
-        // leave the interval running
-        clearInterval(intervalId.current);
+    let pollingTimeout = defaultPollingTimeout; // by default, poll every 4 seconds
+    const intervalFunction = async () => {
+      try {
+        const queueEntry = await getMatchmakingStatus(state.queueEntryId);
+        pollingTimeout = queueEntry.properties.pollingTimeOut;
+        if (queueEntry.properties.state === 'MATCHED') {
+          dispatch({ type: 'redirect', gameId: queueEntry.properties.gid!, cancel: false });
+          clearInterval(iid);
+        }
+      } catch (e) {
+        clearInterval(iid)
+        if (isProblem(e)) {
+          dispatch({ type: 'readError', message: e.detail });
+        } else {
+          dispatch({ type: 'readError', message: 'An error occurred while fetching the matchmaking status.' });
+        }
       }
-    }, pollingTimeout.current);
-    return () => clearInterval(intervalId.current);
+    };
+
+    const iid = setInterval(intervalFunction, pollingTimeout);
+    return () => {
+      clearInterval(iid);
+    }
   }, [state.queueEntryId]);
 
   async function handleCancel() {
-    clearInterval(intervalId.current);
-    await cancelMatchmaking(state.queueEntryId);
-    dispatch({ type: 'redirect', gameId: undefined, cancel: true });
+    try {
+      await cancelMatchmaking(state.queueEntryId);
+      dispatch({ type: 'redirect', gameId: undefined, cancel: true });
+    } catch (e) {
+      if (isProblem(e)) {
+        dispatch({ type: 'readError', message: e.detail });
+      } else {
+        dispatch({ type: 'readError', message: 'An error occurred while cancelling the matchmaking.' });
+      }
+    }
   }
+
+  const navigate = useNavigate();
 
   switch (state.tag) {
     case 'readingStatus':
-      return(
-          <div>
-               <h3>Searching for a opponent...</h3>
-                <button onClick={handleCancel}>Cancel</button>
-          </div>
+      return (
+        <div>
+          <h3>Searching for a opponent...</h3>
+          <button onClick={handleCancel}>Cancel</button>
+        </div>
       );
     case 'redirect':
       return <div>
         <p>Opponent found! Redirecting to game {state.gameId}...</p>
-        <Navigate to={ state.cancel ? '/lobby' : `/game/${state.gameId}`}/>;
+        <Navigate to={state.cancel ? '/lobby' : `/game/${state.gameId}`} />;
+      </div>;
+    case 'error':
+      return <div>
+        <p>{state.message}</p>
+        <button onClick={() => navigate('/lobby', { replace: true })}>Return to lobby</button>
       </div>;
   }
 }

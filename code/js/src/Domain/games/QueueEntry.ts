@@ -6,5 +6,5 @@ export type QueueEntry = {
   status: 'MATCHED' | 'PENDING';
   gameId: number | null;
   createdAt: string;
-  pollingTimOut: number;
+  pollingTimeOut: number;
 };

@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { register } from '../../Service/users/UserServices';
+import { isProblem } from '../../Service/media/Problem';
 
 type State =
   | {
-      tag: 'editing';
-      error?: string;
-      inputs: { username: string; password: string; confirmPassword: string; email: string };
-    }
+  tag: 'editing';
+  error?: string;
+  inputs: { username: string; password: string; confirmPassword: string; email: string };
+}
   | { tag: 'submitting'; username: string; email: string }
   | { tag: 'redirect' };
 
@@ -33,7 +34,7 @@ function reduce(state: State, action: Action): State {
       } else if (action.type === 'submit') {
         const { password, confirmPassword } = state.inputs;
         if (password !== confirmPassword) {
-          return { tag: 'editing', error: "Passwords don't match", inputs: state.inputs };
+          return { tag: 'editing', error: 'Passwords don\'t match', inputs: state.inputs };
         } else {
           return { tag: 'submitting', username: state.inputs.username, email: state.inputs.email };
         }
@@ -111,7 +112,7 @@ export function Register() {
         }
       })
       .catch(error => {
-        dispatch({ type: 'error', message: error.message });
+        dispatch({ type: 'error', message: isProblem(error) ? error.detail : error.message });
       });
   }
 
@@ -124,29 +125,29 @@ export function Register() {
     <form onSubmit={handleSubmit}>
       <fieldset disabled={state.tag !== 'editing'}>
         <div>
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" name="email" value={email} onChange={handleChange} />
+          <label htmlFor='email'>Email</label>
+          <input id='email' type='email' name='email' value={email} onChange={handleChange} />
         </div>
         <div>
-          <label htmlFor="username">Username</label>
-          <input id="username" type="text" name="username" value={username} onChange={handleChange} />
+          <label htmlFor='username'>Username</label>
+          <input id='username' type='text' name='username' value={username} onChange={handleChange} />
         </div>
         <div>
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" name="password" value={password} onChange={handleChange} />
+          <label htmlFor='password'>Password</label>
+          <input id='password' type='password' name='password' value={password} onChange={handleChange} />
         </div>
         <div>
-          <label htmlFor="confirmPassword">Confirm Password</label>
+          <label htmlFor='confirmPassword'>Confirm Password</label>
           <input
-            id="confirmPassword"
-            type="password"
-            name="confirmPassword"
+            id='confirmPassword'
+            type='password'
+            name='confirmPassword'
             value={confirmPassword}
             onChange={handleChange}
           />
         </div>
         <div>
-          <button type="submit">Register</button>
+          <button type='submit'>Register</button>
         </div>
       </fieldset>
       {state.tag === 'editing' && state.error && <div>{state.error}</div>}

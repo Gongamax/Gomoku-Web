@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import App_Icon from '../../Assets/app_icon.png';
+import App_Icon from '../../Assets/AppIcon.png';
 
 /**
  * `HomePage` is a React functional component that renders the home page of the application.

@@ -3,10 +3,10 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getRanking } from '../../Service/users/UserServices';
 import { UserStatsOutputModel } from '../../Service/users/models/GetStatsOutput';
+import { isProblem } from '../../Service/media/Problem';
 
 /**
  * @typedef Player
- * @type {object}
  * @property {string} name - The name of the player.
  * @property {number} score - The score of the player.
  * @property {number} rank - The rank of the player.
@@ -63,6 +63,8 @@ function reduce(state: State, action: Action): State {
         return { tag: 'presenting', players: action.players };
       } else if (action.type === 'loadError') {
         return { tag: 'error', message: action.message };
+      } else if (action.type === 'startLoading') {
+        return state;
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -73,7 +75,7 @@ function reduce(state: State, action: Action): State {
         return { tag: 'presenting', players: action.players };
       } else if (action.type === 'loadError') {
         return { tag: 'error', message: action.message };
-      } else if (action.type === 'startLoading') { // Add this block
+      } else if (action.type === 'startLoading') {
         return { tag: 'loading' };
       } else {
         logUnexpectedAction(state, action);
@@ -114,7 +116,8 @@ export function RankingPage() {
       });
       setLinks(paginationLinks);
     } catch (e) {
-      dispatch({ type: 'loadError', message: e.message });
+      const message = isProblem(e) ? e.detail : e.message;
+      dispatch({ type: 'loadError', message: message });
     }
   };
 
@@ -136,20 +139,20 @@ export function RankingPage() {
       return (
         <div>
           <h1>Player Rankings</h1>
-          <table>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Name</th>
-              <th>Points</th>
+            <tr style={{ borderBottom: '1px solid black' }}>
+              <th style={{ padding: '10px', textAlign: 'left' }}>Rank</th>
+              <th style={{ padding: '10px', textAlign: 'left' }}>Name</th>
+              <th style={{ padding: '10px', textAlign: 'left' }}>Points</th>
             </tr>
             </thead>
             <tbody>
             {state.players.map(player => (
-              <tr key={player.id}>
-                <td>{player.rank}</td>
-                <td><Link to={`/users/${player.id}`}>{player.name}</Link></td>
-                <td>{player.score}</td>
+              <tr key={player.id} style={{ borderBottom: '1px solid #ddd' }}>
+                <td style={{ padding: '10px' }}>{player.rank}</td>
+                <td style={{ padding: '10px' }}><Link to={`/users/${player.id}`}>{player.name}</Link></td>
+                <td style={{ padding: '10px' }}>{player.score}</td>
               </tr>
             ))}
             </tbody>

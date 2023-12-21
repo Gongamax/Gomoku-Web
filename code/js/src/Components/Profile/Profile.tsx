@@ -5,6 +5,7 @@ import {UserInfo} from '../../Domain/users/UserInfo';
 import {getAllGamesByUser} from "../../Service/games/GamesServices";
 import {convertToDomainMatchHistory, convertToDomainUser} from "./ProfileUtil";
 import {useParams} from "react-router-dom";
+import { isProblem } from '../../Service/media/Problem';
 
 /**
  * `Match` is a type that represents a match.
@@ -96,7 +97,7 @@ export function ProfilePage() {
         setMatchHistory(history);
         dispatch({ type: 'loadSuccess', userInfo: userInfo, presentHistory: false });
       } catch (error) {
-        dispatch({ type: 'loadError', message: error.message });
+        dispatch({ type: 'loadError', message: isProblem(error) ? error.detail : error.message });
       }
     }
     fetchData();

@@ -1,5 +1,12 @@
+FROM node:alpine AS builder
+COPY ./js/package.json ./
+RUN npm install
+COPY ./js/.eslintrc.json ./js/tsconfig.json ./js/webpack.config.js ./js/.prettierrc ./js/tsconfig.json ./js/declarations.d.ts ./
+COPY ./js/src ./src/
+RUN npm run build
+
 FROM nginx:alpine
 COPY ./jvm/tests/nginx/nginx.conf /etc/nginx
 
-COPY ./js/dist/main.js /js/
-COPY ./js/public/index.html /js/
+COPY --from=builder ./dist/main.js /opt/isel/daw/
+COPY ./js/public/index.html /opt/isel/daw/

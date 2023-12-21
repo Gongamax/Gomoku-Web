@@ -24,8 +24,6 @@ class UsersController(
     private val userService: UsersService
 ) {
 
-    private val expireCookie = -1
-
     @PostMapping(Uris.Users.REGISTER)
     fun create(@RequestBody @Valid input: UserCreateInputModel): ResponseEntity<*> {
         return when (val res = userService.createUser(input.username, input.email, input.password)) {
@@ -52,12 +50,10 @@ class UsersController(
     }
 
     @PostMapping(Uris.Users.LOGIN)
-    fun login(
-        @Valid @RequestBody input: UserCreateTokenInputModel
-    ): ResponseEntity<*> {
+    fun login(@Valid @RequestBody input: UserCreateTokenInputModel): ResponseEntity<*> {
         return when (val res = userService.createToken(input.username, input.password)) {
             is Success -> {
-                val cookieMaxAge : Long = res.value.tokenExpiration.epochSeconds - Clock.System.now().epochSeconds
+                val cookieMaxAge: Long = res.value.tokenExpiration.epochSeconds - Clock.System.now().epochSeconds
                 ResponseEntity.status(200)
                     .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                     .header(
@@ -213,7 +209,8 @@ class UsersController(
                         if (res.value.nextPage != null)
                             link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.nextPage), Rels.NEXT)
 
-                        link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.lastPage), Rels.LAST)
+                        if (res.value.lastPage != null)
+                            link(URI(Uris.Users.RANKING_INFO + "?page=" + res.value.lastPage), Rels.LAST)
 
                         requireAuth(false)
                     }
