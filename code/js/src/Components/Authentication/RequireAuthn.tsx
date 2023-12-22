@@ -36,6 +36,7 @@ export function useLoggedIn(): boolean {
  *
  * @param {string} name - The name of the cookie to retrieve.
  * @returns {string | undefined} - The value of the cookie if it exists, undefined otherwise.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
  */
 export function getCookie(name: string): string | undefined {
   return document.cookie

@@ -26,11 +26,12 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         request: WebRequest
     ): ResponseEntity<Any>? {
         log.info("Handling MethodArgumentNotValidException: {}", ex.message)
+        val errors = ex.bindingResult.fieldErrors.map { it.defaultMessage }.joinToString(", ")
         return Problem(
             typeUri = Problem.invalidRequestContent,
             title = "Problem.invalidRequestContent",
             status = 400,
-            detail = "Invalid request content",
+            detail = errors ?: "Invalid request content",
         ).toResponse()
     }
 

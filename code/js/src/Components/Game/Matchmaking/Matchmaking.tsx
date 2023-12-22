@@ -53,7 +53,7 @@ function reduce(state: State, action: Action): State {
 }
 
 export function MatchmakingPage() {
-  const { mid } = useParams<{ mid: string }>();
+  const { mid } = useParams();
   const matchId = Number(mid);
   const [state, dispatch] = React.useReducer(reduce, { tag: 'readingStatus', queueEntryId: matchId });
 

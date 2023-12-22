@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Game } from '../../../Domain/games/Game';
+// import { Game } from '../../../Domain/games/Game';
+import { GameOutputModel } from '../../../Service/games/models/GameModelsUtil';
 
 export function PresentGame({ game, onPlay, onResign }: GameBoardProps) {
   if (game) {
@@ -11,7 +12,8 @@ export function PresentGame({ game, onPlay, onResign }: GameBoardProps) {
     return (
       <div>
         <h1>
-          {game.players[0].username} vs {game.players[1].username}
+          {/* {game.players[0].username} vs {game.players[1].username} */}
+          {game.userBlack.username} vs {game.userWhite.username}
         </h1>
         <h2>Turn: {turn}</h2>
         <BoardPresentation board={board} onPlay={onPlay} />
@@ -22,7 +24,7 @@ export function PresentGame({ game, onPlay, onResign }: GameBoardProps) {
 }
 
 interface GameBoardProps {
-  game?: Game;
+  game?: GameOutputModel;
   board?: string[][];
   onPlay: (row: number, col: number) => void;
   onResign?: () => void;

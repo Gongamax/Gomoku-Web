@@ -12,23 +12,14 @@ import {ActionModel} from "./ActionModel";
  * @property links represent navigational links, distinct from entity relationships.
  * @property requireAuth is a boolean that indicates if the entity requires authentication.
  * */
-export class SirenModel<T> {
-  public class: string[];
-  public properties: T;
-  public links: LinkModel[];
-  public recipeLinks: LinkModel[];
-  public entities: EntityModel<T>[];
-  public actions: ActionModel[];
-  public requireAuth: boolean;
-
-  constructor(model: SirenModel<T>) {
-    this.class = model.class;
-    this.properties = model.properties;
-    this.links = model.links;
-    this.entities = model.entities;
-    this.actions = model.actions;
-    this.requireAuth = model.requireAuth;
-  }
+export type SirenModel<T> = {
+  class: string[];
+  properties: T;
+  links: LinkModel[];
+  recipeLinks: LinkModel[];
+  entities: EntityModel<T>[];
+  actions: ActionModel[];
+  requireAuth: boolean;
 }
 
 export const sirenMediaType = 'application/vnd.siren+json';

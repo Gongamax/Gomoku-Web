@@ -11,8 +11,9 @@ import {MatchmakingPage} from './Components/Game/Matchmaking/Matchmaking';
 import {RequireAuthn} from './Components/Authentication/RequireAuthn';
 import {Me} from './Components/Home/Me';
 import {NavBarWrapper} from './Layout/NavBar';
-import {GamePage} from './Components/Game/Gameplay/Game';
+// import {GamePage} from './Components/Game/Gameplay/Game';
 import { NotFoundPage } from './Components/NotFound/NotFoundPage';
+import { GamePlay } from './Components/Game/GamePlay/GamePlay';
 
 /**
  * `App` is the root component of the application.
@@ -74,7 +75,7 @@ const router = createBrowserRouter([
       },
       {
         'path': '/game/:gid',
-        'element': <RequireAuthn><GamePage /></RequireAuthn>,
+        'element': <RequireAuthn><GamePlay /></RequireAuthn>,
       },
       {
         'path': '*',

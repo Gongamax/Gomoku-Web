@@ -7,3 +7,19 @@ COPY ${DEPENDENCY}/META-INF /app/META-INF
 # last layer with the application JARs (i.e. the files that change the most).
 COPY ${DEPENDENCY}/BOOT-INF/classes /app
 ENTRYPOINT ["java","-cp","app:app/lib/*","pt.isel.daw.gomoku.GomokuApplicationKt"]
+
+#FROM openjdk:19 as builder
+#WORKDIR /workspace/app
+#COPY ../gradlew gradlew
+#COPY ../build.gradle.kts build.gradle
+#COPY ../settings.gradle.kts settings.gradle
+#COPY ../gradle gradle
+#RUN chmod +x gradlew
+#COPY ../src src
+#RUN ./gradlew build -x test
+#
+#FROM openjdk:19
+#VOLUME /tmp
+#ARG DEPENDENCY=/workspace/app/build/libs
+#COPY --from=builder ${DEPENDENCY}/application.jar /app/application.jar
+#ENTRYPOINT ["java","-jar","/app/application.jar"]
