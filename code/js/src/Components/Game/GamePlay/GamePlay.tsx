@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { Navigate, useParams } from 'react-router-dom';
-import { getGame, playGame } from '../../../Service/games/GamesServices';
-import { GameState } from '../../../Domain/games/Game';
-import { getUserName } from '../../Authentication/RequireAuthn';
-import { GameOutputModel } from '../../../Service/games/models/GameModelsUtil';
-import { isProblem } from '../../../Service/media/Problem';
-import { PresentGame, ResultPresentation } from './GamePresentation';
-import { User } from '../../../Domain/users/User';
-import { StrictMode } from 'react';
+import {StrictMode} from 'react';
+import {Navigate, useParams} from 'react-router-dom';
+import {getGame, playGame, surrenderGame} from '../../../Service/games/GamesServices';
+import {GameState} from '../../../Domain/games/Game';
+import {getUserName} from '../../Authentication/RequireAuthn';
+import {GameOutputModel} from '../../../Service/games/models/GameModelsUtil';
+import {isProblem} from '../../../Service/media/Problem';
+import {PresentGame, ResultPresentation} from './GamePresentation';
+import {User} from '../../../Domain/users/User';
 
 type State =
   | { tag: 'loading' }
@@ -20,7 +20,7 @@ type State =
 
 type Action =
   | { type: 'waiting' }
-  | { type: 'play'; result?: string; hasPlayed?: boolean }
+  | { type: 'play'; result?: string; hasPlayed?: boolean, resign?: boolean }
   | { type: 'gameOver'; pointsAttribution?: number; winner?: User }
   | { type: 'redirect'; to: string }
   | { type: 'error'; error: string };
@@ -49,6 +49,8 @@ function reducer(state: State, action: Action): State {
       if (action.type === 'play') {
         if (action.hasPlayed) {
           return { tag: 'waitingForPlayResult' };
+        } else if (action.resign){
+          return { tag: 'redirect', to: '/me' };
         } else {
           return state;
         }
@@ -158,19 +160,33 @@ export function GamePlay() {
     }
   };
 
-  //TODO: IMPLEMENT LOGIC
-  function handleResign() {
-    console.log('Resign');
+  async function handleResign() {
+    if (state.tag === 'myTurn' || state.tag === 'waitingForOpponent') {
+      try {
+        await surrenderGame(gameId);
+        dispatch({ type: 'play', resign: true });
+      } catch (error) {
+        console.error('Failed to resign:', error);
+      }
+    }
   }
 
-  //TODO: IMPROVE VISUALS 
   return (
     <div>
       {/* StrictMode to enable additional development behaviors and warnings for the component tree inside */}
       <StrictMode> 
         {state.tag === 'loading' && <div>Loading...</div>}
-        {state.tag === 'waitingForOpponent' && <div>Waiting for opponent...</div>}
-        {state.tag === 'waitingForPlayResult' && <div>Waiting for play result...</div>}
+        {state.tag === 'waitingForOpponent' && (
+            <div>
+              <PresentGame game={game} onPlay={() => {}} />
+              <h3>Waiting for opponent...</h3>
+            </div>
+        )}
+        {state.tag === 'waitingForPlayResult' && (
+            <div>
+              <PresentGame game={game} onPlay={() => {}} />
+              <h3>Waiting for play result...</h3>
+            </div>)}
         {state.tag === 'myTurn' && <PresentGame game={game} onPlay={handlePlay} onResign={handleResign} />}
         {state.tag === 'gameOver' && (
           <div>
