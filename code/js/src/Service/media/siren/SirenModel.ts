@@ -1,6 +1,6 @@
-import {EntityModel} from "./EntityModel";
-import {LinkModel} from "./LinkModel";
-import {ActionModel} from "./ActionModel";
+import { EntityModel } from './EntityModel';
+import { LinkModel } from './LinkModel';
+import { ActionModel } from './ActionModel';
 
 /**
  * Siren is a hypermedia specification for representing entities in JSON.
@@ -20,6 +20,6 @@ export type SirenModel<T> = {
   entities: EntityModel<T>[];
   actions: ActionModel[];
   requireAuth: boolean;
-}
+};
 
 export const sirenMediaType = 'application/vnd.siren+json';

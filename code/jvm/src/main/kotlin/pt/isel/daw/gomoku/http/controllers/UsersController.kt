@@ -14,7 +14,7 @@ import pt.isel.daw.gomoku.http.util.Rels
 import pt.isel.daw.gomoku.http.util.Uris
 import pt.isel.daw.gomoku.services.users.*
 import pt.isel.daw.gomoku.utils.Failure
-import pt.isel.daw.gomoku.utils.PositiveValue
+import pt.isel.daw.gomoku.utils.PageValue
 import pt.isel.daw.gomoku.utils.Success
 import java.net.URI
 
@@ -170,7 +170,7 @@ class UsersController(
 
     @GetMapping(Uris.Users.RANKING_INFO)
     fun getRankingInfo(@RequestParam(name = "page", defaultValue = "1") page: Int): ResponseEntity<*> =
-        when (val res = userService.getRanking(PositiveValue(page))) {
+        when (val res = userService.getRanking(PageValue(page))) {
             is Success -> ResponseEntity.ok()
                 .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                 .body(
@@ -216,7 +216,7 @@ class UsersController(
                     }
                 )
 
-            is Failure -> Problem.rankingNotFound(Uris.Users.rankingInfo())
+            is Failure -> Problem.invalidPageNumber(Uris.Users.rankingInfo(), page)
         }
 
     @GetMapping(Uris.Users.GET_STATS_BY_USERNAME)
@@ -254,7 +254,6 @@ class UsersController(
                     )
                 }
         }
-
 
     @GetMapping(Uris.Users.GET_STATS_BY_ID)
     fun getStatsById(@PathVariable uid: Int): ResponseEntity<*> =

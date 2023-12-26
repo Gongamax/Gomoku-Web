@@ -9,18 +9,10 @@ import { LinkModel } from './LinkModel';
  * @property rel is the relationship of the link to its entity.
  * @property requireAuth is a boolean that indicates if the entity requires authentication.
  * */
-export class EntityModel<T> {
-  public class: string[];
-  public properties: T;
-  public links: LinkModel[];
-  public rel: string[];
-  public requireAuth: boolean[];
-
-  constructor(entity: EntityModel<T>) {
-    this.class = entity.class;
-    this.properties = entity.properties;
-    this.links = entity.links;
-    this.rel = entity.rel;
-    this.requireAuth = entity.requireAuth;
-  }
-}
+export type EntityModel<T> = {
+  class: string[];
+  properties: T;
+  links: LinkModel[];
+  rel: string[];
+  requireAuth: boolean;
+};

@@ -19,7 +19,7 @@ import pt.isel.daw.gomoku.services.games.GamesService
 import pt.isel.daw.gomoku.services.users.UsersService
 import pt.isel.daw.gomoku.utils.Either
 import pt.isel.daw.gomoku.utils.Environment
-import pt.isel.daw.gomoku.utils.PositiveValue
+import pt.isel.daw.gomoku.utils.PageValue
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertNotNull
@@ -117,7 +117,7 @@ class GameServiceTests {
         }
 
         // when: getting all games
-        val allGames = gamesService.getAll(PositiveValue(1))
+        val allGames = gamesService.getAll(PageValue(1))
 
         //then: the game is found
         assertNotNull(allGames)
@@ -200,7 +200,7 @@ class GameServiceTests {
         assertTrue { whiteStats.gamesPlayed > 0 }
 
         //then: check if games of user were updated
-        val gamesOfUser = when(val gamesOfUser = gamesService.getGamesOfUser(game.playerWHITE.id.value, PositiveValue(1))) {
+        val gamesOfUser = when(val gamesOfUser = gamesService.getGamesOfUser(game.playerWHITE.id.value, PageValue(1))) {
             is Either.Left -> fail("Failed to get games of user for $gamesOfUser")
             is Either.Right -> gamesOfUser.value
         }

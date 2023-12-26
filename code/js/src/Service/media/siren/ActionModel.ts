@@ -10,20 +10,11 @@ import { FieldModel } from './FieldModel';
  * @property fields represent the input fields of the action.
  * @property requireAuth is a boolean that indicates if the action requires authentication.
  * */
-export class ActionModel {
-  public name: string;
-  public href: string;
-  public method: string;
-  public type: string;
-  public fields: FieldModel[];
-  public requireAuth: boolean[];
-
-  constructor(action: ActionModel) {
-    this.name = action.name;
-    this.href = action.href;
-    this.method = action.method;
-    this.type = action.type;
-    this.fields = action.fields;
-    this.requireAuth = action.requireAuth;	
-  }
-}
+export type ActionModel = {
+  name: string;
+  href: string;
+  method: string;
+  type: string;
+  fields: FieldModel[];
+  requireAuth: boolean;
+};

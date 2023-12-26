@@ -1,120 +1,104 @@
 import * as React from 'react';
 import { cancelMatchmaking, getMatchmakingStatus } from '../../../Service/games/GamesServices';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { QueueEntry } from '../../../Domain/games/QueueEntry';
 import { isProblem } from '../../../Service/media/Problem';
 
 type State =
-  | { tag: 'readingStatus'; queueEntryId: number }
-  | { tag: 'redirect'; gameId: number; queueEntryId: number; cancel: boolean }
-  | { tag: 'error'; message: string ; queueEntryId: number};
+  | { tag: 'readingStatus'; queueEntryId: number}
+  | { tag: 'redirecting'; to: string; queueEntryId?: number }
+  | { tag: 'error'; message: string; queueEntryId: number };
 
 type Action =
-  | { type: 'readingStatus'; queueEntryId: number }
-  | { type: 'readSuccess'; queueEntry: QueueEntry }
-  | { type: 'redirect'; gameId: number, cancel: boolean }
+  | { type: 'success'; gameId: number }
+  | { type: 'cancel'; queueEntryId: number }
   | { type: 'readError'; message: string };
 
 const logUnexpectedAction = (state: State, action: Action) => {
   console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
 };
 
-const defaultPollingTimeout = 4000;
-
-function reduce(state: State, action: Action): State {
+function reducer(state: State, action: Action): State {
   switch (state.tag) {
     case 'readingStatus':
-      if (action.type === 'readSuccess') {
-        if (action.queueEntry.status === 'PENDING') {
-          return state;
-        } else if (action.queueEntry.status === 'MATCHED') {
-          return {
-            tag: 'redirect',
-            gameId: action.queueEntry.gameId!,
-            queueEntryId: state.queueEntryId,
-            cancel: false,
-          };
-        } else {
-          return state;
-        }
+      if (action.type === 'success') {
+        return { tag: 'redirecting', to: `/game/${action.gameId}` };
+      } else if (action.type === 'cancel') {
+        return { tag: 'redirecting', to: '/lobby' };
       } else if (action.type === 'readError') {
         return { tag: 'error', message: action.message, queueEntryId: state.queueEntryId };
-      } else if (action.type === 'redirect') {
-        // Handle 'redirect' action in 'readingStatus' state
-        return { tag: 'redirect', gameId: action.gameId, queueEntryId: state.queueEntryId, cancel: action.cancel };
       } else {
         logUnexpectedAction(state, action);
         return state;
       }
-    case 'redirect':
-      // Handle the 'redirect' case
+    case 'redirecting':
+      logUnexpectedAction(state, action);
       return state;
   }
 }
 
 export function MatchmakingPage() {
   const { mid } = useParams();
-  const matchId = Number(mid);
-  const [state, dispatch] = React.useReducer(reduce, { tag: 'readingStatus', queueEntryId: matchId });
+  const [state, dispatch] = React.useReducer(reducer, { tag: 'readingStatus', queueEntryId: Number(mid) });
+  const [pollingTimeout, setPollingTimeout] = React.useState<number>(3000);
+  const [cancelled, setCancelled] = React.useState<boolean>(false);
 
   React.useEffect(() => {
-    let pollingTimeout = defaultPollingTimeout; // by default, poll every 4 seconds
-    const intervalFunction = async () => {
-      try {
-        const queueEntry = await getMatchmakingStatus(state.queueEntryId);
-        pollingTimeout = queueEntry.properties.pollingTimeOut;
-        if (queueEntry.properties.state === 'MATCHED') {
-          dispatch({ type: 'redirect', gameId: queueEntry.properties.gid!, cancel: false });
-          clearInterval(iid);
-        }
-      } catch (e) {
-        clearInterval(iid)
-        if (isProblem(e)) {
-          dispatch({ type: 'readError', message: e.detail });
-        } else {
-          dispatch({ type: 'readError', message: 'An error occurred while fetching the matchmaking status.' });
-        }
-      }
-    };
+    if (state.tag !== 'readingStatus' || cancelled)
+      return;
 
-    const iid = setInterval(intervalFunction, pollingTimeout);
+    const iid = setInterval(() => {
+      getMatchmakingStatus(state.queueEntryId)
+        .then(queueEntry => {
+          if (queueEntry) {
+            const { pollingTimeOut, state: status, gid } = queueEntry.properties;
+            if (pollingTimeout !== pollingTimeOut) {
+              setPollingTimeout(pollingTimeOut);
+            }
+            if (status === 'MATCHED') {
+              dispatch({ type: 'success', gameId: gid });
+            }
+          } else {
+            dispatch({ type: 'readError', message: 'Queue entry not found' });
+          }
+        })
+        .catch(e => {
+          dispatch({ type: 'readError', message: isProblem(e) ? e.detail : e.message });
+        });
+    }, pollingTimeout);
+
     return () => {
       clearInterval(iid);
-    }
-  }, [state.queueEntryId]);
+    };
+  }, [pollingTimeout, state.queueEntryId, state.tag, cancelled]);
 
-  async function handleCancel() {
-    try {
-      await cancelMatchmaking(state.queueEntryId);
-      dispatch({ type: 'redirect', gameId: undefined, cancel: true });
-    } catch (e) {
-      if (isProblem(e)) {
-        dispatch({ type: 'readError', message: e.detail });
-      } else {
-        dispatch({ type: 'readError', message: 'An error occurred while cancelling the matchmaking.' });
-      }
+  async function onCancellingHandler() {
+    if (state.tag !== 'readingStatus') {
+      return;
     }
+    cancelMatchmaking(state.queueEntryId)
+      .then(() => {
+        dispatch({ type: 'cancel', queueEntryId: state.queueEntryId });
+        setCancelled(true);
+      })
+      .catch(e => dispatch({ type: 'readError', message: isProblem(e) ? e.detail : e.message }));
   }
 
   const navigate = useNavigate();
-
-  switch (state.tag) {
-    case 'readingStatus':
-      return (
+  return (
+    <div>
+      {state.tag === 'readingStatus' && (
         <div>
           <h3>Searching for a opponent...</h3>
-          <button onClick={handleCancel}>Cancel</button>
+          <button onClick={onCancellingHandler}>Cancel</button>
         </div>
-      );
-    case 'redirect':
-      return <div>
-        <p>Opponent found! Redirecting to game {state.gameId}...</p>
-        <Navigate to={state.cancel ? '/lobby' : `/game/${state.gameId}`} />;
-      </div>;
-    case 'error':
-      return <div>
-        <p>{state.message}</p>
-        <button onClick={() => navigate('/lobby', { replace: true })}>Return to lobby</button>
-      </div>;
-  }
+      )}
+      {state.tag === 'redirecting' && <Navigate to={state.to} />}
+      {state.tag === 'error' && (
+        <div>
+          <p>{state.message}</p>
+          <button onClick={() => navigate('/lobby', { replace: true })}>Return to lobby</button>
+        </div>
+      )}
+    </div>
+  );
 }

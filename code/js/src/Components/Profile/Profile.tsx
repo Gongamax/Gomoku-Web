@@ -7,11 +7,6 @@ import {convertToDomainMatchHistory, convertToDomainUser} from "./ProfileUtil";
 import {useParams} from "react-router-dom";
 import { isProblem } from '../../Service/media/Problem';
 
-/**
- * `Match` is a type that represents a match.
- * It includes properties for `opponent` and `result`.
- */
-
 type State =
     | { tag: 'loading' }
     | { tag: 'presentOnlyInfo'; userInfo: UserInfo}
@@ -82,7 +77,7 @@ const reduce = (state: State, action: Action): State => {
  *
  * @returns {React.ReactElement} - The rendered profile page.
  */
-export function ProfilePage() {
+export function ProfilePage(): React.ReactElement {
   const { uid } = useParams<{ uid: string }>();
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
   const [matchHistory, setMatchHistory] = React.useState([]);

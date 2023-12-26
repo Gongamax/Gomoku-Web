@@ -14,7 +14,7 @@ import pt.isel.daw.gomoku.http.util.Rels
 import pt.isel.daw.gomoku.http.util.Uris
 import pt.isel.daw.gomoku.services.games.*
 import pt.isel.daw.gomoku.utils.Failure
-import pt.isel.daw.gomoku.utils.PositiveValue
+import pt.isel.daw.gomoku.utils.PageValue
 import pt.isel.daw.gomoku.utils.Success
 import java.net.URI
 
@@ -162,26 +162,26 @@ class GameController(
                 is MatchmakingSuccess.OnWaitingQueue -> ResponseEntity.ok()
                     .header("Content-Type", SirenModel.SIREN_MEDIA_TYPE)
                     .body(
-                    siren(
-                        GameMatchmakingOutputModel(
-                            "User on waiting queue",
-                            "mid",
-                            res.value.id
-                        )
-                    ) {
-                        clazz("matchmaking")
-                        link(Uris.Games.matchmaking(), Rels.SELF)
-                        action(
-                            "leave-matchmaking",
-                            Uris.Games.exitMatchmakingQueue(res.value.id),
-                            HttpMethod.DELETE,
-                            "application/json"
+                        siren(
+                            GameMatchmakingOutputModel(
+                                "User on waiting queue",
+                                "mid",
+                                res.value.id
+                            )
                         ) {
+                            clazz("matchmaking")
+                            link(Uris.Games.matchmaking(), Rels.SELF)
+                            action(
+                                "leave-matchmaking",
+                                Uris.Games.exitMatchmakingQueue(res.value.id),
+                                HttpMethod.DELETE,
+                                "application/json"
+                            ) {
+                                requireAuth(true)
+                            }
                             requireAuth(true)
                         }
-                        requireAuth(true)
-                    }
-                )
+                    )
             }
 
             is Failure -> when (res.value) {
@@ -267,16 +267,7 @@ class GameController(
 
     @GetMapping(Uris.Games.GET_ALL_GAMES)
     fun getAllGames(@RequestParam(name = "page", defaultValue = "1") page: Int): ResponseEntity<*> =
-        when (val games = gameService.getAll(PositiveValue(page))) {
-            is Failure ->
-                Problem(
-                    typeUri = Problem.gamesNotFound,
-                    title = "No games",
-                    status = 404,
-                    detail = "There are no games",
-                    instance = Uris.Games.getAllGames()
-                ).toResponse()
-
+        when (val games = gameService.getAll(PageValue(page))) {
             is Success ->
                 ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                     siren(
@@ -324,6 +315,8 @@ class GameController(
                         requireAuth(true)
                     }
                 )
+
+            is Failure -> Problem.invalidPageNumber(instance = Uris.Games.getAllGames(), pageNumber = page)
         }
 
 
@@ -363,7 +356,7 @@ class GameController(
     ): ResponseEntity<*> {
         val id = uid?.toInt() ?: authenticatedUser.user.id.value
         return when (
-            val games = gameService.getGamesOfUser(id, PositiveValue(page))
+            val games = gameService.getGamesOfUser(id, PageValue(page))
         ) {
             is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
@@ -403,7 +396,10 @@ class GameController(
                         link(URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + games.value.firstPage), Rels.FIRST)
 
                     if (games.value.previousPage != null)
-                        link(URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + games.value.previousPage), Rels.PREVIOUS)
+                        link(
+                            URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + games.value.previousPage),
+                            Rels.PREVIOUS
+                        )
 
                     if (games.value.nextPage != null)
                         link(URI(Uris.Games.getAllGamesByUser(id).path + "?page=" + games.value.nextPage), Rels.NEXT)
@@ -419,8 +415,9 @@ class GameController(
                     uid = id
                 )
 
-                GameListError.GamesNotFound -> Problem.gamesNotFound(
-                    instance = Uris.Games.getAllGamesByUser(id)
+                GameListError.InvalidPageNumber -> Problem.invalidPageNumber(
+                    instance = Uris.Games.getAllGamesByUser(id),
+                    pageNumber = page
                 )
             }
         }

@@ -64,11 +64,11 @@ fun Board.playRound(cell: Cell, nextPiece: Piece, variant: Variants): Board =
 fun BoardRun.isWin(cell: Cell, variant: Variants) = variant.isWin(this, cell)
 
 /**
- * Checks if the move in [cell] position is a valid move according to the play rule.
+ * Checks if the move in [cell] position is a valid move, according to the play rule.
  */
 fun Board.canPlayOn(cell: Cell, variant: Variants) = variant.validPlay(this, cell, variant)
 
 /**
- * Checks if the state of the board will end the game as a Draw.
+ * Checks if the state of the board ends the game as a Draw.
  */
 fun BoardRun.isDraw(variant: Variants) = variant.isDraw(this, variant)

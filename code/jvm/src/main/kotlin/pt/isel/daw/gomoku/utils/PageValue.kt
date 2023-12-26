@@ -1,7 +1,8 @@
 package pt.isel.daw.gomoku.utils
 
-data class PositiveValue (val value: Int) {
-    init {
-        if (value < 0) throw IllegalArgumentException("Value must be positive")
-    }
-}
+/**
+ * Data class representing a page value.
+ *
+ * @property value The value of the page.
+ */
+data class PageValue (val value: Int)

@@ -21,7 +21,7 @@ const logUnexpectedAction = (state: State, action: Action) => {
   console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
 };
 
-const reduce = (state: State, action: Action): State => {
+function reducer(state: State, action: Action): State {
   switch (state.tag) {
     case 'loading':
       if (action.type === 'loadSuccess') {
@@ -38,17 +38,16 @@ const reduce = (state: State, action: Action): State => {
       logUnexpectedAction(state, action);
       return state;
   }
-};
+}
 
 export function Me() {
   const currentUser = getUserName();
-  const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
+  const [state, dispatch] = React.useReducer(reducer, { tag: 'loading' });
   const [ongoingGames, setOngoingGames] = React.useState<GameSimpleInfo[]>([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        dispatch({ type: 'startLoading' });
         const userResponse = await getStatsByUsername(currentUser);
         const userInfo = {
           username: userResponse.properties.username,
@@ -60,7 +59,7 @@ export function Me() {
         const uid = userResponse.properties.uid;
         const ongoingGamesResponse = await getAllGamesByUser(uid);
         const games = convertToDomainGames(ongoingGamesResponse, uid);
-        setOngoingGames(games.filter((game) => game.result === 'IN PROGRESS'));
+        setOngoingGames(games.filter(game => game.result === 'IN PROGRESS'));
         dispatch({ type: 'loadSuccess', userInfo });
       } catch (error) {
         dispatch({ type: 'loadError', message: error.message });
@@ -70,7 +69,7 @@ export function Me() {
     fetchData();
   }, [currentUser]);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   switch (state.tag) {
     case 'loading':
@@ -87,24 +86,24 @@ export function Me() {
           <h2>Ongoing Games</h2>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-            <tr style={{ borderBottom: '1px solid #ccc' }}>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Game ID</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Opponent</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Result</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Join</th>
-            </tr>
+              <tr style={{ borderBottom: '1px solid #ccc' }}>
+                <th style={{ padding: '10px', textAlign: 'left' }}>Game ID</th>
+                <th style={{ padding: '10px', textAlign: 'left' }}>Opponent</th>
+                <th style={{ padding: '10px', textAlign: 'left' }}>Result</th>
+                <th style={{ padding: '10px', textAlign: 'left' }}>Join</th>
+              </tr>
             </thead>
             <tbody>
-            {ongoingGames.map((game) => (
-              <tr key={game.id} style={{ borderBottom: '1px solid #ddd' }}>
-                <td style={{ padding: '10px' }}>{game.id}</td>
-                <td style={{ padding: '10px' }}>{game.opponent.username}</td>
-                <td style={{ padding: '10px' }}>{game.result}</td>
-                <td style={{ padding: '10px' }}>
-                  <button onClick={() => navigate(`/game/${game.id}`)}>Join</button>
-                </td>
-              </tr>
-            ))}
+              {ongoingGames.map(game => (
+                <tr key={game.id} style={{ borderBottom: '1px solid #ddd' }}>
+                  <td style={{ padding: '10px' }}>{game.id}</td>
+                  <td style={{ padding: '10px' }}>{game.opponent.username}</td>
+                  <td style={{ padding: '10px' }}>{game.result}</td>
+                  <td style={{ padding: '10px' }}>
+                    <button onClick={() => navigate(`/game/${game.id}`)}>Join</button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -118,11 +117,16 @@ export function Me() {
   }
 }
 
-
 // Auxiliary functions
 
+type GameSimpleInfo = {
+  id: number;
+  opponent: User;
+  result: string;
+};
+
 function convertToDomainGames(response: GetAllGamesByUserOutput, userId: number): GameSimpleInfo[] {
-  return response.entities.map((entity) => {
+  return response.entities.map(entity => {
     const game = entity.properties as unknown as GameOutputModel;
     const opponent = game.userBlack.id.value === userId ? game.userWhite : game.userBlack;
     const result = calculateResult(game, userId);
@@ -133,9 +137,3 @@ function convertToDomainGames(response: GetAllGamesByUserOutput, userId: number)
     };
   });
 }
-
-type GameSimpleInfo = {
-  id: number;
-  opponent: User;
-  result: string;
-};

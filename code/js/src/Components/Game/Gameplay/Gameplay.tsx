@@ -1,29 +1,30 @@
 import * as React from 'react';
-import {StrictMode} from 'react';
-import {Navigate, useParams} from 'react-router-dom';
-import {getGame, playGame, surrenderGame} from '../../../Service/games/GamesServices';
-import {GameState} from '../../../Domain/games/Game';
-import {getUserName} from '../../Authentication/RequireAuthn';
-import {GameOutputModel} from '../../../Service/games/models/GameModelsUtil';
-import {isProblem} from '../../../Service/media/Problem';
-import {PresentGame, ResultPresentation} from './GamePresentation';
-import {User} from '../../../Domain/users/User';
+import { useReducer } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
+import { getGame, playGame, surrenderGame } from '../../../Service/games/GamesServices';
+import { getUserName } from '../../Authentication/RequireAuthn';
+import { isProblem } from '../../../Service/media/Problem';
+import { User } from '../../../Domain/users/User';
+import { Game, convertToDomainGame } from '../../../Domain/games/Game';
+import { useInterval } from './useInterval';
+import { PresentGame, ResultPresentation } from './GamePresentation';
+import { handleWinner, isGameOver, isMyTurn } from './GameUtils';
 
 type State =
-  | { tag: 'loading' }
-  | { tag: 'myTurn' }
-  | { tag: 'waitingForOpponent' }
-  | { tag: 'waitingForPlayResult' }
-  | { tag: 'gameOver'; pointsAttribution: number; winner?: User }
+  | { tag: 'loading'; pollDelay: number }
+  | { tag: 'myTurn'; game: Game; pollDelay: number; badMove?: string }
+  | { tag: 'waitingForOpponent'; game: Game; pollDelay: number }
+  | { tag: 'waitingForPlayResult'; game: Game; pollDelay: number }
+  | { tag: 'gameOver'; winner?: User; game: Game }
   | { tag: 'redirect'; to: string }
-  | { tag: 'error'; error: string };
+  | { tag: 'error'; error: string; game: Game; previousState: State };
 
 type Action =
-  | { type: 'waiting' }
-  | { type: 'play'; result?: string; hasPlayed?: boolean, resign?: boolean }
-  | { type: 'gameOver'; pointsAttribution?: number; winner?: User }
+  | { type: 'waiting'; game: Game; pollDelay: number }
+  | { type: 'play'; game: Game; hasPlayed?: boolean; resign?: boolean; pollDelay?: number; badMove?: string }
+  | { type: 'gameOver'; game: Game; winner?: User }
   | { type: 'redirect'; to: string }
-  | { type: 'error'; error: string };
+  | { type: 'error'; error: string; game?: Game };
 
 function logUnexpectedAction(state: State, action: Action) {
   console.log(`Unexpected action '${action.type} on state '${state.tag}'`);
@@ -33,13 +34,13 @@ function reducer(state: State, action: Action): State {
   switch (state.tag) {
     case 'loading':
       if (action.type === 'waiting') {
-        return { tag: 'waitingForOpponent' };
+        return { tag: 'waitingForOpponent', game: action.game, pollDelay: action.pollDelay };
       } else if (action.type === 'play') {
-        return { tag: 'myTurn' };
+        return { tag: 'myTurn', game: action.game, pollDelay: action.pollDelay };
       } else if (action.type === 'gameOver') {
-        return { tag: 'gameOver', pointsAttribution: action.pointsAttribution, winner: action.winner };
+        return { tag: 'gameOver', game: action.game, winner: action.winner };
       } else if (action.type === 'error') {
-        return { tag: 'error', error: action.error };
+        return { tag: 'error', error: action.error, game: action.game, previousState: state };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -47,19 +48,17 @@ function reducer(state: State, action: Action): State {
 
     case 'myTurn':
       if (action.type === 'play') {
-        if (action.hasPlayed) {
-          return { tag: 'waitingForPlayResult' };
-        } else if (action.resign){
-          return { tag: 'redirect', to: '/me' };
-        } else {
-          return state;
-        }
+        if (action.hasPlayed) return { tag: 'waitingForPlayResult', game: action.game, pollDelay: action.pollDelay };
+        else if (action.resign) return { tag: 'redirect', to: '/me' };
+        else if (action.badMove)
+          return { tag: 'myTurn', game: action.game, pollDelay: action.pollDelay, badMove: action.badMove };
+        else return state;
       } else if (action.type === 'waiting') {
         return state;
       } else if (action.type === 'error') {
-        return { tag: 'error', error: action.error };
-      } else if (action.type === 'gameOver' && action.pointsAttribution) {
-        return { tag: 'gameOver', pointsAttribution: action.pointsAttribution, winner: action.winner };
+        return { tag: 'error', error: action.error, game: action.game, previousState: state };
+      } else if (action.type === 'gameOver') {
+        return { tag: 'gameOver', game: action.game, winner: action.winner };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -67,25 +66,27 @@ function reducer(state: State, action: Action): State {
 
     case 'waitingForOpponent':
       if (action.type === 'play') {
-        return { tag: 'myTurn' };
+        return { tag: 'myTurn', game: action.game, pollDelay: action.pollDelay };
       } else if (action.type === 'waiting') {
         return state;
-      } else if (action.type === 'gameOver' && action.pointsAttribution) {
-        return { tag: 'gameOver', pointsAttribution: action.pointsAttribution, winner: action.winner };
+      } else if (action.type === 'gameOver') {
+        return { tag: 'gameOver', game: action.game, winner: action.winner };
       } else if (action.type === 'error') {
-        return { tag: 'error', error: action.error };
+        return { tag: 'error', error: action.error, game: action.game, previousState: state };
       } else {
         logUnexpectedAction(state, action);
         return state;
       }
 
     case 'waitingForPlayResult':
-      if (action.type === 'gameOver' && action.pointsAttribution) {
-        return { tag: 'gameOver', pointsAttribution: action.pointsAttribution, winner: action.winner };
+      if (action.type === 'gameOver') {
+        return { tag: 'gameOver', game: action.game, winner: action.winner };
       } else if (action.type === 'waiting') {
-        return { tag: 'waitingForOpponent' };
+        return { tag: 'waitingForOpponent', game: action.game, pollDelay: action.pollDelay };
+      } else if (action.type === 'play') {
+        return { tag: 'myTurn', game: action.game, pollDelay: action.pollDelay };
       } else if (action.type === 'error') {
-        return { tag: 'error', error: action.error };
+        return { tag: 'error', error: action.error, game: action.game, previousState: state };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -93,11 +94,11 @@ function reducer(state: State, action: Action): State {
 
     case 'gameOver':
       if (action.type === 'gameOver') {
-        return { tag: 'gameOver', pointsAttribution: action.pointsAttribution, winner: action.winner };
+        return state;
       } else if (action.type === 'redirect') {
         return { tag: 'redirect', to: action.to };
       } else if (action.type === 'error') {
-        return { tag: 'error', error: action.error };
+        return { tag: 'error', error: action.error, game: action.game, previousState: state };
       } else {
         logUnexpectedAction(state, action);
         return state;
@@ -109,125 +110,121 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export function GamePlay() {
-  const [state, dispatch] = React.useReducer(reducer, { tag: 'loading' });
+export function Gameplay() {
+  const [state, dispatch] = useReducer(reducer, { tag: 'loading', pollDelay: 4000 });
   const { gid } = useParams();
   const gameId = Number(gid);
   const currentUser = getUserName();
-  const [game, setGame] = React.useState<GameOutputModel | null>(null);
+  const activeTags = ['waitingForOpponent', 'waitingForPlayResult', 'loading'];
+  const isActiveState = (state: State): state is State & { pollDelay: number } => activeTags.includes(state.tag);
 
-  React.useEffect(() => {
-    if (state.tag === 'myTurn' || state.tag === 'redirect' || state.tag === 'gameOver' || state.tag === 'error') {
-      return;
-    }
-    let pollingTimeout = 4000;
-    let ignore = false; //TODO: PENSAR MELHOR NISTO @see https://react.dev/reference/react/useEffect#fetching-data-with-effects
-    const iid = setInterval(async () => {
-      const res = (await getGame(gameId)).properties;
-      const game = res.game;
-      pollingTimeout = res.pollingTimeOut;
-      if (isMyTurn(currentUser, game)) {
-        dispatch({ type: 'play', hasPlayed: false });
-      } else if (isGameOver(game)) {
-        dispatch({ type: 'gameOver', pointsAttribution: game.variant.points, winner: handleWinner(game) });
-      } else {
-        dispatch({ type: 'waiting' });
-      }
-      if (!ignore) {
-        setGame(game);
-      }
-    }, pollingTimeout);
-
-    return () => {
-      ignore = true;
-      clearInterval(iid);
-    };
-  }, [state.tag, gameId, currentUser]);
-
-  //TODO: PENSAR MELHOR NISTO
-  const handlePlay = async (row: number, col: number) => {
-    //React.MouseEventHandler<HTMLTableDataCellElement>
-    try {
-      const game = (await playGame(gameId, row, col)).properties.game;
-      if (isGameOver(game)) {
-        dispatch({ type: 'gameOver', pointsAttribution: game.variant.points, winner: handleWinner(game) });
-      } else {
-        dispatch({ type: 'play', hasPlayed: true });
-      }
-      setGame(game);
-    } catch (error) {
-      dispatch({ type: 'error', error: isProblem(error) ? error.detail : error.message });
-    }
-  };
-
-  async function handleResign() {
-    if (state.tag === 'myTurn' || state.tag === 'waitingForOpponent') {
+  useInterval(
+    async () => {
       try {
-        await surrenderGame(gameId);
-        dispatch({ type: 'play', resign: true });
+        const res = await getGame(gameId);
+        const currentGame = res.properties.game;
+        const pollingTimeout = res.properties.pollingTimeOut;
+
+        if (isMyTurn(currentUser, currentGame)) {
+          dispatch({ type: 'play', hasPlayed: false, game: currentGame, pollDelay: pollingTimeout });
+        } else if (isGameOver(currentGame)) {
+          dispatch({ type: 'gameOver', game: currentGame, winner: handleWinner(currentGame) });
+        } else {
+          dispatch({ type: 'waiting', game: currentGame, pollDelay: pollingTimeout });
+        }
       } catch (error) {
-        console.error('Failed to resign:', error);
+        dispatch({ type: 'error', error: isProblem(error) ? error.detail : error.message });
       }
-    }
+    },
+    isActiveState(state) ? state.pollDelay : null
+  );
+
+  // Handlers
+
+  async function onPlayHandler(row: number, col: number) {
+    if (state.tag !== 'myTurn') return;
+    playGame(gameId, row, col)
+      .then(result => {
+        const currentGame = convertToDomainGame(result.properties.game);
+        if (isGameOver(currentGame)) {
+          dispatch({ type: 'gameOver', game: currentGame, winner: handleWinner(currentGame) });
+        } else {
+          dispatch({ type: 'play', hasPlayed: true, game: currentGame, pollDelay: state.pollDelay });
+        }
+      })
+      .catch(error => {
+        if (error.status === 400) { //TODO: REVIEW THIS
+          dispatch({
+            type: 'play',
+            hasPlayed: false,
+            game: state.game,
+            pollDelay: state.pollDelay,
+            badMove: error.detail,
+          });
+        } else {
+          dispatch({ type: 'error', error: isProblem(error) ? error.detail : error.message, game: state.game });
+        }
+      });
   }
 
+  async function onResignHandler() {
+    if (state.tag !== 'myTurn') return;
+    surrenderGame(gameId)
+      .then(() => dispatch({ type: 'play', resign: true, game: state.game }))
+      .catch(error =>
+        dispatch({
+          type: 'error',
+          error: isProblem(error) ? error.detail : error.message,
+          game: state.game,
+        })
+      );
+  }
+
+  const onPlayEnabled = state.tag === 'myTurn';
   return (
     <div>
-      {/* StrictMode to enable additional development behaviors and warnings for the component tree inside */}
-      <StrictMode> 
-        {state.tag === 'loading' && <div>Loading...</div>}
-        {state.tag === 'waitingForOpponent' && (
-            <div>
-              <PresentGame game={game} onPlay={() => {}} />
-              <h3>Waiting for opponent...</h3>
-            </div>
-        )}
-        {state.tag === 'waitingForPlayResult' && (
-            <div>
-              <PresentGame game={game} onPlay={() => {}} />
-              <h3>Waiting for play result...</h3>
-            </div>)}
-        {state.tag === 'myTurn' && <PresentGame game={game} onPlay={handlePlay} onResign={handleResign} />}
-        {state.tag === 'gameOver' && (
-          <div>
-            <PresentGame game={game} onPlay={() => {}} />
-            <ResultPresentation
-              me={currentUser}
-              winner={state.winner?.username}
-              points={state.pointsAttribution}
-              onExit={() => dispatch({ type: 'redirect', to: '/me' })}
-            />
-          </div>
-        )}
-        {state.tag === 'redirect' && <Navigate to={state.to} />}
-        {state.tag === 'error' && <div>Error: {state.error}</div>}
-      </StrictMode>
+      {state.tag === 'loading' && <div>Loading...</div>}
+      {state.tag === 'waitingForOpponent' && (
+        <div>
+          <PresentGame game={state.game} onPlayEnabled={onPlayEnabled} />
+          <h3>Waiting for opponent...</h3>
+        </div>
+      )}
+      {state.tag === 'waitingForPlayResult' && (
+        <div>
+          <PresentGame game={state.game} onPlayEnabled={onPlayEnabled} />
+          <h3>Waiting for play result...</h3>
+        </div>
+      )}
+      {state.tag === 'myTurn' && (
+        <div>
+          <PresentGame
+            game={state.game}
+            onPlay={onPlayHandler}
+            onPlayEnabled={onPlayEnabled}
+            onResign={onResignHandler}
+          />
+          <h3>{state.badMove}</h3>
+        </div>
+      )}
+      {state.tag === 'gameOver' && (
+        <div>
+          <PresentGame game={state.game} onPlayEnabled={onPlayEnabled} />
+          <ResultPresentation
+            me={currentUser}
+            winner={state.winner?.username}
+            points={state.game.variant.points}
+            onExit={() => dispatch({ type: 'redirect', to: '/me' })}
+          />
+        </div>
+      )}
+      {state.tag === 'redirect' && <Navigate to={state.to} />}
+      {state.tag === 'error' && state.error && (
+        <div>
+          <PresentGame game={state.game} onPlay={onPlayHandler} onPlayEnabled={onPlayEnabled} />
+          <h3>{state.error}</h3>
+        </div>
+      )}
     </div>
   );
-}
-
-// Auxiliary functions
-
-function isMyTurn(username: string, game: GameOutputModel): boolean {
-  return (
-    (game.state == GameState.NEXT_PLAYER_WHITE && game.userWhite.username == username) ||
-    (game.state == GameState.NEXT_PLAYER_BLACK && game.userBlack.username == username)
-  );
-}
-
-function isGameOver(game: GameOutputModel): boolean {
-  return (
-    game.state == GameState.PLAYER_BLACK_WON || game.state == GameState.PLAYER_WHITE_WON || game.state == GameState.DRAW
-  );
-}
-
-function handleWinner(game: GameOutputModel): User | null {
-  switch (game.state) {
-    case GameState.PLAYER_WHITE_WON:
-      return game.userWhite;
-    case GameState.PLAYER_BLACK_WON:
-      return game.userBlack;
-    case GameState.DRAW:
-      return null;
-  }
 }

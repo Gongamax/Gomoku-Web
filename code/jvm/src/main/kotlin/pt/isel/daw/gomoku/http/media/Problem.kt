@@ -34,6 +34,7 @@ class Problem(
         val invalidTurn = URI(BASE_URL + "invalid-turn")
         val invalidPosition = URI(BASE_URL + "invalid-position")
         val invalidToken = URI(BASE_URL + "invalid-token")
+        val invalidPageNumber = URI(BASE_URL + "invalid-page-number")
 
         // Conflict, already exists
         val userAlreadyExists = URI(BASE_URL + "user-already-exists")
@@ -254,6 +255,14 @@ class Problem(
             title = "Invalid User",
             status = 401,
             detail = "User with id $userId does not exist",
+            instance = instance
+        ).toResponse()
+
+        fun invalidPageNumber(instance: URI?, pageNumber : Int) = Problem(
+            typeUri = invalidPageNumber,
+            title = "Invalid Page Number",
+            status = 400,
+            detail = "Page number $pageNumber is invalid",
             instance = instance
         ).toResponse()
 

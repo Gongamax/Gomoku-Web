@@ -13,7 +13,7 @@ export type Problem = {
   status: number;
   detail?: string;
   instance?: string;
-}
+};
 
 /**
  * `problemMediaType` is a constant that represents the media type for problem details as defined in RFC 7807.
@@ -24,6 +24,12 @@ export const problemMediaType = 'application/problem+json';
  * `isProblem` is a type guard that checks if an object is a `Problem`.
  */
 export function isProblem(object: object): object is Problem {
-  return typeof object === 'object' && object !== null && 'typeUri' in object && 'title' in object &&
-    'status' in object && typeof object.status === 'number';
+  return (
+    typeof object === 'object' &&
+    object !== null &&
+    'typeUri' in object &&
+    'title' in object &&
+    'status' in object &&
+    typeof object.status === 'number'
+  );
 }

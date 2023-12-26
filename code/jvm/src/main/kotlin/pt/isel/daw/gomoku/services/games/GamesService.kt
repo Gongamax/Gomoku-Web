@@ -10,7 +10,7 @@ import pt.isel.daw.gomoku.domain.games.variants.toVariant
 import pt.isel.daw.gomoku.services.utils.PageResult.Companion.toPage
 import pt.isel.daw.gomoku.repository.util.TransactionManager
 import pt.isel.daw.gomoku.repository.jdbi.MatchmakingStatus
-import pt.isel.daw.gomoku.utils.PositiveValue
+import pt.isel.daw.gomoku.utils.PageValue
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
 
@@ -122,24 +122,23 @@ class GamesService(
         }
     }
 
-    fun getGamesOfUser(userId: Int, pageNr: PositiveValue): GameListResult {
+    fun getGamesOfUser(userId: Int, pageNr: PageValue): GameListResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             val usersRepository = it.usersRepository
             usersRepository.getUserById(userId) ?: return@run failure(GameListError.UserDoesNotExist)
             val games = gamesRepository.getGamesByUser(userId)
-            success(toPage(games, pageNr.value))
+            if (pageNr.value < 0) failure(GameListError.InvalidPageNumber)
+            else success(toPage(games, pageNr.value))
         }
     }
 
-    fun getAll(pageNr: PositiveValue): GameListResult {
+    fun getAll(pageNr: PageValue): GameListResult {
         return transactionManager.run {
             val gamesRepository = it.gamesRepository
             val games = gamesRepository.getAll()
-            if (games.isEmpty())
-                failure(GameListError.GamesNotFound)
-            else
-                success(toPage(games, pageNr.value))
+            if (pageNr.value < 0) failure(GameListError.InvalidPageNumber)
+            else success(toPage(games, pageNr.value))
         }
     }
 
@@ -160,7 +159,7 @@ class GamesService(
                     usersRepository.getUserById(userId) ?: return@run failure(MatchmakingError.InvalidUser)
                 val gameModel = gamesDomain.createGameModel(user, opponent, Variants.valueOf(variant))
                 val id = gamesRepository.createGame(gameModel)
-                // Update the matchmaking entry to matched and store the game id
+                // Update the matchmaking entry to match and store the game id
                 gamesRepository.updateMatchmakingEntry(match.id, MatchmakingStatus.MATCHED, id)
                 success(MatchmakingSuccess.MatchFound(id))
             } else {

@@ -35,10 +35,10 @@ export function useLoggedIn(): boolean {
  * `getCookie` is a function that retrieves a cookie by its name.
  *
  * @param {string} name - The name of the cookie to retrieve.
- * @returns {string | undefined} - The value of the cookie if it exists, undefined otherwise.
+ * @returns {string | null} - The value of the cookie if it exists, null otherwise.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
  */
-export function getCookie(name: string): string | undefined {
+export function getCookie(name: string): string | null {
   return document.cookie
     .split('; ')
     .find((row) => row.startsWith(name))
@@ -49,8 +49,8 @@ export function getCookie(name: string): string | undefined {
  * `getUserName` is a function that retrieves the username of the logged in user.
  * It uses the `getCookie` function to retrieve the 'login' cookie, which contains the username.
  *
- * @returns {string | undefined} - The username of the logged in user if they are logged in, undefined otherwise.
+ * @returns {string | null} - The username of the logged in user if they are logged in, undefined otherwise.
  */
-export function getUserName(): string | undefined {
+export function getUserName(): string | null{
   return getCookie('login');
 }

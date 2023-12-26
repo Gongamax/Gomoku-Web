@@ -33,7 +33,7 @@ typealias GameGetResult = Either<GameGetError, Game>
 
 sealed class GameListError {
     object UserDoesNotExist : GameListError()
-    object GamesNotFound: GameListError()
+    object InvalidPageNumber : GameListError()
 }
 
 typealias GameListResult = Either<GameListError, PageResult<Game>>

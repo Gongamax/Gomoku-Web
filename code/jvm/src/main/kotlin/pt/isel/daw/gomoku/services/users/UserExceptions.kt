@@ -2,6 +2,7 @@ package pt.isel.daw.gomoku.services.users
 
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UserStatistics
+import pt.isel.daw.gomoku.services.utils.PageResult
 import pt.isel.daw.gomoku.utils.Either
 
 sealed class UserCreationError {
@@ -44,3 +45,10 @@ sealed class UserUpdateError {
 }
 
 typealias UserUpdateResult = Either<UserUpdateError, Int>
+
+
+sealed class RankingError {
+    object InvalidPageNumber : RankingError()
+}
+
+typealias RankingResult = Either<RankingError, PageResult<UserStatistics>>

@@ -1,20 +1,23 @@
-type Piece = 'BLACK' | 'WHITE' | ' ';
+/**
+ * Type representing a piece in a game.
+ * @type {'BLACK' | 'WHITE'} Piece
+ */
+type Piece = 'BLACK' | 'WHITE';
 
-interface Moves {
+/**
+ * Type representing the moves in a game.
+ * @type {Object} Moves
+ * @property {Piece} key - The key represents the position on the board and the value represents the piece at that position.
+ */
+type Moves = {
   [key: string]: Piece;
-}
+};
 
-export class Board {
-  readonly moves: Moves;
-  readonly winner?: Piece;
-  readonly turn?: Piece;
-
-  constructor(moves: Moves, winnerOrTurn: Piece) {
-    this.moves = moves;
-    if (winnerOrTurn === 'BLACK' || winnerOrTurn === 'WHITE') {
-      this.turn = winnerOrTurn;
-    } else {
-      this.winner = winnerOrTurn;
-    }
-  }
-}
+/**
+ * Type representing a game board.
+ * @type {Object} Board
+ * @property {Moves} moves - The moves made on the board.
+ */
+export type Board = {
+  moves: Moves;
+};

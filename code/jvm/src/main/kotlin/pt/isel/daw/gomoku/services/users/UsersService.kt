@@ -6,11 +6,9 @@ import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.User
 import pt.isel.daw.gomoku.domain.users.UsersDomain
 import pt.isel.daw.gomoku.domain.utils.Token
-import pt.isel.daw.gomoku.services.utils.PageResult.Companion.toPage
 import pt.isel.daw.gomoku.repository.util.TransactionManager
-import pt.isel.daw.gomoku.services.others.RankingError
-import pt.isel.daw.gomoku.services.others.RankingResult
-import pt.isel.daw.gomoku.utils.PositiveValue
+import pt.isel.daw.gomoku.services.utils.PageResult.Companion.toPage
+import pt.isel.daw.gomoku.utils.PageValue
 import pt.isel.daw.gomoku.utils.Success
 import pt.isel.daw.gomoku.utils.failure
 import pt.isel.daw.gomoku.utils.success
@@ -91,7 +89,7 @@ class UsersService(
             val usersRepository = it.usersRepository
             val tokenValidationInfo = usersDomain.createTokenValidationInformation(token)
             val userAndToken = usersRepository.getTokenByTokenValidationInfo(tokenValidationInfo)
-            if (userAndToken != null ) {
+            if (userAndToken != null) {
                 if (!usersDomain.isTokenTimeValid(clock, userAndToken.second))
                     return@run failure(UserGetByTokenError.TokenExpired)
                 usersRepository.updateTokenLastUsed(userAndToken.second, clock.now())
@@ -102,7 +100,7 @@ class UsersService(
         }
     }
 
-    fun updateUser(id : Int, username: String, email: String, password: String): UserUpdateResult {
+    fun updateUser(id: Int, username: String, email: String, password: String): UserUpdateResult {
         if (!usersDomain.isSafePassword(password)) {
             return failure(UserUpdateError.InsecurePassword)
         }
@@ -134,11 +132,11 @@ class UsersService(
         }
     }
 
-    fun getRanking(pageNr: PositiveValue): RankingResult =
+    fun getRanking(pageNr: PageValue): RankingResult =
         transactionManager.run {
             val usersRepository = it.usersRepository
             val ranking = usersRepository.getAllStats()
-            if (ranking.isEmpty()) return@run failure(RankingError.RankingDoesNotExist)
+            if (pageNr.value < 1) failure(RankingError.InvalidPageNumber)
             else success(toPage(ranking, pageNr.value))
         }
 
