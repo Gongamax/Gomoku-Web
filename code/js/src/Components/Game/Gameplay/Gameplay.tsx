@@ -6,7 +6,7 @@ import { getUserName } from '../../Authentication/RequireAuthn';
 import { isProblem } from '../../../Service/media/Problem';
 import { User } from '../../../Domain/users/User';
 import { Game, convertToDomainGame } from '../../../Domain/games/Game';
-import { useInterval } from './useInterval';
+import { useInterval } from './useInterval'
 import { PresentGame, ResultPresentation } from './GamePresentation';
 import { handleWinner, isGameOver, isMyTurn } from './GameUtils';
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getVariantList, matchmaking } from '../../../Service/games/GamesServices';
 import { getStatsByUsername } from '../../../Service/users/UserServices';
@@ -15,7 +15,7 @@ type State =
 
 type Action =
   | { type: 'loadSuccess'; username: string; points: number; variants: string[] }
-  | { type: 'selectVariant'; selectedVariant: string, username: string, points: number }
+  | { type: 'selectVariant'; selectedVariant: string; username: string; points: number }
   | { type: 'initiateMatchmaking'; response: { id: number; idType: string } }
   | { type: 'loadError'; message: string };
 
@@ -30,7 +30,7 @@ const logUnexpectedAction = (state: State, action: Action) => {
  * @param {string} username - The username of the player.
  * @returns {Promise<{ username: string, points: number }>} - A promise that resolves to an object containing the username and points.
  */
-async function fetchPlayerInfo(username: string): Promise<{ username: string, points: number }> {
+async function fetchPlayerInfo(username: string): Promise<{ username: string; points: number }> {
   const user = await getStatsByUsername(username);
   return { username: user.properties.username, points: user.properties.points };
 }
@@ -43,7 +43,7 @@ async function fetchPlayerInfo(username: string): Promise<{ username: string, po
  */
 async function fetchGameVariants(): Promise<string[]> {
   const variants = await getVariantList();
-  return variants.properties.variants.map((variant: { name: string; }) => variant.name);
+  return variants.properties.variants.map((variant: { name: string }) => variant.name);
 }
 
 /**
@@ -113,14 +113,13 @@ const reduce = (state: State, action: Action): State => {
 
 export function LobbyPage() {
   const [state, dispatch] = React.useReducer(reduce, { tag: 'loading' });
-  const [selectedVariant, setSelectedVariant] = useState<string>('STANDARD');
+  //const [selectedVariant, setSelectedVariant] = useState<string>('STANDARD');
   const currentUser = getUserName();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [playerInfo, gameVariants] =
-          await Promise.all([fetchPlayerInfo(currentUser), fetchGameVariants()]);
+        const [playerInfo, gameVariants] = await Promise.all([fetchPlayerInfo(currentUser), fetchGameVariants()]);
         dispatch({ type: 'loadSuccess', ...playerInfo, variants: gameVariants });
       } catch (e) {
         dispatch({ type: 'loadError', message: isProblem(e) ? e.detail : e.message });
@@ -133,17 +132,17 @@ export function LobbyPage() {
   }, [currentUser]);
 
   const handleVariantSelect = (selectedVariant: string, username: string, points: number) => {
-    setSelectedVariant(selectedVariant);
+    //setSelectedVariant(selectedVariant);
     dispatch({ type: 'selectVariant', selectedVariant, username: username, points: points });
   };
 
-  async function handleMatchmaking() {
-    const { selectedVariant } = state as { selectedVariant: string };
-    initiateMatchmaking(selectedVariant).then(response => {
-      dispatch({ type: 'initiateMatchmaking', response });
-    }).catch(error => {
-      dispatch({ type: 'loadError', message: error.message });
-    });
+  function handleMatchmaking() {
+    if (state.tag !== 'edit') {
+      return;
+    }
+    initiateMatchmaking(state.selectedVariant)
+      .then(response => dispatch({ type: 'initiateMatchmaking', response }))
+      .catch(error => dispatch({ type: 'loadError', message: error.message }));
   }
 
   switch (state.tag) {
@@ -151,27 +150,26 @@ export function LobbyPage() {
       return <div>Loading...</div>;
 
     case 'present':
-      dispatch({ type: 'selectVariant', selectedVariant, username: state.username, points: state.points });
+      //dispatch({ type: 'selectVariant', selectedVariant, username: state.username, points: state.points });
       return (
         <div>
           <h1>Lobby</h1>
           <p>Username: {state.username}</p>
           <p>Points: {state.points}</p>
           <p>Choose a Game Variant:</p>
-          {
-            state.variants.map((variant, index) => (
-              <div key={index}>
-                <input
-                  type='radio'
-                  id={`radio-${index}`}
-                  name='variants'
-                  value={variant}
-                  checked={selectedVariant === variant}
-                  onChange={() => handleVariantSelect(variant, state.username, state.points)}
-                />
-                <label htmlFor={`radio-${index}`}>{variant}</label>
-              </div>
-            ))}
+          {state.variants.map((variant, index) => (
+            <div key={index}>
+              <input
+                type="radio"
+                id={`radio-${index}`}
+                name="variants"
+                value={variant}
+                checked={false} // state.selectedVariant === variant
+                onChange={() => handleVariantSelect(variant, state.username, state.points)}
+              />
+              <label htmlFor={`radio-${index}`}>{variant}</label>
+            </div>
+          ))}
           <button onClick={handleMatchmaking}>Find Game</button>
         </div>
       );
@@ -186,11 +184,11 @@ export function LobbyPage() {
           {state.variants.map((variant, index) => (
             <div key={index}>
               <input
-                type='radio'
+                type="radio"
                 id={`radio-${index}`}
-                name='variants'
+                name="variants"
                 value={variant}
-                checked={selectedVariant === variant}
+                checked={state.selectedVariant === variant}
                 onChange={() => handleVariantSelect(variant, state.username, state.points)}
               />
               <label htmlFor={`radio-${index}`}>{variant}</label>
@@ -217,21 +215,24 @@ export function LobbyPage() {
             <Navigate to={`/matchmaking/${state.id}`} replace={true} />
           </div>
         );
-      else
-        return <div>Unexpected idType</div>;
+      else return <div>Unexpected idType</div>;
 
     case 'error':
       return (
-        <div style={{
-          padding: '20px',
-          backgroundColor: '#f8d7da',
-          color: '#721c24',
-          borderRadius: '5px',
-          marginTop: '20px',
-        }}>
+        <div
+          style={{
+            padding: '20px',
+            backgroundColor: '#f8d7da',
+            color: '#721c24',
+            borderRadius: '5px',
+            marginTop: '20px',
+          }}
+        >
           <h2>Oops!</h2>
           <p>Something went wrong. Please try again later.</p>
-          <p><small>Error details: {state.message}</small></p>
+          <p>
+            <small>Error details: {state.message}</small>
+          </p>
         </div>
       );
 
