@@ -355,9 +355,7 @@ class GameController(
         @RequestParam(name = "page", defaultValue = "1") page: Int
     ): ResponseEntity<*> {
         val id = uid?.toInt() ?: authenticatedUser.user.id.value
-        return when (
-            val games = gameService.getGamesOfUser(id, PageValue(page))
-        ) {
+        return when (val games = gameService.getGamesOfUser(id, PageValue(page))) {
             is Success -> ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
                 siren(
                     GameGetAllByUserOutputModel(

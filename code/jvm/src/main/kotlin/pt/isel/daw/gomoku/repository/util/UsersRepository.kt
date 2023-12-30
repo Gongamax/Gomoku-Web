@@ -43,4 +43,6 @@ interface UsersRepository {
     fun getAllUsers(): List<User>
 
     fun getAllStats(): List<UserStatistics>
+
+    fun getStatsByUsernameForRanking(username: String): List<UserStatistics>
 }

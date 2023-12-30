@@ -201,6 +201,22 @@ class JdbiUsersRepository(
             .mapTo<User>()
             .list()
 
+    override fun getStatsByUsernameForRanking(username: String): List<UserStatistics> =
+        handle.createQuery(
+            """
+            select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, draws, rank, points
+            from dbo.Users as users
+            inner join dbo.Statistics as statistics
+            on users.id = statistics.user_id and statistics.rank > 0
+            where users.username LIKE :username
+            order by rank 
+        """.trimIndent()
+        )
+            .bind("username", "%$username%")
+            .mapTo<UserStatsDBModel>()
+            .list()
+            .map { it.toUserStatistics() }
+
     override fun getAllStats(): List<UserStatistics> =
         handle.createQuery(
             """

@@ -1,6 +1,7 @@
 package pt.isel.daw.gomoku.services.users
 
 import kotlinx.datetime.Clock
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import pt.isel.daw.gomoku.domain.users.Email
 import pt.isel.daw.gomoku.domain.users.User
@@ -163,4 +164,17 @@ class UsersService(
                 else failure(UserStatsError.UserStatsDoesNotExist)
             }
         }
+
+    fun getStatsByUsernameForRanking(username: String, page : PageValue): RankingResult =
+        transactionManager.run {
+            logger.info("services {} {}", username, page.value)
+            val usersRepository = it.usersRepository
+            val users = usersRepository.getStatsByUsernameForRanking(username)
+            if (page.value < 1) failure(RankingError.InvalidPageNumber)
+            else success(toPage(users, page.value))
+        }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(UsersService::class.java)
+    }
 }

@@ -249,6 +249,75 @@ class UserServiceTests {
         assertTrue { maybeUser is Failure }
     }
 
+    @Test
+    fun `search by username on leaderboard returns for valid username and page`(){
+        // given: a user service
+        val testClock = TestClock()
+        val maxTokensPerUser = 5
+        val userService = createUsersService(testClock, maxTokensPerUser = maxTokensPerUser)
+
+        // when: searching for alice
+        val username = "alice"
+        val page = 1
+        val users = userService.getStatsByUsernameForRanking(username, PageValue(page))
+
+        // then: the search is successful
+        assertTrue(users is Success)
+        assertTrue { users.value.content.isNotEmpty() }
+        assertEquals(username, users.value.content.first { it.user.username == "alice" }.user.username)
+    }
+
+    @Test
+    fun `search by username on leaderboard returns empty for invalid username`(){
+        // given: a user service
+        val testClock = TestClock()
+        val maxTokensPerUser = 5
+        val userService = createUsersService(testClock, maxTokensPerUser = maxTokensPerUser)
+
+        // when: searching for invalid username
+        val username = "invalid"
+        val page = 1
+        val users = userService.getStatsByUsernameForRanking(username, PageValue(page))
+
+        // then: the search is successful
+        assertTrue(users is Success)
+        assertTrue { users.value.content.isEmpty() }
+    }
+
+    @Test
+    fun `search by username on leaderboard returns empty for invalid page`(){
+        // given: a user service
+        val testClock = TestClock()
+        val maxTokensPerUser = 5
+        val userService = createUsersService(testClock, maxTokensPerUser = maxTokensPerUser)
+
+        // when: searching for invalid page
+        val username = "alice"
+        val page = -1
+        val users = userService.getStatsByUsernameForRanking(username, PageValue(page))
+
+        // then: the search is successful
+        assertTrue(users is Failure)
+    }
+
+    @Test
+    fun `search by username on leaderboard returns a list of users`(){
+        // given: a user service
+        val testClock = TestClock()
+        val maxTokensPerUser = 5
+        val userService = createUsersService(testClock, maxTokensPerUser = maxTokensPerUser)
+
+        // when: searching for alice
+        val username = "user"
+        val page = 1
+        val users = userService.getStatsByUsernameForRanking(username, PageValue(page))
+
+        // then: the search is successful
+        assertTrue(users is Success)
+        assertTrue { users.value.content.isNotEmpty() }
+        assertTrue { users.value.content.size > 5 }
+    }
+
     companion object {
 
         private fun createUsersService(

@@ -1,7 +1,7 @@
-import {GameOutputModel} from '../../Service/games/models/GameModelsUtil';
-import {GetStatsOutput} from "../../Service/users/models/GetStatsOutput";
-import {GetAllGamesByUserOutput} from "../../Service/games/models/GetUserGamesOutput";
-
+import { GameOutputModel } from '../../Service/games/models/GameModelsUtil';
+import { GetStatsOutput } from '../../Service/users/models/GetStatsOutput';
+import { GetAllGamesByUserOutput } from '../../Service/games/models/GetUserGamesOutput';
+import { GameState } from '../../Domain/games/Game';
 
 /**
  * `calculateResult` is a function that calculates the result of a game for a given user.
@@ -13,29 +13,29 @@ import {GetAllGamesByUserOutput} from "../../Service/games/models/GetUserGamesOu
  */
 export function calculateResult(game: GameOutputModel, userId: number): string {
   switch (game.state) {
-    case 'PLAYER_WHITE_WON':
+    case GameState.PLAYER_WHITE_WON:
       return game.userWhite.id.value === userId ? 'WIN' : 'LOSS';
-    case 'PLAYER_BLACK_WON':
+    case GameState.PLAYER_BLACK_WON:
       return game.userBlack.id.value === userId ? 'WIN' : 'LOSS';
-    case 'DRAW':
+    case GameState.DRAW:
       return 'DRAW';
     default:
       return 'IN PROGRESS';
   }
 }
 
-export function convertToDomainUser(response: GetStatsOutput){
-  return{
+export function convertToDomainUser(response: GetStatsOutput) {
+  return {
     username: response.properties.username,
     wins: response.properties.wins,
     losses: response.properties.losses,
     draws: response.properties.gamesPlayed - (response.properties.wins + response.properties.losses),
-    gamesPlayed: response.properties.gamesPlayed
-  }
+    gamesPlayed: response.properties.gamesPlayed,
+  };
 }
 
-export function convertToDomainMatchHistory(response: GetAllGamesByUserOutput, userId: number){
-  return response.entities.map((entity) => {
+export function convertToDomainMatchHistory(response: GetAllGamesByUserOutput, userId: number) {
+  return response.entities.map(entity => {
     const game = entity.properties as unknown as GameOutputModel;
     const opponent = game.userBlack.id.value === userId ? game.userWhite : game.userBlack;
     const result = calculateResult(game, userId);

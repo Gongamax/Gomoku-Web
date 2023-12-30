@@ -36,6 +36,7 @@ class HomeController {
                 recipeLinks(UriTemplate(Uris.HOME), Rels.HOME)
                 recipeLinks(UriTemplate(Uris.SYSTEM_INFO), Rels.SYSTEM_INFO)
                 recipeLinks(UriTemplate(Uris.Users.RANKING_INFO + "?page=1"), Rels.RANKING_INFO)
+                recipeLinks(UriTemplate(Uris.Users.GET_STATS_BY_USERNAME_FOR_RANKING + "?page=1"), Rels.GET_STATS_BY_USERNAME_FOR_RANKING)
                 recipeLinks(UriTemplate(Uris.Users.AUTH_HOME), Rels.AUTH_HOME)
                 recipeLinks(UriTemplate(Uris.Games.MATCHMAKING), Rels.MATCHMAKING)
                 recipeLinks(UriTemplate(Uris.Games.GET_MATCHMAKING_STATUS), Rels.MATCHMAKING_STATUS)

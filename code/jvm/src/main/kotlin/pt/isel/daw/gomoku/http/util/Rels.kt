@@ -32,6 +32,8 @@ object Rels {
 
     val RANKING_INFO = LinkRelation(BASE_URL + "ranking-info")
 
+    val GET_STATS_BY_USERNAME_FOR_RANKING = LinkRelation(BASE_URL + "get-stats-by-username-for-ranking")
+
     val USER_STATS = LinkRelation(BASE_URL + "get-user-stats")
 
     val USER_STATS_BY_USERNAME: LinkRelation = LinkRelation(BASE_URL + "get-user-stats-by-username")

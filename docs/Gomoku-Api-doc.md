@@ -18,6 +18,7 @@ designed to be consumed by a front-end application.
     - [Get Home Page with User Login](#get-home-page-with-user-login)
     - [Get Stats Page of User by id](#get-stats-page-of-user-by-id)
     - [Get Ranking Info Page of all Users](#get-ranking-info-page-of-all-users)
+    - [Get Ranking Info Page by username](#get-ranking-info-page-by-username)
     - [Update User](#update-user)
     - [Get User Stats by Username](#get-user-stats-by-username)
 - [Game](#game)
@@ -825,7 +826,96 @@ dSMo4PIL3LYbjwiiy8XYtKe4nyQIAusWRg7kCPJHr_o=
 
 #
 
-# Update User
+# Get Ranking Info Page by username
+
+    Retrieve the ranking page of all users. Each page contains 20 users.
+
+**Endpoint:** `/api/ranking/{name}?page={page}`
+**Method:** GET
+
+**Parameters:**
+
+- `name` (string, path) - The username of the user
+- e.g: {name} = alice
+- `page` (integer, query) - The page number
+- e.g: {page} = 1
+- if not passed, the page will be 1
+- if passed, the page must be greater than 1
+- if passed, the page must be less than the total number of pages
+
+**Success Response Example:**
+
+```json
+{
+  "class": [
+    "ranking-info"
+  ],
+  "properties": {
+    "page": 1,
+    "pageSize": 20
+  },
+  "links": [
+    {
+      "rel": [
+        "self"
+      ],
+      "href": "/api/ranking/{name}?page=1"
+    },
+    {
+      "rel": [
+        "next"
+      ],
+      "href": "/api/ranking/{name}?page=2"
+    },
+    {
+      "rel": [
+        "previous"
+      ],
+      "href": "/api/ranking/{name}?page=0"
+    }
+  ],
+  "entities": [
+    {
+      "class": [
+        "user-statistics"
+      ],
+      "properties": {
+        "username": "alice",
+        "gamesPlayed": 10,
+        "wins": 5,
+        "losses": 3,
+        "draws": 2,
+        "rank": 1,
+        "points": 100
+      },
+      "links": [
+        {
+          "rel": [
+            "self"
+          ],
+          "href": "/api/users/alice"
+        }
+      ]
+    },
+    // More user statistics entities...
+  ]
+}
+```
+
+**Failure**
+
+- Invalid page number
+
+```json
+{
+"status": 400,
+"title": "Invalid page number",
+"detail": "The page number must be greater than 0",
+"instance": "/api/ranking/alice?page=-1"
+}
+```
+
+#   Update User
 
     Update the information of a user.
     Can update the username, email and password.

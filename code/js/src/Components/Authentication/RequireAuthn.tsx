@@ -33,7 +33,7 @@ export function useLoggedIn(): boolean {
 
 /**
  * `getCookie` is a function that retrieves a cookie by its name.
- *
+ *  This function was taken from https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
  * @param {string} name - The name of the cookie to retrieve.
  * @returns {string | null} - The value of the cookie if it exists, null otherwise.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie

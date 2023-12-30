@@ -2,6 +2,7 @@ package pt.isel.daw.gomoku.http.controllers
 
 import jakarta.validation.Valid
 import kotlinx.datetime.Clock
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -219,6 +220,76 @@ class UsersController(
             is Failure -> Problem.invalidPageNumber(Uris.Users.rankingInfo(), page)
         }
 
+    @GetMapping(Uris.Users.GET_STATS_BY_USERNAME_FOR_RANKING)
+    fun getRankingByUsername(
+        @PathVariable name: String,
+        @RequestParam(name = "page", defaultValue = "1") page: Int
+    ): ResponseEntity<*> {
+        logger.info("getStatsByUsernameForRanking: $name, $page")
+        return when (val res = userService.getStatsByUsernameForRanking(name, PageValue(page))) {
+            is Success -> {
+                logger.info("res {}", res.value.content)
+                ResponseEntity.ok().header("Content-Type", SirenModel.SIREN_MEDIA_TYPE).body(
+                    siren(
+                        RankingInfoOutputModel(
+                            page,
+                            res.value.pageSize
+                        )
+                    ) {
+                        clazz("ranking-info-by-username")
+                        link(URI(Uris.Users.getStatsByUsernameForRanking(name).path + "?page=" + page), Rels.SELF)
+                        res.value.content.forEach {
+                            entity(
+                                UserStatsOutputModel(
+                                    it.user.id.value,
+                                    it.user.username,
+                                    it.gamesPlayed,
+                                    it.wins,
+                                    it.losses,
+                                    it.rank,
+                                    it.points
+                                ),
+                                Rels.USER_STATS
+                            ) {
+                                clazz("user-statistics")
+                                link(Uris.Users.getStatsById(it.user.id.value), Rels.SELF)
+                                requireAuth(false)
+                            }
+                        }
+                        if (res.value.firstPage != null)
+                            link(
+                                URI(Uris.Users.getStatsByUsernameForRanking(name).path + "?page=" + res.value.firstPage),
+                                Rels.FIRST
+                            )
+
+                        if (res.value.previousPage != null)
+                            link(
+                                URI(Uris.Users.getStatsByUsernameForRanking(name).path + "?page=" + res.value.previousPage),
+                                Rels.PREVIOUS
+                            )
+
+                        if (res.value.nextPage != null)
+                            link(
+                                URI(Uris.Users.getStatsByUsernameForRanking(name).path + "?page=" + res.value.nextPage),
+                                Rels.NEXT
+                            )
+
+                        if (res.value.lastPage != null)
+                            link(
+                                URI(Uris.Users.getStatsByUsernameForRanking(name).path + "?page=" + res.value.lastPage),
+                                Rels.LAST
+                            )
+
+                        requireAuth(false)
+                    }
+                )
+
+            }
+
+            is Failure -> Problem.invalidPageNumber(Uris.Users.getStatsByUsernameForRanking(name), page)
+        }
+    }
+
     @GetMapping(Uris.Users.GET_STATS_BY_USERNAME)
     fun getStatsByUsername(@PathVariable name: String): ResponseEntity<*> =
         when (val stats = userService.getUserStatsByUsername(name)) {
@@ -318,6 +389,11 @@ class UsersController(
                 )
             }
         }
+    }
+
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(UsersController::class.java)
     }
 }
 

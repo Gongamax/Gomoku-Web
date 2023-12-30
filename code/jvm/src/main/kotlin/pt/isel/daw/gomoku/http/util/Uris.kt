@@ -17,6 +17,7 @@ object Uris {
         const val GET_USER_BY_ID = "$PREFIX/users/{uid}"
         const val AUTH_HOME = "$PREFIX/me"
         const val RANKING_INFO = "$PREFIX/ranking"
+        const val GET_STATS_BY_USERNAME_FOR_RANKING = "$PREFIX/ranking/{name}"
         const val GET_STATS_BY_ID = "$PREFIX/stats/{uid}"
         const val GET_STATS_BY_USERNAME = "$PREFIX/stats/username/{name}"
         const val UPDATE_USER = "$PREFIX/users/update"
@@ -29,6 +30,7 @@ object Uris {
         fun logout(): URI = URI(LOGOUT)
         fun register(): URI = URI(REGISTER)
         fun rankingInfo(): URI = URI(RANKING_INFO)
+        fun getStatsByUsernameForRanking(name: String) = UriTemplate(GET_STATS_BY_USERNAME_FOR_RANKING).expand(name)
         fun updateUser(): URI = URI(UPDATE_USER)
     }
 

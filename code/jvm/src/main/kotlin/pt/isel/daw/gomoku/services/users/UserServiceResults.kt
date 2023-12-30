@@ -52,3 +52,4 @@ sealed class RankingError {
 }
 
 typealias RankingResult = Either<RankingError, PageResult<UserStatistics>>
+

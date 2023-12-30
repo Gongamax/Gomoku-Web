@@ -130,7 +130,6 @@ export function RankingPage() {
     setCurrentPage(parseInt(page));
   };
 
-
   switch (state.tag) {
     case 'loading':
       return <div>Loading...</div>;
@@ -151,7 +150,7 @@ export function RankingPage() {
             {state.players.map(player => (
               <tr key={player.id} style={{ borderBottom: '1px solid #ddd' }}>
                 <td style={{ padding: '10px' }}>{player.rank}</td>
-                <td style={{ padding: '10px' }}><Link to={`/users/${player.id}`}>{player.name}</Link></td>
+                <td style={{ padding: '10px' }}><Link to={`/profile/${player.id}`}>{player.name}</Link></td>
                 <td style={{ padding: '10px' }}>{player.score}</td>
               </tr>
             ))}
