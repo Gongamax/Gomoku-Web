@@ -153,7 +153,7 @@ export function Gameplay() {
         }
       })
       .catch(error => {
-        if (error.status === 400) { //TODO: REVIEW THIS
+        if (error.status === 400) { // Bad move
           dispatch({
             type: 'play',
             hasPlayed: false,

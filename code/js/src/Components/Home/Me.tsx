@@ -9,23 +9,27 @@ import { GetAllGamesByUserOutput } from '../../Service/games/models/GetUserGames
 import { GameOutputModel } from '../../Service/games/models/GameModelsUtil';
 import { User } from '../../Domain/users/User';
 import { useNavigate } from 'react-router-dom';
+import { GetStatsOutput } from '../../Service/users/models/GetStatsOutput';
+import { isProblem } from '../../Service/media/Problem';
 
-type State = { tag: 'loading' } | { tag: 'presenting'; userInfo: UserInfo } | { tag: 'error'; message: string };
+type State =
+  | { tag: 'loading' }
+  | { tag: 'present'; userInfo: UserInfo; ongoingGames: GameSimpleInfo[] }
+  | { tag: 'error'; message: string };
 
 type Action =
-  | { type: 'startLoading' }
-  | { type: 'loadSuccess'; userInfo: UserInfo }
+  | { type: 'loadSuccess'; userInfo: UserInfo; ongoingGames: GameSimpleInfo[] }
   | { type: 'loadError'; message: string };
 
-const logUnexpectedAction = (state: State, action: Action) => {
-  console.log(`Unexpected action '${action.type}' on state '${state.tag}'`);
-};
+function logUnexpectedAction(state: State, action: Action) {
+  console.log(`Unexpected action '${action.type} on state '${state.tag}'`);
+}
 
 function reducer(state: State, action: Action): State {
   switch (state.tag) {
     case 'loading':
       if (action.type === 'loadSuccess') {
-        return { tag: 'presenting', userInfo: action.userInfo };
+        return { tag: 'present', userInfo: action.userInfo, ongoingGames: action.ongoingGames };
       } else if (action.type === 'loadError') {
         return { tag: 'error', message: action.message };
       } else {
@@ -33,7 +37,7 @@ function reducer(state: State, action: Action): State {
         return state;
       }
 
-    case 'presenting':
+    case 'present':
     case 'error':
       logUnexpectedAction(state, action);
       return state;
@@ -43,26 +47,16 @@ function reducer(state: State, action: Action): State {
 export function Me() {
   const currentUser = getUserName();
   const [state, dispatch] = React.useReducer(reducer, { tag: 'loading' });
-  const [ongoingGames, setOngoingGames] = React.useState<GameSimpleInfo[]>([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const userResponse = await getStatsByUsername(currentUser);
-        const userInfo = {
-          username: userResponse.properties.username,
-          wins: userResponse.properties.wins,
-          losses: userResponse.properties.losses,
-          draws: userResponse.properties.gamesPlayed - (userResponse.properties.wins + userResponse.properties.losses),
-          gamesPlayed: userResponse.properties.gamesPlayed,
-        };
-        const uid = userResponse.properties.uid;
-        const ongoingGamesResponse = await getAllGamesByUser(uid);
-        const games = convertToDomainGames(ongoingGamesResponse, uid);
-        setOngoingGames(games.filter(game => game.result === 'IN PROGRESS'));
-        dispatch({ type: 'loadSuccess', userInfo });
+        const userResponse: GetStatsOutput = await getStatsByUsername(currentUser);
+        const userInfo: UserInfo = createUserInfo(userResponse);
+        const ongoingGames: GameSimpleInfo[] = await fetchOngoingGames(userResponse.properties.uid);
+        dispatch({ type: 'loadSuccess', userInfo, ongoingGames });
       } catch (error) {
-        dispatch({ type: 'loadError', message: error.message });
+        dispatch({ type: 'loadError', message: isProblem(error) ? error.detail : error.message });
       }
     }
 
@@ -70,12 +64,11 @@ export function Me() {
   }, [currentUser]);
 
   const navigate = useNavigate();
-
   switch (state.tag) {
     case 'loading':
       return <div>Loading...</div>;
 
-    case 'presenting':
+    case 'present':
       return (
         <div>
           <h1>Hello {state.userInfo.username}</h1>
@@ -94,7 +87,7 @@ export function Me() {
               </tr>
             </thead>
             <tbody>
-              {ongoingGames.map(game => (
+              {state.ongoingGames.map(game => (
                 <tr key={game.id} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={{ padding: '10px' }}>{game.id}</td>
                   <td style={{ padding: '10px' }}>{game.opponent.username}</td>
@@ -136,4 +129,16 @@ function convertToDomainGames(response: GetAllGamesByUserOutput, userId: number)
       result: result,
     };
   });
+}
+
+function createUserInfo(userResponse: GetStatsOutput): UserInfo {
+  const { username, wins, losses, gamesPlayed } = userResponse.properties;
+  const draws = gamesPlayed - (wins + losses);
+  return { username, wins, losses, draws, gamesPlayed };
+}
+
+async function fetchOngoingGames(uid: number): Promise<GameSimpleInfo[]> {
+  const ongoingGamesResponse = await getAllGamesByUser(uid);
+  const games = convertToDomainGames(ongoingGamesResponse, uid);
+  return games.filter(game => game.result === 'IN PROGRESS');
 }

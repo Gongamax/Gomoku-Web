@@ -71,7 +71,7 @@ export function MatchmakingPage() {
     };
   }, [pollingTimeout, state.queueEntryId, state.tag, cancelled]);
 
-  async function onCancellingHandler() {
+  function onCancellingHandler() {
     if (state.tag !== 'readingStatus') {
       return;
     }

@@ -46,14 +46,16 @@ export function PresentGame({ game, onPlay, onPlayEnabled, onResign }: GameBoard
  * @returns {React.ReactElement} The GameBoard component.
  */
 function BoardPresentation({ board, onPlay, onPlayEnabled }: GameBoardProps): React.ReactElement {
+  const cellSize = 30;
+  const boardSize = board.length * cellSize;
   return (
-    <div style={{ position: 'relative', height: '450px', width: '450px', background: '#FFCC66' }}>
+    <div style={{ position: 'relative', height: `${boardSize}px`, width: `${boardSize}px`, background: '#FFCC66' }}>
       {Array.from({ length: board.length + 1 }, (_, i) => (
         <div
           key={i}
           style={{
             position: 'absolute',
-            top: `${i * 30}px`,
+            top: `${i * cellSize}px`,
             left: '0',
             height: '1px',
             width: '100%',
@@ -67,7 +69,7 @@ function BoardPresentation({ board, onPlay, onPlayEnabled }: GameBoardProps): Re
           style={{
             position: 'absolute',
             top: '0',
-            left: `${i * 30}px`,
+            left: `${i * cellSize}px`,
             height: '100%',
             width: '1px',
             background: 'black',
@@ -83,8 +85,8 @@ function BoardPresentation({ board, onPlay, onPlayEnabled }: GameBoardProps): Re
             }}
             style={{
               position: 'absolute',
-              top: `calc(${i * 30}px - 10px)`,
-              left: `calc(${j * 30}px - 10px)`,
+              top: `calc(${i * cellSize}px - 10px)`,
+              left: `calc(${j * cellSize}px - 10px)`,
               height: '20px',
               width: '20px',
               borderRadius: '50%',

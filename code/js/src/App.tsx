@@ -22,9 +22,7 @@ import { Gameplay } from './Components/Game/Gameplay/Gameplay';
  */
 export function App(): React.ReactElement {
   return (
-    <React.StrictMode>
       <RouterProvider router={router} />
-    </React.StrictMode>
   );
 }
 

@@ -1,7 +1,8 @@
 import { test, expect, Browser, BrowserContext, Page, chromium } from '@playwright/test';
 
 // Define a context to store the user credentials
-let userCredentials = { username: '', password: '' };
+let userCredentials1 = { username: '', password: '' };
+let userCredentials2 = { username: '', password: '' };
 let browser: Browser;
 let context: BrowserContext;
 let page: Page;
@@ -31,10 +32,41 @@ test.beforeAll(async () => {
   await usernameInput.fill(username);
   await passwordInput.fill(password);
   await confirmPasswordInput.fill(password);
-  await registerButton.click();
+  await Promise.all([
+    page.waitForResponse(response => response.url().includes('/api/users') && response.status() === 201),
+    registerButton.click(),
+  ]);
 
   // Store the user credentials
-  userCredentials = { username, password };
+  userCredentials1 = { username, password };
+
+  // User 2
+  // Navigate to the registration page
+  await page.goto('http://localhost:8000/register');
+
+  // Fill in the registration form
+  const emailInput2 = page.getByLabel('Email');
+  const usernameInput2 = page.getByLabel('Username');
+  const passwordInput2 = page.getByLabel('Password', { exact: true });
+  const confirmPasswordInput2 = page.getByLabel('Confirm Password', { exact: true });
+  const registerButton2 = page.getByRole('button');
+
+  // Generate unique username and password
+  const email2 = `user${Math.floor(Math.random() * 10000)}@example.com`;
+  const username2 = `user${Math.floor(Math.random() * 10000)}`;
+  const password2 = `Password${Math.floor(Math.random() * 10000)}`;
+
+  await emailInput2.fill(email2);
+  await usernameInput2.fill(username2);
+  await passwordInput2.fill(password2);
+  await confirmPasswordInput2.fill(password2);
+  await Promise.all([
+    page.waitForResponse(response => response.url().includes('/api/users') && response.status() === 201),
+    registerButton2.click(),
+  ]);
+
+  // Store the user credentials
+  userCredentials2 = { username: username2, password: password2 };
 });
 
 test.afterAll(async () => {
@@ -42,7 +74,8 @@ test.afterAll(async () => {
   await context.close();
   await browser.close();
   // Clear the user credentials after all tests
-  userCredentials = { username: '', password: '' };
+  userCredentials1 = { username: '', password: '' };
+  userCredentials2 = { username: '', password: '' };
 });
 
 test('two users can register, log in, find a game, and play a game', async () => {
@@ -65,8 +98,8 @@ test('two users can register, log in, find a game, and play a game', async () =>
   };
 
   // Log in the user in each browser
-  await loginUser(page1, userCredentials.username, userCredentials.password);
-  await loginUser(page2, userCredentials.username, userCredentials.password);
+  await loginUser(page1, userCredentials1.username, userCredentials1.password);
+  await loginUser(page2, userCredentials2.username, userCredentials2.password);
 
   // Navigate to the lobby page in each browser and search for a game
   await page1.click('a[href="/lobby"]');
@@ -79,17 +112,14 @@ test('two users can register, log in, find a game, and play a game', async () =>
   await findGameButton2.click();
 
   // In browser1, wait for the game to start
-  await expect(page.getByText('Turn: BLACK')).toBeVisible();
+  await page1.waitForSelector('text="Turn: Black"');
+  await expect(page1.getByText('Turn: Black')).toBeVisible();
 
-  // In browser1, game starts
-  const gameTurn = page1.getByText('Turn: BLACK');
-  await expect(gameTurn).toBeVisible();
-
-  // In browser1, surrender the game
+  // In browser2, surrender the game
   const surrenderButton = page1.getByRole('button', { name: 'Surrender' });
   await surrenderButton.click();
 
-  // then in browser2, the game is over
+  // then in browser1, the game is over
   const gameResult = page2.getByText('Game Over');
   await expect(gameResult).toBeVisible();
 
