@@ -6,9 +6,10 @@ import { getUserName } from '../../Authentication/RequireAuthn';
 import { isProblem } from '../../../Service/media/Problem';
 import { User } from '../../../Domain/users/User';
 import { Game, convertToDomainGame } from '../../../Domain/games/Game';
-import { useInterval } from './useInterval'
+import { useInterval } from './useInterval';
 import { PresentGame, ResultPresentation } from './GamePresentation';
 import { handleWinner, isGameOver, isMyTurn } from './GameUtils';
+import { ProblemType } from '../../../Service/media/ProblemTypes';
 
 type State =
   | { tag: 'loading'; pollDelay: number }
@@ -141,7 +142,7 @@ export function Gameplay() {
 
   // Handlers
 
-  async function onPlayHandler(row: number, col: number) {
+  function onPlayHandler(row: number, col: number) {
     if (state.tag !== 'myTurn') return;
     playGame(gameId, row, col)
       .then(result => {
@@ -153,7 +154,8 @@ export function Gameplay() {
         }
       })
       .catch(error => {
-        if (error.status === 400) { // Bad move
+        const badMovesProblems = [ProblemType.INVALID_POSITION, ProblemType.INVALID_TURN, ProblemType.INVALID_TIME];
+        if (badMovesProblems.includes(error.typeUri)) {
           dispatch({
             type: 'play',
             hasPlayed: false,
@@ -167,7 +169,7 @@ export function Gameplay() {
       });
   }
 
-  async function onResignHandler() {
+  function onResignHandler() {
     if (state.tag !== 'myTurn') return;
     surrenderGame(gameId)
       .then(() => dispatch({ type: 'play', resign: true, game: state.game }))

@@ -92,7 +92,6 @@ export function ProfilePage(): React.ReactElement {
         const historyResponse = await getAllGamesByUser(userId);
         const userInfo = convertToDomainUser(userResponse);
         const matchHistory: Match[] = convertToDomainMatchHistory(historyResponse, userId);
-        console.log(matchHistory);
         dispatch({ type: 'loadSuccess', userInfo: userInfo, matchHistory: matchHistory });
       } catch (error) {
         dispatch({ type: 'loadError', message: isProblem(error) ? error.detail : error.message });
