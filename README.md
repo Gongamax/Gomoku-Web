@@ -1,18 +1,5 @@
 # Gomoku Royale
 
-## Professor
-
-```
-- Pedro Félix
-```
-
-## Authors
-
-```
-- Gonçalo Frutuoso - 49495
-- Daniel Carvalho - 49419
-```
-
 ## Introduction
 
 Gomoku Royale is a web application that allows users to play Gomoku games. The application is composed of a server and a client. The server is responsible for handling the business logic of the application and the client is responsible for handling the user interface.
