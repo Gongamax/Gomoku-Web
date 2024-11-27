@@ -34,6 +34,7 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
+    "js-intro": "file:",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0"

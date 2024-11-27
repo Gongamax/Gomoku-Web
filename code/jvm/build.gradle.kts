@@ -96,4 +96,4 @@ task<Exec>("composeUp") {
 
 task<Exec>("composeDown") {
     commandLine("docker-compose", "down")
-}
+}3

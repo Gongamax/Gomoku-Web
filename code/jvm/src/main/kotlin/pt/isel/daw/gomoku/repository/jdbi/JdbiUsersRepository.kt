@@ -157,7 +157,7 @@ class JdbiUsersRepository(
             .execute()
     }
 
-    override fun updateTokenLastUsed(token: Token, now: Instant) {
+    override fun    (token: Token, now: Instant) {
         handle.createUpdate(
             """
                 update dbo.Tokens
