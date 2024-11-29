@@ -157,7 +157,7 @@ class JdbiUsersRepository(
             .execute()
     }
 
-    override fun    (token: Token, now: Instant) {
+    override fun updateTokenLastUsed(token: Token, now: Instant) {
         handle.createUpdate(
             """
                 update dbo.Tokens
@@ -223,7 +223,8 @@ class JdbiUsersRepository(
                 select users.id, users.username, users.email, users.password_validation, games_played, wins, losses, draws, rank, points
                 from dbo.Users as users
                 inner join dbo.Statistics as statistics
-                on users.id = statistics.user_id and statistics.rank > 0
+                on users.id = statistics.user_id 
+                --and statistics.rank > 0
                 order by rank asc
             """.trimIndent()
         )

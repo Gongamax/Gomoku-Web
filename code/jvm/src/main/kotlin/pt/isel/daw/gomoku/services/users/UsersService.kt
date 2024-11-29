@@ -138,7 +138,9 @@ class UsersService(
             val usersRepository = it.usersRepository
             val ranking = usersRepository.getAllStats()
             if (pageNr.value < 1) failure(RankingError.InvalidPageNumber)
-            else success(toPage(ranking, pageNr.value))
+            else {
+                success(toPage(ranking, pageNr.value))
+            }
         }
 
     fun getUserStatsById(id: Int): UserStatsResult =
